@@ -1,0 +1,8 @@
+{
+  "name": "FormCraft",
+  "description": "Aplikasi pembuat form modern dengan sampel Google Forms, kustomisasi tampilan mendalam, generator embed interaktif, dan paket freemium kuota respon.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

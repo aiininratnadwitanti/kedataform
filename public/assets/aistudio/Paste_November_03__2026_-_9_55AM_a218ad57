@@ -1,0 +1,1068 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  ArrowRight, 
+  CheckCircle2, 
+  Layers, 
+  Palette, 
+  Code2, 
+  FolderLock, 
+  Folder, 
+  Plus, 
+  ChevronRight, 
+  Play, 
+  Calendar, 
+  Check, 
+  Star, 
+  ExternalLink, 
+  Search, 
+  Bell, 
+  User, 
+  BarChart3, 
+  FileText, 
+  MoreHorizontal, 
+  Laptop, 
+  Sparkles, 
+  HelpCircle, 
+  X, 
+  ShieldCheck, 
+  Zap, 
+  Clock, 
+  ChevronDown,
+  CalendarClock,
+  ShoppingBag,
+  GraduationCap,
+  CalendarCheck,
+  PartyPopper,
+  Mail,
+  Crown,
+  BarChart2,
+  MoreVertical
+} from 'lucide-react';
+import { FORM_TEMPLATES, FormTemplateItem, INITIAL_RECENT_FORMS } from '../data/formTemplates';
+import { PricingPlansCarousel } from './PricingPlansCarousel';
+
+interface LandingPageProps {
+  onStartBlank: () => void;
+  onSelectTemplate: (template: FormTemplateItem) => void;
+  onOpenSignIn: () => void;
+}
+
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onStartBlank,
+  onSelectTemplate,
+  onOpenSignIn,
+}) => {
+  // Demo interactive states
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  return (
+    <div className="min-h-screen bg-white text-neutral-900 selection:bg-purple-100 selection:text-purple-900 font-sans antialiased">
+      
+      {/* ========================================================================= */}
+      {/* 1. TOP NAVBAR (TRANSPARAN & MENGIKUTI HALAMAN KETIKA DISCROLL)             */}
+      {/* ========================================================================= */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-neutral-200/80 shadow-2xs transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-8">
+          
+          {/* Brand Logo */}
+          <div 
+            className="flex items-center gap-2.5 cursor-pointer whitespace-nowrap shrink-0"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            {/* Minimal solid neutral geometric icon */}
+            <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-white shadow-xs">
+              <Layers className="w-4 h-4 stroke-[2.5]" />
+            </div>
+            <span className="font-extrabold text-lg tracking-tight text-neutral-900">
+              FormCraft
+            </span>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-8 text-xs font-semibold text-neutral-600">
+            <a href="#how-it-works" className="hover:text-neutral-900 transition-colors whitespace-nowrap">
+              Cara Kerja
+            </a>
+            <a href="#features" className="hover:text-neutral-900 transition-colors whitespace-nowrap">
+              Fitur Unggulan
+            </a>
+            <a href="#templates" className="hover:text-neutral-900 transition-colors whitespace-nowrap">
+              Template
+            </a>
+            <a href="#pricing" className="hover:text-neutral-900 transition-colors whitespace-nowrap">
+              Harga
+            </a>
+            <a href="#faqs" className="hover:text-neutral-900 transition-colors whitespace-nowrap">
+              FAQ
+            </a>
+          </nav>
+
+          {/* Right Action Button: Only One Button (Login) as requested */}
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={onOpenSignIn}
+              className="px-4 py-2 bg-gradient-to-b from-slate-800 to-slate-950 hover:from-slate-700 hover:to-slate-900 text-white text-xs font-bold rounded-xl shadow-xs border border-slate-700/60 transition-all hover:scale-102 active:scale-98 whitespace-nowrap cursor-pointer"
+            >
+              Login
+            </button>
+          </div>
+
+        </div>
+      </header>
+
+      {/* ========================================================================= */}
+      {/* 2. HERO SECTION: HEADLINE, AVATARS, CTAs, AND HERO DASHBOARD PREVIEW       */}
+      {/* ========================================================================= */}
+      <section className="pt-16 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-gradient-to-b from-slate-100 via-zinc-50 to-slate-100/60">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          
+          {/* Main Headline with Unified Cohesive Gray Typography */}
+          <div className="space-y-4 max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/80 border border-slate-300/80 text-[11px] font-semibold text-slate-700 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-pulse" />
+              <span>Next-Gen Workspace · Realtime Form Engine</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15] [text-wrap:balance]">
+              All-in-One Form Management for<br className="hidden sm:inline" />
+              <span className="text-slate-600 underline decoration-slate-300/80 decoration-4 underline-offset-8"> High-Performing Teams</span>
+            </h1>
+
+            <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">
+              FormCraft membantu Anda merancang formulir, mengkustomisasi kanvas visual, mengatur jadwal operasional hari & jam, serta mengelola respon terisolasi tanpa tercampur dalam satu dashboard modern.
+            </p>
+          </div>
+
+          {/* Action CTAs: High-End Tactile Buttons */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+            <button
+              type="button"
+              onClick={onStartBlank}
+              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-b from-zinc-800 to-zinc-950 hover:from-zinc-700 hover:to-zinc-900 text-white font-bold text-xs rounded-xl shadow-md border border-zinc-700/60 transition-all hover:scale-102 active:scale-98 cursor-pointer"
+            >
+              Get Started Free
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsVideoModalOpen(true)}
+              className="w-full sm:w-auto px-5 py-3 bg-gradient-to-b from-white to-slate-100 hover:from-slate-50 hover:to-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+            >
+              <Play className="w-3.5 h-3.5 text-slate-700 fill-slate-700" />
+              <span>Watch Demo</span>
+            </button>
+          </div>
+
+          {/* HERO DASHBOARD PREVIEW: STRUKTUR IDENTIK DASHBOARD NYATA DENGAN KEDALAMAN NUANSA ABU-ABU */}
+          <div className="mt-14 max-w-5xl mx-auto rounded-2xl border border-slate-300/80 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_4px_16px_rgba(15,23,42,0.06)] ring-1 ring-slate-900/5 bg-white overflow-hidden text-left select-none">
+            
+            {/* 1. Browser Chrome Window Header */}
+            <div className="bg-gradient-to-r from-slate-200/90 via-slate-100 to-slate-200/90 border-b border-slate-300/80 px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-slate-300 border border-slate-400/70 shadow-inner" />
+                <div className="w-3 h-3 rounded-full bg-slate-300 border border-slate-400/70 shadow-inner" />
+                <div className="w-3 h-3 rounded-full bg-slate-300 border border-slate-400/70 shadow-inner" />
+                <span className="text-[11px] font-mono text-slate-500 ml-2 hidden sm:inline bg-white/70 px-2.5 py-0.5 rounded-md border border-slate-300/60 shadow-2xs">
+                  formcraft.studio/dashboard
+                </span>
+              </div>
+
+              {/* Top Bar Actions */}
+              <div className="flex items-center gap-2.5">
+                <div className="relative hidden sm:block">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    readOnly
+                    value="Telusuri formulir..."
+                    className="bg-white/95 rounded-lg pl-8 pr-3 py-1 text-[11px] text-slate-600 w-44 border border-slate-300/90 shadow-2xs focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-200/80 border border-slate-300 text-slate-800 text-[10px] font-bold shadow-2xs">
+                  <Crown className="w-3 h-3 text-slate-700" />
+                  <span>88/100 Respon</span>
+                </div>
+                <img 
+                  className="w-6 h-6 rounded-full object-cover border border-slate-300 shadow-2xs"
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80" 
+                  alt="Avatar" 
+                />
+              </div>
+            </div>
+
+            {/* 2. Top Header & Stats (Sederhana, Bersih & Elegan) */}
+            <div className="bg-gradient-to-b from-slate-100/90 to-slate-50 border-b border-slate-200/90 px-5 py-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight">
+                  Dashboard Formulir
+                </h3>
+                <span className="text-[10px] font-bold text-slate-700 bg-white border border-slate-200/90 px-2 py-0.5 rounded-md shadow-2xs">
+                  Freemium
+                </span>
+              </div>
+
+              {/* Ringkasan Ringkas */}
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-xs flex items-center gap-1.5 text-xs">
+                  <BarChart2 className="w-3.5 h-3.5 text-slate-700" />
+                  <span className="font-bold text-slate-900 font-mono">178</span>
+                  <span className="text-[10px] text-slate-500 font-medium">Respon</span>
+                </div>
+                <div className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-xs flex items-center gap-1.5 text-xs">
+                  <FileText className="w-3.5 h-3.5 text-slate-700" />
+                  <span className="font-bold text-slate-900 font-mono">5</span>
+                  <span className="text-[10px] text-slate-500 font-medium">Form</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Section: Mulai Formulir Baru (6 Template Rapi dengan Nuansa Abu Beragam) */}
+            <div className="bg-slate-50/70 border-b border-slate-200/90 px-6 py-4.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-slate-800 uppercase tracking-wider block">
+                  Mulai Formulir Baru
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium">
+                  Template Standar
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                {FORM_TEMPLATES.map((item, idx) => {
+                  const isBlank = item.id === 'blank';
+                  const topHeaderBgs = ['bg-slate-200', 'bg-slate-300/80', 'bg-zinc-200', 'bg-zinc-300/80', 'bg-slate-200/90', 'bg-slate-300/60'];
+                  const headerBgClass = topHeaderBgs[idx % topHeaderBgs.length];
+
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => onSelectTemplate(item)}
+                      className="group cursor-pointer text-left space-y-1.5"
+                    >
+                      <div className="h-22 rounded-xl border border-slate-200 group-hover:border-slate-500 group-hover:shadow-md transition-all overflow-hidden bg-white flex flex-col shadow-xs group-hover:-translate-y-0.5">
+                        {isBlank ? (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-white to-slate-100/70 group-hover:from-slate-50 group-hover:to-slate-150 transition-colors">
+                            <div className="w-8 h-8 rounded-lg bg-white border border-slate-300 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                              <Plus className="w-4 h-4 text-slate-800 stroke-[2.5]" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-full h-full flex flex-col bg-white">
+                            <div 
+                              className={`h-4.5 w-full px-2 flex items-center gap-1.5 ${headerBgClass}`}
+                            >
+                              <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                              <div className="w-8 h-1 rounded-full bg-slate-400/80" />
+                            </div>
+                            <div className="p-2.5 flex-1 flex flex-col justify-center space-y-1.5">
+                              <div className="h-1.5 w-4/5 rounded bg-slate-300/80" />
+                              <div className="h-1 w-3/5 rounded bg-slate-200/90" />
+                              <div className="h-1 w-2/5 rounded bg-slate-150" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-700 truncate block group-hover:text-slate-900 transition-colors">
+                        {item.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 4. Section: Formulir Saya (Kartu Berkarakter Abu-Abu Multi-Tonal & Berbobot) */}
+            <div className="p-6 space-y-3.5 bg-gradient-to-b from-slate-100/80 via-slate-50 to-slate-100/60 flex-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-slate-800 uppercase tracking-wider">
+                  Formulir Saya
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium">
+                  4 Formulir Aktif
+                </span>
+              </div>
+
+              {/* 4 Kartu Formulir Rapi, Bersih, Berdimensi & Tidak Flat */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {[
+                  {
+                    id: 'rf_1',
+                    title: 'Kuesioner Teman Belajar AI',
+                    category: 'Riset',
+                    responses: 88,
+                    headerGradient: 'bg-gradient-to-r from-slate-200 to-slate-100 border-b border-slate-300/80',
+                    badgeColor: 'text-slate-900',
+                    barFill: 'bg-slate-900',
+                    status: 'Tutup 31 Okt',
+                    statusClass: 'text-slate-800 bg-slate-100/90 border-slate-200',
+                    desc: 'Survei kebutuhan fitur mahasiswa',
+                    updated: 'Diperbarui 10m lalu',
+                  },
+                  {
+                    id: 'rf_2',
+                    title: 'Order Form Merchandise',
+                    category: 'Order',
+                    responses: 42,
+                    headerGradient: 'bg-gradient-to-r from-zinc-200 to-zinc-100 border-b border-zinc-300/80',
+                    badgeColor: 'text-zinc-900',
+                    barFill: 'bg-zinc-800',
+                    status: 'Buka 08:00 - 17:00',
+                    statusClass: 'text-zinc-800 bg-zinc-100/90 border-zinc-200',
+                    desc: 'Pemesanan kaos & paket aksesoris',
+                    updated: 'Diperbarui 25m lalu',
+                  },
+                  {
+                    id: 'rf_3',
+                    title: 'Kuis Evaluasi Frontend',
+                    category: 'Kuis',
+                    responses: 15,
+                    headerGradient: 'bg-gradient-to-r from-slate-300/80 to-slate-200/70 border-b border-slate-300/90',
+                    badgeColor: 'text-slate-900',
+                    barFill: 'bg-slate-700',
+                    status: 'Otomatis Dinilai',
+                    statusClass: 'text-slate-800 bg-slate-100/90 border-slate-200',
+                    desc: 'Ujian komprehensif 5 soal coding',
+                    updated: 'Diperbarui 1j lalu',
+                  },
+                  {
+                    id: 'rf_5',
+                    title: 'RSVP Tech Summit Night',
+                    category: 'Acara',
+                    responses: 24,
+                    headerGradient: 'bg-gradient-to-r from-zinc-300/80 to-zinc-200/70 border-b border-zinc-300/90',
+                    badgeColor: 'text-zinc-900',
+                    barFill: 'bg-zinc-700',
+                    status: 'Selalu Dibuka',
+                    statusClass: 'text-zinc-800 bg-zinc-100/90 border-zinc-200',
+                    desc: 'Konfirmasi kehadiran seminar tech',
+                    updated: 'Diperbarui 3j lalu',
+                  },
+                ].map((form) => (
+                  <div
+                    key={form.id}
+                    onClick={onStartBlank}
+                    className="bg-white rounded-xl border border-slate-200/90 hover:border-slate-400 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col justify-between cursor-pointer group min-h-[195px] shadow-xs"
+                  >
+                    <div>
+                      {/* Header Strip with Subtle Gray Gradient */}
+                      <div 
+                        className={`px-4 py-3 flex items-center justify-between ${form.headerGradient}`}
+                      >
+                        <span className={`text-[10px] font-extrabold tracking-wider uppercase ${form.badgeColor}`}>
+                          {form.category}
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-slate-800 bg-white/80 px-2 py-0.5 rounded border border-slate-200/70 shadow-2xs">
+                          {form.responses}/100
+                        </span>
+                      </div>
+
+                      {/* Progress Bar Multi-Shade */}
+                      <div className="w-full h-1 bg-slate-100">
+                        <div 
+                          className={`h-full ${form.barFill}`} 
+                          style={{ width: `${form.responses}%` }} 
+                        />
+                      </div>
+
+                      {/* Card Content */}
+                      <div className="p-4 space-y-2">
+                        <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-slate-800 transition-colors line-clamp-1">
+                          {form.title}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 line-clamp-1">
+                          {form.desc}
+                        </p>
+                        <span className="text-[9px] text-slate-400 block font-medium">
+                          {form.updated}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between text-[9px] bg-slate-50/50">
+                      <span className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded border shadow-2xs ${form.statusClass}`}>
+                        <Clock className="w-2.5 h-2.5 text-slate-500" />
+                        <span>{form.status}</span>
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-800 transition-colors" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+
+
+      {/* ========================================================================= */}
+      {/* 4. SECTION: BUILT TO HELP YOU MOVE PROJECTS FORWARD (WITH LAPTOP MOCKUP!) */}
+      {/* ========================================================================= */}
+      <section className="py-20 bg-slate-100/50 border-t border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* Left Column: Heading & 3 Bullets with Solid Neutral Icons */}
+            <div className="lg:col-span-6 space-y-6 text-left">
+              <div className="space-y-2">
+                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight [text-wrap:balance]">
+                  <span className="text-slate-900">Built to Help You </span>
+                  <span className="bg-gradient-to-r from-slate-700 via-slate-500 to-zinc-600 bg-clip-text text-transparent">Move Projects Forward</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed [text-wrap:balance]">
+                  Atur formulir dalam hitungan detik, tentukan jam buka dan hari operasional, pantau kuota tanggapan per folder, dan kustomisasi desain visual langsung dari dashboard.
+                </p>
+              </div>
+
+              {/* 3 Square Feature Points */}
+              <div className="space-y-4 pt-2">
+                
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-slate-800 to-slate-950 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs border border-slate-700/60">
+                    <FileText className="w-4 h-4 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900">Unified Form Management</h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Rancang, atur kuota, dan amati seluruh data respon terpusat di satu tempat.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-slate-800 to-slate-950 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs border border-slate-700/60">
+                    <CalendarClock className="w-4 h-4 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900">Aturan Jam & Hari Pembukaan Form</h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Tentukan sampai jam berapa dan hari apa formulir dibuka, dengan auto-close otomatis.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-slate-800 to-slate-950 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs border border-slate-700/60">
+                    <Palette className="w-4 h-4 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900">Canva-Style Visual Customization</h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Ubah sudut membulat kartu, gaya bayangan, upload banner cover, dan kustom warna primer.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Right Column: Clean SaaS Window Preview with Rich Gray Layering */}
+            <div className="lg:col-span-6 bg-slate-200/60 rounded-2xl p-4 sm:p-6 border border-slate-300/80 shadow-xs">
+              
+              {/* APP WINDOW CARD */}
+              <div className="w-full bg-white rounded-xl border border-slate-300/80 shadow-md ring-1 ring-black/5 overflow-hidden select-none">
+                
+                {/* 2D Window Header */}
+                <div className="bg-gradient-to-r from-slate-200/90 via-slate-100 to-slate-200/90 px-3.5 py-2.5 border-b border-slate-300 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-400/70" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-400/70" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-400/70" />
+                    <span className="text-[10px] font-mono text-slate-500 ml-2 bg-white/70 px-2 py-0.5 rounded border border-slate-300/60">
+                      formcraft.studio/workspace
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
+                    Live Form
+                  </span>
+                </div>
+                
+                {/* 2D Window Content */}
+                <div className="p-4 sm:p-5 text-left space-y-3.5">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-[10px] text-slate-500">
+                    <span className="font-bold text-slate-800">Survei Preferensi Pembelajaran AI</span>
+                    <span className="text-slate-800 font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
+                      Aktif · 88 Respon
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-800 space-y-1.5 shadow-2xs">
+                      <span className="font-semibold block text-slate-900">1. Apakah Anda menggunakan tools AI untuk belajar?</span>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                        <span className="w-3.5 h-3.5 rounded-full border-2 border-slate-800 flex items-center justify-center">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-800" />
+                        </span>
+                        <span>Ya, sangat sering (setiap hari)</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-800 space-y-1.5 shadow-2xs">
+                      <span className="font-semibold block text-slate-900">2. Paket langganan yang Anda minati:</span>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                        <span className="w-3.5 h-3.5 rounded-sm border border-slate-400" />
+                        <span>Paket Pro Mahasiswa (Rp 79.000/bln)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-100">
+                    <span>Kuota: 88 dari 100 respon gratis</span>
+                    <span className="text-slate-800 font-bold">
+                      Jadwal: Tutup 23:59 WIB
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 5. SECTION: "HOW IT WORKS" — GET SET UP IN MINUTES, NOT DAYS              */}
+      {/* ========================================================================= */}
+      <section id="how-it-works" className="py-20 bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/70 border-t border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-slate-700 bg-slate-200/80 border border-slate-300 px-3 py-1 rounded-full uppercase tracking-wider">
+              How It Works
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 [text-wrap:balance]">
+              <span className="text-slate-900">Get Set Up in Minutes, </span>
+              <span className="bg-gradient-to-r from-slate-700 via-slate-500 to-zinc-600 bg-clip-text text-transparent">Not Days</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 [text-wrap:balance]">
+              Dari memilih template siap pakai hingga mengatur jadwal penutupan jam & hari, kelola formulir semudah hitungan menit.
+            </p>
+          </div>
+
+          {/* 3 Step Cards with Numbers (1, 2, 3) and Preview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Step 1 */}
+            <div className="space-y-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-b from-slate-800 to-slate-950 text-white flex items-center justify-center font-bold text-xs shadow-xs border border-slate-700/60">
+                  1
+                </div>
+                <h3 className="font-bold text-sm text-slate-900">Create Your Workspace</h3>
+              </div>
+              <p className="text-xs text-slate-500">
+                Buat formulir baru dari template populer atau mulai dari kanvas kosong.
+              </p>
+
+              {/* Mini Preview Card */}
+              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm ring-1 ring-slate-900/5 space-y-2.5">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                  <span>Proyek Formulir</span>
+                  <button type="button" onClick={onStartBlank} className="text-[10px] bg-gradient-to-b from-slate-800 to-slate-950 text-white px-2 py-0.5 rounded font-bold cursor-pointer shadow-2xs">
+                    + New Form
+                  </button>
+                </div>
+                <div className="p-2 rounded-lg bg-slate-100 text-[11px] font-semibold text-slate-800 flex items-center gap-2 border border-slate-200/70">
+                  <span className="w-2 h-2 rounded-full bg-slate-900" />
+                  <span>Website Feedback Survey</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="space-y-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-b from-slate-800 to-slate-950 text-white flex items-center justify-center font-bold text-xs shadow-xs border border-slate-700/60">
+                  2
+                </div>
+                <h3 className="font-bold text-sm text-slate-900">Atur Jadwal & Desain</h3>
+              </div>
+              <p className="text-xs text-slate-500">
+                Atur hari & jam buka form, cover banner Canva, dan kuota freemium 100 respon.
+              </p>
+
+              {/* Mini Preview Card */}
+              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm ring-1 ring-slate-900/5 space-y-2">
+                <div className="text-xs font-bold text-slate-800">Aturan Jam & Kuota</div>
+                <div className="space-y-1.5 text-[10px]">
+                  <div className="p-1.5 bg-slate-50 rounded border border-slate-200 flex items-center justify-between">
+                    <span className="text-slate-600">Jadwal Operasional</span>
+                    <span className="text-slate-900 font-bold">Sen-Jum (08:00 - 17:00)</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-50 rounded border border-slate-200 flex items-center justify-between">
+                    <span className="text-slate-600">Kuota Responden</span>
+                    <span className="text-slate-900 font-bold">100 Respon Gratis</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="space-y-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-b from-slate-800 to-slate-950 text-white flex items-center justify-center font-bold text-xs shadow-xs border border-slate-700/60">
+                  3
+                </div>
+                <h3 className="font-bold text-sm text-slate-900">Track Progress & Ekspor CSV</h3>
+              </div>
+              <p className="text-xs text-slate-500">
+                Data responden masuk secara real-time dan dapat langsung diunduh ke format Excel/CSV.
+              </p>
+
+              {/* Mini Preview Card */}
+              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm ring-1 ring-slate-900/5 space-y-2">
+                <div className="text-xs font-bold text-slate-800">Live Respondent Feed</div>
+                <div className="space-y-1 text-[10px]">
+                  <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                    <span className="font-semibold text-slate-700">Ahmad Fauzi</span>
+                    <span className="text-slate-800 font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">Tersimpan</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="font-semibold text-slate-700">Dewi Lestari</span>
+                    <span className="text-slate-800 font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">Tersimpan</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 6. SECTION: POWERFUL FEATURES TO KEEP YOUR FORMS ON TRACK (BENTO ROWS)     */}
+      {/* ========================================================================= */}
+      <section id="features" className="py-20 bg-slate-50/60 border-t border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-16">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-slate-700 bg-slate-200/80 border border-slate-300 px-3 py-1 rounded-full uppercase tracking-wider">
+              Features
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 [text-wrap:balance]">
+              Powerful Features to Keep Your Forms on Track
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 [text-wrap:balance]">
+              Kombinasi kemudahan manajemen form, kebebasan kustomisasi kanvas visual, dan jadwal pengisian fleksibel.
+            </p>
+          </div>
+
+          {/* Row 1: Left Preview Card + Right Text */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 bg-slate-200/60 p-6 rounded-2xl border border-slate-300/80 shadow-xs">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm ring-1 ring-slate-900/5 space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                  <span>Task & Form Management</span>
+                  <span className="text-[10px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded border border-slate-200">4 Formulir Aktif</span>
+                </div>
+                <div className="divide-y divide-slate-100 text-[11px]">
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="font-semibold text-slate-800">Kuesioner Riset Mahasiswa</span>
+                    <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">88 Respon</span>
+                  </div>
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="font-semibold text-slate-800">Order Form Merchandise</span>
+                    <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">42 Respon</span>
+                  </div>
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="font-semibold text-slate-800">Blank Quiz Evaluasi</span>
+                    <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">15 Respon</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 space-y-3 text-left">
+              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+                Task & Form Management
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Pantau seluruh kuesioner dan progres kuota respon dalam satu layar. Setiap formulir memiliki tabel jawaban terisolasi yang siap diekspor ke format CSV.
+              </p>
+            </div>
+          </div>
+
+          {/* Row 2: Left Text + Right Preview Card (Timeline View) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5 space-y-3 text-left order-2 lg:order-1">
+              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+                Aturan Jam Buka & Hari Operasional
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Atur form dibuka sampai jam berapa dan hari apa saja. Batasi pengisian kuis agar tidak lewat jam pelajaran atau buka pendaftaran seminar sesuai jadwal kantor Anda.
+              </p>
+            </div>
+
+            <div className="lg:col-span-7 bg-slate-200/60 p-6 rounded-2xl border border-slate-300/80 shadow-xs order-1 lg:order-2">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm ring-1 ring-slate-900/5 space-y-3 text-left">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                  <span>Jadwal Operasional Form</span>
+                  <span className="text-[10px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Terjadwal Otomatis</span>
+                </div>
+                <div className="space-y-2 text-[11px]">
+                  <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between shadow-2xs">
+                    <span className="font-semibold text-slate-900">Survei AI — Batas Jumat 31 Okt</span>
+                    <span className="text-[10px] font-mono text-slate-600 font-semibold">Tutup 23:59 WIB</span>
+                  </div>
+                  <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between shadow-2xs">
+                    <span className="font-semibold text-slate-900">Order Form Pre-Order Batch 2</span>
+                    <span className="text-[10px] font-mono text-slate-600 font-semibold">Senin - Jumat (08:00 - 17:00)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 7. SECTION: TEMPLATES GALLERY                                             */}
+      {/* ========================================================================= */}
+      <section id="templates" className="py-20 bg-slate-100/70 border-t border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+          
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-left">
+            <div>
+              <span className="text-xs font-bold text-slate-700 bg-slate-200 border border-slate-300 px-3 py-1 rounded-full uppercase tracking-wider">
+                Template Gallery
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+                Pilih Template Formulir Favorit
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl">
+                Tersedia 6 template siap pakai dengan header banner rapi dan pertanyaan terstruktur.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onStartBlank}
+              className="px-4 py-2.5 bg-gradient-to-b from-slate-800 to-slate-950 hover:from-slate-700 hover:to-slate-900 text-white text-xs font-bold rounded-xl shadow-sm border border-slate-700/60 transition-all shrink-0 cursor-pointer"
+            >
+              + Mulai Form Kosong Baru
+            </button>
+          </div>
+
+          {/* 6 Templates Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FORM_TEMPLATES.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => onSelectTemplate(item)}
+                className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xl hover:-translate-y-1 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 flex flex-col group text-left shadow-xs ring-1 ring-slate-900/5"
+              >
+                <div 
+                  className="h-24 w-full relative overflow-hidden flex flex-col justify-between p-3.5 transition-colors border-b border-slate-200/80"
+                  style={{ backgroundColor: item.accentBg }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.accentColor }} />
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/80 px-2 py-0.5 rounded border border-slate-200/60 shadow-2xs" style={{ color: item.accentColor }}>
+                      {item.category}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5 bg-white/90 p-2 rounded-lg border border-slate-200/80 shadow-2xs">
+                    <div className="h-1.5 w-3/4 rounded bg-slate-300/80" />
+                    <div className="h-1 w-1/2 rounded bg-slate-200" />
+                  </div>
+                </div>
+
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                  <div>
+                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">
+                      {item.category}
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-slate-800 transition-colors">
+                      {item.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>Gunakan Template Ini →</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 8. SECTION: SIMPLE, TRANSPARENT PRICING FOR EVERY TEAM (3 CARDS)          */}
+      {/* ========================================================================= */}
+      <section id="pricing" className="py-20 bg-slate-50/70 border-t border-slate-200/80">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-12">
+          
+          <div className="text-center space-y-2">
+            <span className="text-xs font-bold text-slate-700 bg-slate-200 border border-slate-300 px-3 py-1 rounded-full uppercase tracking-wider">
+              Pricing Plans
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 [text-wrap:balance]">
+              Simple, Transparent Pricing for Every Team
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 [text-wrap:balance]">
+              Setiap formulir di akun Anda mendapatkan kuota gratis hingga 100 respon pertama.
+            </p>
+          </div>
+
+          {/* Pricing Plans with Smooth 5-Second Auto-Shifting Motion Animation */}
+          <PricingPlansCarousel 
+            onStartBlank={onStartBlank} 
+            onOpenSignIn={onOpenSignIn} 
+          />
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 9. SECTION: WHAT HIGH-PERFORMING TEAMS ARE SAYING (TESTIMONIALS)          */}
+      {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* 9. SECTION: WHAT HIGH-PERFORMING TEAMS ARE SAYING (TESTIMONIALS)          */}
+      {/* ========================================================================= */}
+      <section className="py-20 bg-slate-100/70 border-t border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 [text-wrap:balance]">
+              What High-Performing Teams Are Saying
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 [text-wrap:balance]">
+              Pengalaman nyata ribuan mahasiswa, dosen, dan pelaku bisnis yang menggunakan FormCraft Studio.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            {[
+              {
+                quote: 'Pemisahan folder responden benar-benar menyelamatkan skripsi saya. Data survei 88 mahasiswa tidak pernah tercampur dengan formulir lainnya.',
+                name: 'Rizka Farida Damayanti',
+                role: 'Mahasiswa Peneliti AI',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80',
+              },
+              {
+                quote: 'Fitur jam buka form sangat membantu untuk kuis mata kuliah. Form otomatis tertutup tepat pukul 17:00 sehingga mahasiswa disiplin.',
+                name: 'Dimas Anggoro',
+                role: 'Dosen Teknik Informatika',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=128&q=80',
+              },
+              {
+                quote: 'Kuota gratis 100 respon per formulir sangat adil dan ramah untuk UMKM yang baru merilis produk dan pemesanan online.',
+                name: 'Anisa Maharani',
+                role: 'Founder, Batik Merchandise',
+                avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=128&q=80',
+              },
+            ].map((t, idx) => (
+              <div key={idx} className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm ring-1 ring-slate-900/5 space-y-4 flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1 text-slate-700 text-xs">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-slate-700 text-slate-700" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed italic">
+                    "{t.quote}"
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+                  <img src={t.avatar} alt={t.name} className="w-8 h-8 rounded-full object-cover border border-slate-200 shadow-2xs" />
+                  <div>
+                    <div className="text-xs font-bold text-slate-900">{t.name}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 10. SECTION: FAQ                                                          */}
+      {/* ========================================================================= */}
+      <section id="faqs" className="py-20 bg-white border-t border-slate-200/80">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-8 text-left">
+          <div className="text-center space-y-2">
+            <span className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-300 px-3 py-1 rounded-full uppercase tracking-wider">
+              FAQ
+            </span>
+            <h2 className="text-3xl font-extrabold text-slate-900">
+              Pertanyaan yang Sering Diajukan
+            </h2>
+          </div>
+
+          <div className="divide-y divide-slate-200 border-y border-slate-200">
+            {[
+              {
+                q: 'Bagaimana cara mengatur jam dan hari pembukaan form?',
+                a: 'Anda dapat mengatur jam buka operasional (contoh: Senin-Jumat, pukul 08:00 - 17:00 WIB) atau menentukan tanggal deadline tertentu. Formulir akan otomatis menolak respon baru di luar jadwal tersebut.',
+              },
+              {
+                q: 'Apa maksud kuota gratis 100 respon per formulir?',
+                a: 'Setiap formulir yang Anda buat memiliki jatah hingga 100 tanggapan responden secara terpisah dan cuma-cuma tanpa masa kedaluwarsa.',
+              },
+              {
+                q: 'Apakah data respon per formulir saling terisolasi?',
+                a: 'Ya, seluruh data tersimpan dalam map penyimpanan terisolasi berdasarkan formId dan folderId, sehingga survei riset tidak akan tercampur dengan data pesanan.',
+              },
+              {
+                q: 'Bisakah saya mengunduh data responden ke file Excel/CSV?',
+                a: 'Tentu bisa! Tombol Unduh CSV tersedia di header editor dan tab Bagikan dengan format UTF-8 BOM yang langsung terbaca rapi di Microsoft Excel atau Google Sheets.',
+              },
+            ].map((faq, i) => (
+              <div key={i} className="py-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between text-xs font-bold text-slate-900 text-left cursor-pointer"
+                >
+                  <span>{faq.q}</span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${activeFaq === i ? 'rotate-180' : ''}`} />
+                </button>
+                {activeFaq === i && (
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                    {faq.a}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 11. CTA SECTION: READY TO GET STARTED?                                   */}
+      {/* ========================================================================= */}
+      <section className="py-16 bg-slate-50/70 border-t border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="bg-gradient-to-br from-zinc-900 via-neutral-900 to-zinc-950 rounded-3xl p-8 sm:p-14 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl text-left relative overflow-hidden border border-zinc-700/80 ring-1 ring-white/10">
+            
+            <div className="space-y-4 max-w-lg relative z-10">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                Ready to Get Started?
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                Bergabunglah bersama ribuan tim dan kreator untuk merancang formulir yang rapi, cantik, terjadwal otomatis, dan terorganisir hari ini.
+              </p>
+              <button
+                type="button"
+                onClick={onStartBlank}
+                className="px-6 py-3 bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-xs rounded-xl shadow-md transition-all hover:scale-102 cursor-pointer"
+              >
+                Mulai Gratis Sekarang
+              </button>
+            </div>
+
+            {/* Clean Flat Dashboard Preview Card on the right */}
+            <div className="w-full sm:w-80 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-lg space-y-3">
+              <div className="flex items-center justify-between text-[10px] text-zinc-300">
+                <span className="font-bold">FormCraft Live Hub</span>
+                <span>100 Kuota Gratis</span>
+              </div>
+              <div className="space-y-1.5">
+                <div className="h-2 bg-white/30 rounded w-3/4" />
+                <div className="h-2 bg-white/20 rounded w-1/2" />
+              </div>
+              <div className="p-2.5 bg-white text-zinc-900 rounded-xl shadow-sm text-[10px] space-y-1 font-semibold">
+                <div className="flex items-center justify-between">
+                  <span>Riset AI Mahasiswa</span>
+                  <span className="text-zinc-900 font-mono">88 Respon</span>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-zinc-900 h-full w-[88%]" />
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 12. FOOTER (CLEAN MINIMALIST LIGHT FOOTER)                                */}
+      {/* ========================================================================= */}
+      <footer className="py-12 bg-white border-t border-slate-200/80 text-xs text-slate-500">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-gradient-to-b from-slate-800 to-slate-950 flex items-center justify-center text-white text-[10px] font-bold shadow-2xs">
+                FC
+              </div>
+              <span className="font-bold text-slate-900">FormCraft Studio</span>
+              <span>— Platform pembuat formulir modern dengan kuota 100 respon gratis.</span>
+            </div>
+
+            <div className="flex items-center gap-6 font-medium">
+              <a href="#how-it-works" className="hover:text-slate-900 transition-colors">Cara Kerja</a>
+              <a href="#features" className="hover:text-slate-900 transition-colors">Fitur</a>
+              <a href="#templates" className="hover:text-slate-900 transition-colors">Template</a>
+              <a href="#pricing" className="hover:text-slate-900 transition-colors">Harga</a>
+              <button type="button" onClick={onOpenSignIn} className="hover:text-slate-900 transition-colors cursor-pointer">Login</button>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
+            <span>© 2026 FormCraft Studio Inc. Hak cipta dilindungi undang-undang.</span>
+            <span>Dibuat untuk produktivitas tim di layar laptop & desktop.</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* Video Demo Modal */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-neutral-200">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
+                <Play className="w-4 h-4 text-neutral-800" />
+                <span>Demo Interaktif FormCraft Studio</span>
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setIsVideoModalOpen(false)}
+                className="text-neutral-400 hover:text-neutral-700 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="aspect-video bg-neutral-900 rounded-xl flex flex-col items-center justify-center text-white space-y-3 p-4">
+              <div className="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center shadow-lg">
+                <Play className="w-5 h-5 fill-white ml-0.5" />
+              </div>
+              <p className="text-xs text-neutral-300">
+                Pratinjau Alur Kerja: Buat Form → Atur Jadwal Buka → Kustom Desain → Kumpulkan 100 Respon
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsVideoModalOpen(false)}
+                className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold rounded-lg cursor-pointer"
+              >
+                Tutup & Mulai Coba
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
