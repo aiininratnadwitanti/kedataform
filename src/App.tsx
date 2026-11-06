@@ -991,7 +991,6 @@ function MainApp() {
     if (isLoginPage) {
       return (
         <LoginPage
-          user={user}
           onLogin={handleUpdateUser}
           onBackToLanding={() => setIsLoginPage(false)}
         />
