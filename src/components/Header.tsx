@@ -1,17 +1,9 @@
 import React from 'react';
-import { 
-  Palette, 
-  Share2, 
-  Eye, 
+import {
+  Eye,
   ArrowLeft,
-  SlidersHorizontal,
-  Crown,
-  Download,
-  CalendarClock,
-  Check,
-  Sparkles,
   Users,
-  Settings,
+  User,
   Save
 } from 'lucide-react';
 import { UserAccount, FormSchema } from '../types/form';
@@ -48,6 +40,9 @@ export interface HeaderProps {
   customSubTab?: 'questions' | 'design';
   onSaveThemeDesign?: () => void;
   primaryAccentColor?: string;
+  accessRole?: 'owner' | 'editor' | 'viewer';
+  canEdit?: boolean;
+  collaborators?: { id: string; name: string; email: string; avatarUrl?: string; status: 'active' | 'pending' }[];
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -72,11 +67,17 @@ export const Header: React.FC<HeaderProps> = ({
   customSubTab = 'questions',
   onSaveThemeDesign,
   primaryAccentColor,
+  accessRole = 'owner',
+  canEdit = true,
+  collaborators = [],
 }) => {
   const isOverQuota = user.plan === 'free' && responseCount >= user.maxFreeResponses;
   const availability = form ? checkFormAvailability(form.schedule) : null;
   const primaryAccent = primaryAccentColor || form?.theme?.primaryColor || '#223A5E';
   const contrastText = getContrastTextColor(primaryAccent);
+  const collaboratorPreview = [...collaborators].sort(
+    (a, b) => (a.status === 'active' ? 0 : 1) - (b.status === 'active' ? 0 : 1)
+  );
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-blue-200/80 shadow-xs transition-all">
@@ -103,10 +104,23 @@ export const Header: React.FC<HeaderProps> = ({
               <input
                 type="text"
                 value={formTitle}
+                readOnly={!canEdit}
                 onChange={(e) => onUpdateTitle(e.target.value)}
-                className="text-xs sm:text-sm font-semibold text-slate-900 bg-transparent hover:bg-blue-50/50 focus:bg-white focus:ring-2 focus:ring-blue-200 px-2 py-1 rounded-lg border border-transparent hover:border-blue-200 transition-all max-w-[140px] sm:max-w-xs truncate shadow-2xs"
-                title="Klik untuk mengubah nama formulir"
+                className="text-xs sm:text-sm font-semibold text-slate-900 bg-transparent hover:bg-blue-50/50 focus:bg-white focus:ring-2 focus:ring-blue-200 px-2 py-1 rounded-lg border border-transparent hover:border-blue-200 transition-all min-w-[120px] max-w-[55vw] shadow-2xs"
+                style={{ ['fieldSizing' as any]: 'content' }}
+                title={formTitle}
               />
+              {accessRole !== 'owner' && (
+                <span
+                  className={`hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0 ${
+                    accessRole === 'viewer'
+                      ? 'text-amber-700 bg-amber-50 border-amber-200'
+                      : 'text-blue-900 bg-blue-50 border-blue-200'
+                  }`}
+                >
+                  {accessRole === 'viewer' ? 'Hanya Lihat' : 'Editor'}
+                </span>
+              )}
             </div>
           </div>
 
@@ -114,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             
             {/* Tombol Simpan Formulir (Aturan Kuis & Jam Buka/Tutup) */}
-            {onOpenSaveConfigModal && (
+            {onOpenSaveConfigModal && canEdit && (
               <button
                 type="button"
                 onClick={onOpenSaveConfigModal}
@@ -138,26 +152,44 @@ export const Header: React.FC<HeaderProps> = ({
             )}
 
             {/* Tombol Kolaborasi Tim (Colab) */}
-            {onOpenCollaboration && (
+            {onOpenCollaboration && canEdit && (
               <button
                 type="button"
                 onClick={onOpenCollaboration}
-                className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-50/80 hover:bg-blue-100/90 text-blue-950 border border-blue-200/80 transition-all cursor-pointer shadow-2xs"
+                style={{ backgroundColor: `${primaryAccent}12`, color: primaryAccent, borderColor: `${primaryAccent}35` }}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer shadow-2xs hover:opacity-90"
                 title="Buka kolaborasi tim dan undang rekan"
               >
-                <Users className="w-3.5 h-3.5 text-blue-700" />
+                <Users className="w-3.5 h-3.5" style={{ color: primaryAccent }} />
                 <span className="hidden md:inline">Colab</span>
-                <div className="flex -space-x-1 items-center ml-0.5">
-                  <div 
-                    className="w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center border border-white"
-                    style={{ backgroundColor: primaryAccent, color: contrastText }}
-                  >
-                    R
+                {collaboratorPreview.length > 0 && (
+                  <div className="flex -space-x-1 items-center ml-0.5">
+                    {collaboratorPreview.slice(0, 3).map((c, i) =>
+                      <div
+                        key={c.id}
+                        title={`${c.name}${c.status === 'pending' ? ' (menunggu)' : ''}`}
+                        className="relative w-4 h-4 rounded-full overflow-hidden border border-white bg-slate-200 text-slate-600"
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <User className="w-2.5 h-2.5" strokeWidth={2} />
+                        </div>
+                        {c.avatarUrl?.trim() ? (
+                          <img
+                            src={c.avatarUrl}
+                            alt={c.name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : null}
+                      </div>
+                    )}
+                    {collaboratorPreview.length > 3 && (
+                      <div className="w-4 h-4 rounded-full bg-slate-200 text-[7px] font-bold text-slate-700 flex items-center justify-center border border-white">
+                        +{collaboratorPreview.length - 3}
+                      </div>
+                    )}
                   </div>
-                  <div className="w-4 h-4 rounded-full bg-slate-700 text-[8px] font-bold text-white flex items-center justify-center border border-white">
-                    S
-                  </div>
-                </div>
+                )}
               </button>
             )}
 
@@ -165,11 +197,13 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onTogglePreview}
-              style={isPreviewOpen ? { backgroundColor: primaryAccent, color: contrastText, borderColor: primaryAccent } : undefined}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer shadow-2xs ${
-                isPreviewOpen
-                  ? 'shadow-xs'
-                  : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-300'
+              style={{
+                backgroundColor: isPreviewOpen ? primaryAccent : '#ffffff',
+                color: isPreviewOpen ? contrastText : primaryAccent,
+                borderColor: isPreviewOpen ? primaryAccent : `${primaryAccent}55`,
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer shadow-2xs hover:opacity-95 ${
+                isPreviewOpen ? 'shadow-xs' : ''
               }`}
             >
               <Eye className="w-3.5 h-3.5 stroke-[2.5]" style={{ color: isPreviewOpen ? contrastText : primaryAccent }} />

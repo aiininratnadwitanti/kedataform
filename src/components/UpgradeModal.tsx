@@ -8,6 +8,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { UserAccount } from '../types/form';
+import { api } from '../utils/api';
+import { loadSnap } from '../utils/snap';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -28,20 +30,53 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isProcessing, setIsProcessing] = useState(false);
   const [successUpgraded, setSuccessUpgraded] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSimulatePayment = () => {
+  const startCheckout = async (plan: 'pro' | 'business') => {
+    if (isProcessing) return;
+    setErrorMsg('');
     setIsProcessing(true);
-    setTimeout(() => {
+    try {
+      const cfg = await api.billingConfig();
+      if (!cfg.configured) {
+        throw new Error('Pembayaran belum dikonfigurasi. Isi MIDTRANS_SERVER_KEY & MIDTRANS_CLIENT_KEY di .env.');
+      }
+      const snap = await loadSnap(cfg.snapScriptUrl, cfg.clientKey);
+      const { orderId, token } = await api.billingCheckout({ plan, billingCycle });
+      snap.pay(token, {
+        onSuccess: async () => {
+          try {
+            await api.billingVerify(orderId);
+          } catch (e) {
+            console.error('Verifikasi pembayaran gagal', e);
+          }
+          setIsProcessing(false);
+          setSuccessUpgraded(true);
+          onUpgradeToPro();
+          setTimeout(() => {
+            setSuccessUpgraded(false);
+            onClose();
+          }, 1400);
+        },
+        onPending: () => {
+          setIsProcessing(false);
+          setErrorMsg('Pembayaran tertunda. Selesaikan sesuai instruksi Midtrans, lalu coba lagi.');
+        },
+        onError: () => {
+          setIsProcessing(false);
+          setErrorMsg('Pembayaran gagal. Silakan coba lagi.');
+        },
+        onClose: () => {
+          setIsProcessing(false);
+          setErrorMsg('Jendela pembayaran ditutup sebelum transaksi selesai.');
+        },
+      });
+    } catch (e: any) {
       setIsProcessing(false);
-      setSuccessUpgraded(true);
-      onUpgradeToPro();
-      setTimeout(() => {
-        setSuccessUpgraded(false);
-        onClose();
-      }, 1400);
-    }, 600);
+      setErrorMsg(e?.message || 'Gagal memulai pembayaran.');
+    }
   };
 
   return (
@@ -79,7 +114,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
                 type="button"
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-2.5 py-1 text-xs rounded-lg transition-colors cursor-pointer ${
-                  billingCycle === 'monthly' ? 'bg-[#223A5E] text-white font-bold shadow-xs' : 'text-slate-300 hover:text-white font-medium'
+                  billingCycle === 'monthly' ? 'bg-[var(--system-primary)] text-[var(--system-primary-contrast)] font-bold shadow-xs' : 'text-slate-300 hover:text-white font-medium'
                 }`}
               >
                 Bulanan
@@ -88,7 +123,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
                 type="button"
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-2.5 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
-                  billingCycle === 'yearly' ? 'bg-[#223A5E] text-white font-bold shadow-xs' : 'text-slate-300 hover:text-white font-medium'
+                  billingCycle === 'yearly' ? 'bg-[var(--system-primary)] text-[var(--system-primary-contrast)] font-bold shadow-xs' : 'text-slate-300 hover:text-white font-medium'
                 }`}
               >
                 <span>Tahunan</span>
@@ -101,7 +136,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
         </div>
 
         {/* Pricing Cards Grid: Fleksibel, Responsif & Tidak Terpotong di Layar Kecil */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 bg-[#F3F8FD]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 bg-[var(--system-bg-soft)]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
             
             {/* 1. Paket Gratis */}
@@ -160,8 +195,8 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
             </div>
 
             {/* 2. Pro Premium (Highlighted) */}
-            <div className="bg-white rounded-2xl border-2 border-[#223A5E] p-4 shadow-md relative flex flex-col justify-between ring-2 ring-blue-200/60">
-              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#223A5E] text-white text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-2xs">
+            <div className="bg-white rounded-2xl border-2 border-[var(--system-primary)] p-4 shadow-md relative flex flex-col justify-between ring-2 ring-blue-200/60">
+              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[var(--system-primary)] text-[var(--system-primary-contrast)] text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-2xs">
                 Rekomendasi
               </div>
 
@@ -200,12 +235,12 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               <div className="pt-4">
                 <button
                   type="button"
-                  onClick={handleSimulatePayment}
+                  onClick={() => startCheckout('pro')}
                   disabled={isProcessing || user.plan === 'pro'}
                   className={`w-full py-2 text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
                     user.plan === 'pro'
                       ? 'bg-blue-100 text-blue-900 border-blue-300 cursor-default'
-                      : 'bg-[#223A5E] hover:bg-[#1a2d4a] text-white border-[#8c5f10] active:scale-98'
+                      : 'bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] border-[var(--system-primary)] active:scale-98'
                   }`}
                 >
                   {isProcessing ? (
@@ -258,16 +293,23 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               <div className="pt-4">
                 <button
                   type="button"
-                  onClick={handleSimulatePayment}
-                  className="w-full py-2 text-xs font-semibold text-slate-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors cursor-pointer"
+                  onClick={() => startCheckout('business')}
+                  disabled={isProcessing}
+                  className="w-full py-2 text-xs font-semibold text-slate-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors cursor-pointer disabled:opacity-60"
                 >
-                  Pilih Bisnis
+                  {isProcessing ? 'Memproses...' : 'Pilih Bisnis'}
                 </button>
               </div>
             </div>
 
           </div>
         </div>
+
+        {errorMsg && (
+          <div className="px-4 sm:px-5 py-2 bg-rose-50 border-t border-rose-200 text-[11px] text-rose-700">
+            {errorMsg}
+          </div>
+        )}
 
         {/* Footer Ringkas: Garansi & Metode Pembayaran */}
         <div className="p-2.5 px-4 sm:px-5 bg-white border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 shrink-0">

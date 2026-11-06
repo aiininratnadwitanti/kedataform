@@ -64,8 +64,9 @@ import {
   AlertCircle,
   Share2
 } from 'lucide-react';
+import { api } from '../utils/api';
 import confetti from 'canvas-confetti';
-import { FormSchema, UserAccount, FormSubmission } from '../types/form';
+import { FormSchema, UserAccount, FormSubmission, CollaborationInvitation } from '../types/form';
 import { 
   FORM_TEMPLATES, 
   INITIAL_RECENT_FORMS, 
@@ -88,9 +89,25 @@ import {
   isLightColor, 
   getContrastTextColor,
   LIGHT_THEME_ACCENTS, 
-  DARK_THEME_ACCENTS 
+  DARK_THEME_ACCENTS,
+  resolveIsDark,
+  adjustAccentForTheme,
+  isThemeModeDark,
 } from './SystemSettingsModal';
 import { CenterToastPopup } from './CenterToastPopup';
+
+const formatDateTimeLabel = (value: string): string => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
 
 interface DashboardViewProps {
   user: UserAccount;
@@ -112,6 +129,9 @@ interface DashboardViewProps {
   onUpdateUser?: (updated: UserAccount) => void;
   initialSidebarView?: 'dashboard' | 'my_forms' | 'system_rules' | 'plans' | 'profile';
   onSidebarViewChange?: (view: 'dashboard' | 'my_forms' | 'system_rules' | 'plans' | 'profile') => void;
+  collaborationInvitations?: CollaborationInvitation[];
+  onAcceptInvitation?: (id: string) => void;
+  onDeclineInvitation?: (id: string) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -132,6 +152,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onUpdateUser,
   initialSidebarView,
   onSidebarViewChange,
+  collaborationInvitations = [],
+  onAcceptInvitation,
+  onDeclineInvitation,
 }) => {
   // Navigation Sidebar View State: 'dashboard' | 'my_forms' | 'system_rules' | 'plans' | 'profile'
   const [activeSidebarView, setActiveSidebarView] = useState<'dashboard' | 'my_forms' | 'system_rules' | 'plans' | 'profile'>(
@@ -208,7 +231,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     setEditProfileAvatar(user.avatarUrl);
   }, [user.name, user.avatarUrl]);
 
-  const handleSaveProfile = (e?: React.FormEvent) => {
+  const handleSaveProfile = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!editProfileName.trim()) {
       showCenterToast(
@@ -221,16 +244,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
 
     try {
+      const updated = { ...user, name: editProfileName.trim(), avatarUrl: editProfileAvatar };
       if (onUpdateUser) {
-        onUpdateUser({
-          ...user,
-          name: editProfileName.trim(),
-          avatarUrl: editProfileAvatar,
-        });
+        onUpdateUser(updated);
       }
-      localStorage.setItem('kedataform_user_name', editProfileName.trim());
-      localStorage.setItem('kedataform_user_avatar', editProfileAvatar);
-
+      try {
+        localStorage.setItem('kedataform_user_name', editProfileName.trim());
+        localStorage.setItem('kedataform_user_avatar', editProfileAvatar || '');
+      } catch {}
+      try {
+        await api.updateMe({ name: updated.name, avatarUrl: updated.avatarUrl });
+      } catch (err) {
+        console.error('Gagal menyimpan profil ke server', err);
+      }
       showCenterToast(
         'Berhasil Disimpan',
         'Perubahan profil dan nama lengkap Anda telah berhasil diperbarui.',
@@ -404,7 +430,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }, []);
 
   const currentSettings = systemSettings || DEFAULT_SYSTEM_SETTINGS;
-  const isDark = currentSettings.themeMode === 'dark';
+  const isDark = resolveIsDark(currentSettings);
   const isEn = currentSettings.language === 'en';
 
   // Live Notification System State
@@ -446,6 +472,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   ]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
+  const quotaNotifRef = React.useRef<Record<string, { warn?: boolean; full?: boolean }>>({});
 
   const handleOpenNotificationDetail = (n: NotificationItem) => {
     setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
@@ -456,20 +483,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const activeAccentSwatches = isDark ? DARK_THEME_ACCENTS : LIGHT_THEME_ACCENTS;
   const primaryAccent = currentSettings.primaryAccentColor || (isDark ? '#223A5E' : '#223A5E');
   const contrastTextColor = getContrastTextColor(primaryAccent);
+  const fontScale = typeof currentSettings.fontSizeScale === 'number' ? currentSettings.fontSizeScale : 100;
 
   const handleUpdateSetting = (patch: Partial<SystemSettings>) => {
-    // When theme mode is switched: automatically adapt accent color to ensure contrast!
-    if (patch.themeMode && patch.themeMode !== currentSettings.themeMode) {
-      if (patch.themeMode === 'dark' && isDarkColor(currentSettings.primaryAccentColor)) {
-        patch.primaryAccentColor = '#223A5E'; // Switch to blue for dark mode
-      } else if (patch.themeMode === 'light' && isLightColor(currentSettings.primaryAccentColor)) {
-        patch.primaryAccentColor = '#223A5E'; // Switch to deep archival gold for light mode
+    if (patch.systemStyle === 'oled') {
+      patch.themeMode = 'dark';
+      if (isDarkColor(currentSettings.primaryAccentColor)) {
+        patch.primaryAccentColor = adjustAccentForTheme(currentSettings.primaryAccentColor, 'dark');
       }
     }
+    // When theme mode is switched: automatically adapt accent color to ensure contrast!
+    if (!patch.systemStyle && patch.themeMode && patch.themeMode !== currentSettings.themeMode) {
+      const targetIsDark = isThemeModeDark(patch.themeMode);
+      if (targetIsDark && isDarkColor(currentSettings.primaryAccentColor)) {
+        patch.primaryAccentColor = adjustAccentForTheme(currentSettings.primaryAccentColor, 'dark');
+      } else if (!targetIsDark && isLightColor(currentSettings.primaryAccentColor)) {
+        patch.primaryAccentColor = adjustAccentForTheme(currentSettings.primaryAccentColor, 'light');
+      }
+    }
+    const nextSettings = { ...currentSettings, ...patch };
     if (onUpdateSystemSettings) {
-      onUpdateSystemSettings({ ...currentSettings, ...patch });
+      onUpdateSystemSettings(nextSettings);
       setSettingsAutoSaved(true);
       setTimeout(() => setSettingsAutoSaved(false), 2000);
+    }
+    try {
+      localStorage.setItem('kedataform_system_settings', JSON.stringify(nextSettings));
+    } catch {
+      // ignore
     }
   };
 
@@ -600,8 +641,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Active responses list for selected form
   const activeSelectedResponses = formResponsesMap[activeSelectedForm?.id || ''] || [];
 
+  // Notifikasi kuota (lonceng + toast), sekali per ambang agar tidak spam
+  React.useEffect(() => {
+    if (user.plan !== 'free') return;
+    const limit = user.maxFreeResponses || 100;
+    (recentForms || []).forEach((rf) => {
+      const count = formResponsesMap[rf.id]?.length ?? rf.responseCount ?? 0;
+      const state = quotaNotifRef.current[rf.id] || {};
+      const nowLabel = isEn ? 'Just now' : 'Baru saja';
+      if (count >= limit && !state.full) {
+        quotaNotifRef.current[rf.id] = { ...state, full: true, warn: true };
+        const title = isEn ? 'Response quota reached' : 'Batas kuota respon tercapai';
+        const desc = isEn
+          ? `"${rf.title}" reached ${limit} responses (Free plan limit). Upgrade to Pro for unlimited responses.`
+          : `Formulir "${rf.title}" mencapai ${limit} respon (batas paket Free). Upgrade ke Pro untuk respon tanpa batas.`;
+        setNotifications((prev) => [{ id: `quota_full_${rf.id}_${Date.now()}`, title, desc, time: nowLabel, read: false, type: 'quota', formId: rf.id, formTitle: rf.title, details: desc }, ...prev]);
+        showCenterToast(title, desc, 'error', 3500);
+      } else if (count >= Math.floor(limit * 0.8) && count < limit && !state.warn) {
+        quotaNotifRef.current[rf.id] = { ...state, warn: true };
+        const remaining = limit - count;
+        const title = isEn ? 'Quota almost full' : 'Kuota hampir penuh';
+        const desc = isEn
+          ? `"${rf.title}" has used ${count}/${limit} responses. ${remaining} responses left.`
+          : `Formulir "${rf.title}" sudah memakai ${count}/${limit} respon. Sisa ${remaining} respon.`;
+        setNotifications((prev) => [{ id: `quota_warn_${rf.id}_${Date.now()}`, title, desc, time: nowLabel, read: false, type: 'quota', formId: rf.id, formTitle: rf.title, details: desc }, ...prev]);
+        showCenterToast(title, desc, 'success', 3000);
+      }
+    });
+  }, [formResponsesMap, recentForms, user.plan, user.maxFreeResponses, isEn]);
+
   // Filter recent forms for "Formulir Saya"
-  const filteredForms = recentForms.filter((f) => {
+  const filteredForms = (recentForms || []).filter((f) => {
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q || f.title.toLowerCase().includes(q) || (f.form.description || '').toLowerCase().includes(q);
     
@@ -628,8 +698,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         textColor: '#0f172a',
         canvasPattern: 'dots',
         headerBannerType: 'preset',
-        headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-        headerGradient: 'linear-gradient(135deg, #223A5E 0%, #d97706 100%)',
+        headerCoverUrl: '/assets/landing/formulir.jpeg',
+        headerGradient: 'linear-gradient(135deg, #223A5E 0%, #1e40af 100%)',
         headerOverlayOpacity: 30,
         headerPosition: 'banner_top',
         showLogo: false,
@@ -642,7 +712,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         borderRadiusNum: 16,
         radius: 'lg',
         cardBorderWidth: 1,
-        cardBorderColor: '#eedaa2',
+        cardBorderColor: '#bfdbfe',
         cardShadow: 'soft',
         buttonStyle: 'solid',
         submitButtonText: 'Kirim Formulir',
@@ -655,18 +725,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     } else {
       newForm.theme.canvasBg = '#F3F8FD';
       newForm.theme.cardBg = '#ffffff';
-      newForm.theme.cardBorderColor = '#eedaa2';
+      newForm.theme.cardBorderColor = '#bfdbfe';
       if (!newForm.theme.primaryColor || newForm.theme.primaryColor === '#18181b' || newForm.theme.primaryColor === '#27272a') {
         newForm.theme.primaryColor = template.accentColor || '#223A5E';
       }
-    }
-
-    if (onUpdateSystemSettings && currentSettings.themeMode === 'dark') {
-      onUpdateSystemSettings({
-        ...currentSettings,
-        themeMode: 'light',
-        primaryAccentColor: '#223A5E',
-      });
     }
 
     const newRecent: RecentFormItem = {
@@ -676,7 +738,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       responseCount: 0,
       iconType: template.iconType,
       accentColor: template.accentColor || '#223A5E',
-      accentBg: '#fef3c7',
+      accentBg: '#dbeafe',
       coverImage: newForm.theme?.headerCoverUrl || '',
       form: newForm,
     };
@@ -791,10 +853,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     setRecentForms((prev) =>
       prev.map((rf) => (rf.id === item.id ? { ...rf, form: updatedForm } : rf))
     );
-    try {
-      const updatedList = recentForms.map((rf) => (rf.id === item.id ? { ...rf, form: updatedForm } : rf));
-      localStorage.setItem('kedataform_user_forms', JSON.stringify(updatedList));
-    } catch (err) {}
 
     setActiveMenuFormId(null);
     setToastMessage(newIsQuiz ? `✓ Mode Kuis & Penilaian berhasil diaktifkan untuk "${item.title}"!` : `✓ Mode Kuis dinonaktifkan (Formulir Standar)`);
@@ -883,10 +941,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     <div 
       className={`min-h-screen transition-colors duration-200 antialiased flex flex-col ${
         isDark 
-          ? 'bg-[#121214] text-slate-100 selection:bg-slate-800 selection:text-white' 
-          : 'bg-[#F3F8FD] text-[#0f172a] selection:bg-orange-100 selection:text-orange-950'
+          ? 'text-slate-100 selection:bg-slate-800 selection:text-white' 
+          : 'text-[#0f172a] selection:bg-blue-100 selection:text-blue-950'
       }`}
-      style={{ fontFamily: systemFontFamily }}
+      style={{ fontFamily: systemFontFamily, backgroundColor: 'var(--system-bg)' }}
     >
       
       {/* 1. TOP HEADER: MINIMALIST EDITORIAL */}
@@ -952,7 +1010,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 className={`w-full text-xs rounded-full pl-9 pr-8 py-2 border focus:outline-none transition-all shadow-2xs ${
                   isDark 
                     ? 'bg-[#222226] hover:bg-[#28282e] text-slate-100 placeholder:text-slate-500 border-slate-700 focus:border-slate-500' 
-                    : 'bg-[#F3F8FD] hover:bg-white text-slate-800 placeholder:text-slate-400 border-slate-200 focus:border-[#b45309]'
+                    : 'bg-[var(--system-bg-soft)] hover:bg-white text-slate-800 placeholder:text-slate-400 border-slate-200 focus:border-[var(--system-primary)]'
                 }`}
               />
               {searchQuery && (
@@ -1061,9 +1119,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 title={isEn ? 'Notifications & Alerts' : 'Pusat Notifikasi & Respon'}
               >
                 <Bell className="w-4 h-4 stroke-[2]" />
-                {notifications.some(n => !n.read) && (
+                {notifications.some(n => !n.read) || collaborationInvitations.length > 0 ? (
                   <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse ring-2 ring-white" />
-                )}
+                ) : null}
               </button>
 
               {isNotificationsOpen && (
@@ -1091,6 +1149,48 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {currentSettings.emailNotifications ? (isEn ? 'Live Alerts ON' : 'Notifikasi Aktif') : (isEn ? 'Muted' : 'Dinonaktifkan')}
                     </span>
                   </div>
+
+                  {collaborationInvitations.length > 0 && (
+                    <div className="space-y-2 border-b pb-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 font-bold text-xs">
+                          <Users className="w-3.5 h-3.5" style={{ color: primaryAccent }} />
+                          <span>{isEn ? 'Collaboration Invites' : 'Undangan Kolaborasi'}</span>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                          {collaborationInvitations.length}
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {collaborationInvitations.map((inv) => (
+                          <div key={inv.id} className="p-2.5 rounded-xl border border-blue-200 bg-blue-50/60 text-xs space-y-1.5">
+                            <div className="font-bold text-slate-900 line-clamp-2">{inv.formTitle}</div>
+                            <div className="text-[11px] text-slate-500">
+                              {isEn ? 'Invited by' : 'Diundang oleh'} <strong className="text-slate-700">{inv.inviterName}</strong>
+                              {' · '}
+                              {inv.role === 'editor' ? 'Editor' : 'Viewer'}
+                            </div>
+                            <div className="flex items-center gap-2 pt-0.5">
+                              <button
+                                type="button"
+                                onClick={() => onAcceptInvitation?.(inv.id)}
+                                className="px-2.5 py-1 rounded-lg bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] text-[11px] font-bold transition-colors cursor-pointer"
+                              >
+                                Terima
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onDeclineInvitation?.(inv.id)}
+                                className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 text-[11px] font-bold transition-colors cursor-pointer"
+                              >
+                                Tolak
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-2 max-h-56 overflow-y-auto scrollbar-thin">
                     {notifications.length === 0 ? (
@@ -1160,10 +1260,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         
         {/* SIDEBAR: THEME-AWARE EDITORIAL NAVIGATION */}
         <aside
-          className={`w-64 border-r flex flex-col justify-between shrink-0 select-none transition-all z-30 min-h-[calc(100vh-61px)] sticky top-[61px] self-start ${
+          className={`dark-text-scope w-64 border-r flex flex-col justify-between shrink-0 select-none transition-all z-30 min-h-[calc(100vh-61px)] sticky top-[61px] self-start ${
             isDark 
               ? 'bg-[#161619] border-slate-800 text-slate-300' 
-              : 'bg-[#F3F8FD] border-slate-200 text-slate-700'
+              : 'bg-[var(--system-bg-soft)] border-slate-200 text-slate-700'
           } ${
             isMobileSidebarOpen
               ? isDark ? 'fixed inset-y-0 left-0 shadow-2xl p-5 bg-[#18181b]' : 'fixed inset-y-0 left-0 shadow-2xl p-5 bg-white'
@@ -1380,21 +1480,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 {/* Avatar Profil dengan Badge yang Jelas */}
                 <div className="relative shrink-0">
                   <div 
-                    className="w-11 h-11 rounded-full overflow-hidden border-2 ring-2 ring-blue-100 shadow-2xs group-hover:scale-105 transition-transform"
+                    className="relative w-11 h-11 rounded-full overflow-hidden border-2 ring-2 ring-blue-100 shadow-2xs group-hover:scale-105 transition-transform bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200"
                     style={{ borderColor: `${primaryAccent}80` }}
                   >
-                    <img 
-                      src={user.avatarUrl} 
-                      alt={user.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  {/* Badge Ikon Edit Profil */}
-                  <div 
-                    className="absolute -bottom-1 -right-1 bg-slate-900 text-white rounded-full p-1 border border-white shadow-xs group-hover:bg-blue-600 transition-colors"
-                    title="Buka halaman profil"
-                  >
-                    <User className="w-2.5 h-2.5 stroke-[2.5]" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <User className="w-5 h-5" strokeWidth={1.8} />
+                    </div>
+                    {user.avatarUrl?.trim() ? (
+                      <img 
+                        src={user.avatarUrl} 
+                        alt={user.name} 
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : null}
                   </div>
                 </div>
 
@@ -1406,10 +1505,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     {user.name}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                    <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${
                       user.plan === 'pro' 
-                        ? 'bg-blue-100 text-blue-950 border border-blue-300' 
-                        : 'bg-slate-100 text-slate-700 border border-slate-200'
+                        ? 'bg-amber-500 text-white border-amber-600' 
+                        : 'bg-slate-700 text-white border-slate-800 dark:bg-slate-600 dark:border-slate-500'
                     }`}>
                       {user.plan === 'pro' ? 'PRO' : 'FREE (Maks 100/Form)'}
                     </span>
@@ -1490,7 +1589,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </aside>
 
         {/* MAIN EDITORIAL WORKBENCH */}
-        <main className="flex-1 min-w-0 p-2.5 sm:p-4 space-y-5 overflow-y-auto w-full">
+        <main className="dark-text-scope flex-1 min-w-0 p-2.5 sm:p-4 space-y-5 overflow-y-auto w-full">
 
           {/* VIEW: ISOLATED RESPONSES */}
           {isViewingResponses ? (
@@ -1537,10 +1636,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           const inputEl = document.getElementById('dashboard-ai-chat-input');
                           inputEl?.focus();
                         }}
-                        style={{ fontFamily: systemFontFamily }}
-                        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs tracking-wider uppercase flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-slate-700"
+                        style={{ fontFamily: systemFontFamily, backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+                        className="px-3 py-1.5 rounded-lg text-xs tracking-wider uppercase flex items-center gap-1.5 transition-all cursor-pointer shadow-xs hover:opacity-90"
                       >
-                        <Bot className="w-3.5 h-3.5 stroke-[2] text-blue-300" />
+                        <Bot className="w-3.5 h-3.5 stroke-[2] text-[var(--system-primary-contrast)]" />
                         <span>Buat dengan AI</span>
                       </button>
                     </div>
@@ -1552,13 +1651,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           id={item.id === 'blank' ? 'tour-blank-form' : undefined}
                           onClick={() => handleCreateFromTemplate(item)}
                           className={`group cursor-pointer text-left space-y-1.5 p-2 rounded-xl border border-transparent transition-all ${
-                            isDark ? 'hover:border-slate-700 hover:bg-[#222226]' : 'hover:border-slate-300 hover:bg-[#F3F8FD]'
+                            isDark ? 'hover:border-slate-700 hover:bg-[#222226]' : 'hover:border-slate-300 hover:bg-[var(--system-bg-soft)]'
                           }`}
                         >
                           <div className={`h-24 rounded-lg border transition-all flex flex-col items-center justify-center p-3 relative ${
                             isDark 
                               ? 'bg-[#222226] border-slate-700 group-hover:border-blue-400 group-hover:shadow-xs' 
-                              : 'bg-white border-slate-200 group-hover:border-[#b45309] group-hover:shadow-xs'
+                              : 'bg-white border-slate-200 group-hover:border-[var(--system-primary)] group-hover:shadow-xs'
                           }`}>
                             {item.id === 'blank' ? (
                               <div className={`w-8 h-8 rounded-full border flex items-center justify-center group-hover:scale-105 transition-transform ${
@@ -1650,14 +1749,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             inputEl?.focus();
                           }, 120);
                         }}
-                        style={{ fontFamily: systemFontFamily }}
-                        className={`px-4 py-2 rounded-xl text-xs tracking-wider uppercase border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs font-bold ${
-                          isDark 
-                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700' 
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
-                        }`}
+                        style={{ fontFamily: systemFontFamily, backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+                        className="px-4 py-2 rounded-xl text-xs tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs font-bold hover:opacity-90"
                       >
-                        <Bot className="w-3.5 h-3.5 inline text-[#b45309] stroke-[2]" />
+                        <Bot className="w-3.5 h-3.5 inline text-[var(--system-primary-contrast)] stroke-[2]" />
                         <span>Buat dengan AI</span>
                       </button>
                     </div>
@@ -1739,7 +1834,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         
                         // Sampul seragam: gunakan gambar kustom atau sampul standar estetis agar seluruh kartu seragam
                         const rawCover = item.form.theme?.headerCoverUrl || '';
-const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png') ? rawCover : '/assets/landing/formulir.jpeg';
+                        const legacyDefaultCovers = ['/assets/aistudio/image_3ec5f637.png', '/public/assets/aistudio/image_3ec5f637.png'];
+                        const formCover = (rawCover && !legacyDefaultCovers.includes(rawCover)) ? rawCover : '/assets/landing/formulir.jpeg';
 
                         return (
                           <div
@@ -1797,6 +1893,22 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                                   >
                                     {item.title}
                                   </h3>
+                                  {item.accessRole && item.accessRole !== 'owner' && (
+                                    <div className="flex items-center gap-1.5 mt-1">
+                                      <span
+                                        className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                                          item.accessRole === 'viewer'
+                                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                            : 'bg-blue-50 text-blue-800 border-blue-200'
+                                        }`}
+                                      >
+                                        {item.accessRole === 'viewer' ? 'Viewer' : 'Editor'}
+                                      </span>
+                                      {item.ownerName && (
+                                        <span className="text-[10px] text-slate-400 truncate">Milik {item.ownerName}</span>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* 3-DOTS MENU: Outside hero cover, unclipped & scrollable */}
@@ -1839,48 +1951,54 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                                         <BarChart2 className="w-3.5 h-3.5 stroke-[2]" style={{ color: primaryAccent }} />
                                         <span>{isEn ? `Respondent Data (${isolatedCount})` : `Data Responden (${isolatedCount})`}</span>
                                       </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => setSelectedFormForSchedule(item.form)}
-                                        className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
-                                        }`}
-                                      >
-                                        <CalendarClock className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
-                                        <span>{isEn ? 'Schedule & Availability' : 'Atur Jadwal Buka'}</span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => handleToggleQuizModeFromMenu(item, e)}
-                                        className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between cursor-pointer ${
-                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
-                                        }`}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-blue-500' : 'text-slate-400'}`} />
-                                          <span>{isEn ? 'Quiz & Scoring' : 'Mode Kuis & Skor'}</span>
-                                        </div>
-                                        <span 
-                                          className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border"
-                                          style={{
-                                            backgroundColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined,
-                                            color: item.form.quizConfig?.isQuizMode ? contrastTextColor : undefined,
-                                            borderColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined
-                                          }}
+                                      {item.accessRole !== 'viewer' && (
+                                        <button
+                                          type="button"
+                                          onClick={() => setSelectedFormForSchedule(item.form)}
+                                          className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
+                                            isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
+                                          }`}
                                         >
-                                          {item.form.quizConfig?.isQuizMode ? (isEn ? 'On' : 'Aktif') : (isEn ? 'Off' : 'Nonaktif')}
-                                        </span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => handleDuplicateForm(item, e)}
-                                        className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
-                                        }`}
-                                      >
-                                        <Copy className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
-                                        <span>{isEn ? 'Duplicate Form' : 'Duplikat Formulir'}</span>
-                                      </button>
+                                          <CalendarClock className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
+                                          <span>{isEn ? 'Schedule & Availability' : 'Atur Jadwal Buka'}</span>
+                                        </button>
+                                      )}
+                                      {item.accessRole !== 'viewer' && (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => handleToggleQuizModeFromMenu(item, e)}
+                                          className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between cursor-pointer ${
+                                            isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
+                                          }`}
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-blue-500' : 'text-slate-400'}`} />
+                                            <span>{isEn ? 'Quiz & Scoring' : 'Mode Kuis & Skor'}</span>
+                                          </div>
+                                          <span
+                                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border"
+                                            style={{
+                                              backgroundColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined,
+                                              color: item.form.quizConfig?.isQuizMode ? contrastTextColor : undefined,
+                                              borderColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined
+                                            }}
+                                          >
+                                            {item.form.quizConfig?.isQuizMode ? (isEn ? 'On' : 'Aktif') : (isEn ? 'Off' : 'Nonaktif')}
+                                          </span>
+                                        </button>
+                                      )}
+                                      {(!item.accessRole || item.accessRole === 'owner') && (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => handleDuplicateForm(item, e)}
+                                          className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
+                                            isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
+                                          }`}
+                                        >
+                                          <Copy className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
+                                          <span>{isEn ? 'Duplicate Form' : 'Duplikat Formulir'}</span>
+                                        </button>
+                                      )}
                                       <div className={`my-1 border-t ${isDark ? 'border-slate-700' : 'border-slate-100'}`} />
                                       <button
                                         type="button"
@@ -1897,16 +2015,18 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                                         <span>{isEn ? 'Share Form' : 'Bagikan Formulir'}</span>
                                       </button>
                                       <div className={`my-1 border-t ${isDark ? 'border-slate-700' : 'border-slate-100'}`} />
-                                      <button
-                                        type="button"
-                                        onClick={(e) => handleDeleteForm(item.id, e)}
-                                        className={`w-full px-3.5 py-2 text-left text-xs text-rose-500 flex items-center gap-2 cursor-pointer ${
-                                          isDark ? 'hover:bg-rose-950/40' : 'hover:bg-rose-50'
-                                        }`}
-                                      >
-                                        <Trash2 className="w-3.5 h-3.5 stroke-[2] text-rose-500" />
-                                        <span>{isEn ? 'Delete Form' : 'Hapus Formulir'}</span>
-                                      </button>
+                                      {(!item.accessRole || item.accessRole === 'owner') && (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => handleDeleteForm(item.id, e)}
+                                          className={`w-full px-3.5 py-2 text-left text-xs text-rose-500 flex items-center gap-2 cursor-pointer ${
+                                            isDark ? 'hover:bg-rose-950/40' : 'hover:bg-rose-50'
+                                          }`}
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5 stroke-[2] text-rose-500" />
+                                          <span>{isEn ? 'Delete Form' : 'Hapus Formulir'}</span>
+                                        </button>
+                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -1915,14 +2035,14 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                             </div>
 
                             <div className={`px-5 py-3 border-t flex items-center justify-between text-xs ${
-                              isDark ? 'bg-[#161619] border-slate-800' : 'bg-[#F3F8FD] border-slate-150'
+                              isDark ? 'bg-[#161619] border-slate-800' : 'bg-[var(--system-bg-soft)] border-slate-150'
                             }`}>
                               <span className="text-[11px] font-mono text-slate-400">{item.lastOpened}</span>
                               <span 
                                 className="font-bold tracking-wider flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
                                 style={{ color: primaryAccent, fontFamily: systemFontFamily }}
                               >
-                                <span>EDIT FORM</span>
+                                <span>{(item.accessRole === 'viewer') ? 'LIHAT FORM' : 'EDIT FORM'}</span>
                                 <ArrowRight className="w-3.5 h-3.5 stroke-[2]" />
                               </span>
                             </div>
@@ -1944,7 +2064,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                             key={item.id}
                             onClick={() => onOpenForm(item.form)}
                             className={`p-4 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${
-                              isDark ? 'hover:bg-[#202025]' : 'hover:bg-[#F3F8FD]'
+                              isDark ? 'hover:bg-[#202025]' : 'hover:bg-[var(--system-bg-soft)]'
                             }`}
                           >
                             <div className="flex items-center gap-3.5 min-w-0">
@@ -2140,23 +2260,12 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
 
                       <button
                         type="button"
-                        onClick={handleApplyToEntireSystem}
-                        className="px-4 py-2 text-xs font-serif font-bold tracking-wider uppercase rounded-xl shadow-xs transition-all hover:opacity-95 cursor-pointer flex items-center gap-2"
-                        style={{ 
-                          backgroundColor: primaryAccent,
-                          color: contrastTextColor,
-                          fontFamily: systemFontFamily 
-                        }}
-                        title={isEn ? "Apply to entire studio workspace" : "Terapkan ke seluruh antarmuka studio"}
-                      >
-                        <Save className="w-3.5 h-3.5 stroke-[2]" style={{ color: contrastTextColor }} />
-                        <span>{isEn ? 'Save & Apply Design' : 'Simpan & Terapkan Desain'}</span>
-                      </button>
-
-                      <button
-                        type="button"
                         onClick={handleResetSettingsToDefault}
-                        className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 rounded-xl border border-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
+                        className={`px-3.5 py-2 text-xs font-semibold rounded-xl border flex items-center gap-1.5 cursor-pointer transition-colors ${
+                          isDark
+                            ? 'text-slate-100 hover:text-white bg-[var(--system-surface-2)] border-[var(--system-border)] hover:bg-[var(--system-surface)]'
+                            : 'text-slate-600 hover:text-slate-900 bg-slate-100 border-slate-200 hover:bg-slate-200/70'
+                        }`}
                         title={isEn ? "Reset all system settings to defaults" : "Kembalikan semua setelan ke awal pabrik"}
                       >
                         <RotateCcw className="w-3.5 h-3.5 stroke-[2]" />
@@ -2172,7 +2281,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                     
                     {/* In-page sub-sidebar */}
                     <div className={`w-full lg:w-64 border-b lg:border-b-0 lg:border-r p-3 sm:p-4 space-y-1 shrink-0 transition-colors ${
-                      isDark ? 'border-slate-800 bg-[#161619]' : 'border-slate-200 bg-[#F3F8FD]'
+                      isDark ? 'border-slate-800 bg-[#161619]' : 'border-slate-200 bg-[var(--system-bg-soft)]'
                     }`}>
                       <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold hidden lg:block">
                         Sub-Menu Pengaturan
@@ -2185,13 +2294,13 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                             label: 'Tema, Font & Palet', 
                             desc: 'Mode, font, palet pensil', 
                             icon: <Palette className="w-4 h-4 stroke-[2]" />,
-                            badge: currentSettings.themeMode === 'dark' ? 'Dark' : currentSettings.themeMode === 'light' ? 'Light' : 'Auto'
+                            badge: ({ dark: 'Dark', light: 'Light', auto: 'Auto', sepia: 'Sepia', dim: 'Dim' } as Record<string, string>)[currentSettings.themeMode] || 'Auto'
                           },
                           { 
                             id: 'workspace', 
-                            label: 'Workspace & Bahasa', 
-                            desc: 'Identitas & Zona Waktu', 
-                            icon: <Building2 className="w-4 h-4 stroke-[2]" /> 
+                            label: 'Preferensi Workspace', 
+                            desc: 'Zona Waktu & Format', 
+                            icon: <Building2 className="w-4 h-4 stroke-[2]" />
                           },
                           { 
                             id: 'notifications', 
@@ -2278,19 +2387,10 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                               </p>
                             </div>
                             
-                            <button
-                              type="button"
-                              onClick={handleApplyToEntireSystem}
-                              className="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wider uppercase shadow-2xs hover:opacity-95 transition-all flex items-center gap-1.5 self-start sm:self-auto shrink-0 cursor-pointer"
-                              style={{ 
-                                backgroundColor: primaryAccent, 
-                                color: contrastTextColor,
-                                fontFamily: systemFontFamily 
-                              }}
-                            >
-                              <Save className="w-3.5 h-3.5 stroke-[2]" style={{ color: contrastTextColor }} />
-                              <span>Terapkan Desain</span>
-                            </button>
+                            <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-semibold">
+                              <CheckCircle2 className="w-3.5 h-3.5 stroke-[2]" />
+                              <span>Tersimpan otomatis</span>
+                            </div>
                           </div>
 
                           {/* Grid Theme & Font Dropdowns */}
@@ -2298,7 +2398,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                             
                             {/* Card 1: Mode & Nuansa Tema */}
                             <div className={`p-4 rounded-2xl border space-y-3.5 ${
-                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
+                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[var(--system-bg-soft)] border-slate-200 text-slate-800'
                             }`}>
                               <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider font-bold">
                                 <Contrast className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
@@ -2329,7 +2429,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
 
                               <div className="space-y-1.5">
                                 <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                                  Gaya Nuansa UI
+                                  Preset Warna Studio
                                 </label>
                                 <div className="relative">
                                   <select
@@ -2356,7 +2456,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
 
                             {/* Card 2: Tipografi Font */}
                             <div className={`p-4 rounded-2xl border space-y-3.5 ${
-                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
+                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[var(--system-bg-soft)] border-slate-200 text-slate-800'
                             }`}>
                               <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider font-bold">
                                 <Type className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
@@ -2399,25 +2499,39 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                                 </div>
                               </div>
 
-                              <div className="space-y-1.5">
+                              <div className="space-y-2">
                                 <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                                   Skala Ukuran Teks (Font Size)
                                 </label>
-                                <div className="relative">
-                                  <select
-                                    value={currentSettings.fontSizeScale}
-                                    onChange={(e) => handleUpdateSetting({ fontSizeScale: e.target.value as any })}
-                                    className={`w-full appearance-none rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none transition-all cursor-pointer pr-9 ${
-                                      isDark 
-                                        ? 'bg-[#161619] border border-slate-700 text-slate-100 hover:border-slate-600 focus:ring-1 focus:ring-slate-600' 
-                                        : 'bg-white border border-slate-300 hover:border-slate-400 text-slate-900 focus:ring-1 focus:ring-slate-400'
-                                    }`}
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-semibold text-slate-500">Kompak (85%)</span>
+                                  <span
+                                    className="text-[11px] font-bold px-2 py-0.5 rounded-md border"
+                                    style={{
+                                      color: primaryAccent,
+                                      borderColor: `${primaryAccent}40`,
+                                      backgroundColor: `${primaryAccent}12`,
+                                    }}
                                   >
-                                    <option value="compact">Kompak (90% - Informasi Padat)</option>
-                                    <option value="standard">Standar (100% - Default Seimbang)</option>
-                                    <option value="comfortable">Lapang (110% - Nyaman & Besar)</option>
-                                  </select>
-                                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                                    {fontScale}%
+                                  </span>
+                                  <span className="text-[10px] font-semibold text-slate-500">Lapang (130%)</span>
+                                </div>
+                                <input
+                                  type="range"
+                                  min={85}
+                                  max={130}
+                                  step={5}
+                                  value={fontScale}
+                                  onChange={(e) => handleUpdateSetting({ fontSizeScale: Number(e.target.value) })}
+                                  className="w-full h-2 cursor-pointer"
+                                  style={{ accentColor: 'var(--system-primary)' }}
+                                />
+                                <div className="flex justify-between text-[9px] font-mono text-slate-400">
+                                  <span>85%</span>
+                                  <span>100%</span>
+                                  <span>115%</span>
+                                  <span>130%</span>
                                 </div>
                               </div>
                             </div>
@@ -2426,7 +2540,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
 
                           {/* SECTION: WARNA AKSEN LINGKARAN */}
                           <div className={`p-5 rounded-2xl border space-y-4 ${
-                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
+                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[var(--system-bg-soft)] border-slate-200 text-slate-800'
                           }`}>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
@@ -2495,57 +2609,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                             </div>
                           </div>
 
-                          {/* Border Radius & Animations */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className={`p-4 rounded-2xl border space-y-1.5 ${
-                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
-                            }`}>
-                              <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                                Kelengkungan Sudut (Border Radius)
-                              </label>
-                              <div className="relative">
-                                <select
-                                  value={currentSettings.borderRadius}
-                                  onChange={(e) => handleUpdateSetting({ borderRadius: e.target.value as any })}
-                                  className={`w-full appearance-none rounded-xl px-3.5 py-2 text-xs font-medium cursor-pointer pr-9 focus:outline-none ${
-                                    isDark 
-                                      ? 'bg-[#161619] border border-slate-700 text-slate-100' 
-                                      : 'bg-white border border-slate-300 text-slate-900'
-                                  }`}
-                                >
-                                  <option value="modern">Modern Rounded (12px / 24px - Default)</option>
-                                  <option value="sharp">Tajam / Sharp (6px / 8px)</option>
-                                  <option value="rounded">Ekstra Membulat (16px / 32px)</option>
-                                </select>
-                                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
-                              </div>
-                            </div>
-
-                            <div className={`p-4 rounded-2xl border flex items-center justify-between ${
-                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-900'
-                            }`}>
-                              <div>
-                                <label className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
-                                  Animasi Transisi Halus
-                                </label>
-                                <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                  Efek perpindahan micro-interaction antar tampilan
-                                </p>
-                              </div>
-                              <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={currentSettings.enableAnimations}
-                                  onChange={(e) => handleUpdateSetting({ enableAnimations: e.target.checked })}
-                                  className="sr-only peer"
-                                />
-                                <div 
-                                  className="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"
-                                  style={{ backgroundColor: currentSettings.enableAnimations ? primaryAccent : undefined }}
-                                />
-                              </label>
-                            </div>
-                          </div>
+                          {/* Border Radius & Animasi dihapus sesuai permintaan */}
 
                         </div>
                       )}
@@ -2561,47 +2625,16 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                               style={{ fontFamily: systemFontFamily }}
                             >
                               <Building2 className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
-                              <span>Workspace & Identitas Lembaga</span>
+                              <span>Preferensi Workspace</span>
                             </h3>
                             <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                              Kelola nama workspace, email kontak resmi, zona waktu, dan format tanggal.
+                              Atur zona waktu dan format tanggal default untuk workspace Anda.
                             </p>
                           </div>
 
                           <div className={`p-5 rounded-2xl border space-y-4 ${
-                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
+                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[var(--system-bg-soft)] border-slate-200 text-slate-800'
                           }`}>
-                            <div>
-                              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
-                                Nama Workspace / Instansi
-                              </label>
-                              <input
-                                type="text"
-                                value={currentSettings.workspaceName}
-                                onChange={(e) => handleUpdateSetting({ workspaceName: e.target.value })}
-                                className={`w-full text-xs rounded-xl p-2.5 focus:outline-none focus:ring-1 ${
-                                  isDark 
-                                    ? 'bg-[#161619] border border-slate-700 text-slate-100 focus:ring-slate-600' 
-                                    : 'bg-white border border-slate-300 text-slate-800 focus:ring-slate-400'
-                                }`}
-                              />
-                            </div>
-
-                            <div>
-                              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
-                                Email Kontak Administrator
-                              </label>
-                              <input
-                                type="email"
-                                value={currentSettings.adminEmail}
-                                onChange={(e) => handleUpdateSetting({ adminEmail: e.target.value })}
-                                className={`w-full text-xs rounded-xl p-2.5 focus:outline-none focus:ring-1 ${
-                                  isDark 
-                                    ? 'bg-[#161619] border border-slate-700 text-slate-100 focus:ring-slate-600' 
-                                    : 'bg-white border border-slate-300 text-slate-800 focus:ring-slate-400'
-                                }`}
-                              />
-                            </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
@@ -3008,8 +3041,8 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                       <button
                         type="button"
                         onClick={onOpenUpgradeModal}
-                        style={{ fontFamily: systemFontFamily }}
-                        className="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold tracking-wider uppercase text-xs rounded-xl shadow-md transition-colors cursor-pointer"
+                        style={{ fontFamily: systemFontFamily, color: primaryAccent }}
+                        className="w-full py-2.5 bg-white hover:bg-slate-50 font-bold tracking-wider uppercase text-xs rounded-xl shadow-md border border-white/70 transition-colors cursor-pointer"
                       >
                         Tingkatkan ke Pro
                       </button>
@@ -3195,9 +3228,10 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                         <button
                           type="button"
                           onClick={handleApplyCursorCrop}
-                          className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 bg-slate-950 hover:bg-slate-800 text-white border border-slate-800"
+                          style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+                          className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 hover:opacity-90"
                         >
-                          <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                          <Check className="w-4 h-4 text-[var(--system-primary-contrast)] stroke-[3]" />
                           <span>Selesai & Terapkan Foto Ini</span>
                         </button>
                       </div>
@@ -3214,14 +3248,20 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                         }`}>
                           <div className="relative group">
                             <div 
-                              className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 ring-4 ring-blue-200/80 dark:ring-blue-950/60 shadow-lg"
+                              className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 ring-4 ring-blue-200/80 dark:ring-blue-950/60 shadow-lg bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200"
                               style={{ borderColor: primaryAccent }}
                             >
-                              <img 
-                                src={editProfileAvatar} 
-                                alt={editProfileName} 
-                                className="w-full h-full object-cover"
-                              />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <User className="w-12 h-12 sm:w-14 sm:h-14" strokeWidth={1.6} />
+                              </div>
+                              {editProfileAvatar?.trim() ? (
+                                <img 
+                                  src={editProfileAvatar} 
+                                  alt={editProfileName} 
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              ) : null}
                             </div>
                             <input
                               type="file"
@@ -3245,10 +3285,11 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                           <button
                             type="button"
                             onClick={() => editAvatarFileInputRef.current?.click()}
-                            className="px-5 py-2.5 text-xs font-black text-white bg-slate-950 hover:bg-slate-800 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-xs border border-slate-800"
+                            style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+                            className="px-5 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-xs hover:opacity-90"
                             title="Pilih foto baru dan langsung atur crop lingkaran"
                           >
-                            <Camera className="w-4 h-4 stroke-[2.2] text-blue-300" />
+                            <Camera className="w-4 h-4 stroke-[2.2] text-[var(--system-primary-contrast)]" />
                             <span>Ubah Foto</span>
                           </button>
                         </div>
@@ -3316,7 +3357,8 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                                 <button
                                   type="button"
                                   onClick={() => navigateTo('plans')}
-                                  className="px-3.5 py-1.5 text-[11px] font-black rounded-xl shadow-xs transition-all cursor-pointer bg-slate-900 text-white hover:bg-slate-800 border border-slate-800"
+                                  style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+                                  className="px-3.5 py-1.5 text-[11px] font-black rounded-xl shadow-xs transition-all cursor-pointer hover:opacity-90"
                                 >
                                   Upgrade
                                 </button>
@@ -3328,9 +3370,10 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
                           <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end">
                             <button
                               type="submit"
-                              className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 bg-slate-950 hover:bg-slate-800 text-white border border-slate-800"
+                              style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+                              className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 hover:opacity-90"
                             >
-                              <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                              <Check className="w-4 h-4 text-[var(--system-primary-contrast)] stroke-[3]" />
                               <span>Simpan Perubahan</span>
                             </button>
                           </div>
@@ -3487,7 +3530,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
       {isDeleteModalOpen && formPendingDelete && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
           <div 
-            className={`w-full max-w-md rounded-3xl border shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-150 ${
+            className={`w-full max-w-lg rounded-3xl border shadow-2xl p-6 sm:p-7 space-y-6 animate-in zoom-in-95 duration-150 ${
               isDark ? 'bg-[#1c1c20] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
             }`}
             style={{ fontFamily: systemFontFamily }}
@@ -3508,20 +3551,20 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
             </div>
 
             {/* Form Info Box */}
-            <div className={`p-4 rounded-2xl border-2 space-y-2.5 shadow-2xs ${
+            <div className={`p-4 rounded-2xl border-2 space-y-3 shadow-2xs ${
               isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-100/90 border-slate-300'
             }`}>
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="flex items-start gap-2">
+                <FileText className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <span 
-                  className="font-extrabold text-sm truncate"
+                  className="font-extrabold text-sm break-words leading-snug"
                   style={{ color: isDark ? '#ffffff' : '#0f172a' }}
                 >
                   {formPendingDelete.title}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs font-mono font-bold pt-1.5 border-t border-slate-200 dark:border-slate-800" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>
-                <span>Terakhir dibuka: <strong style={{ color: isDark ? '#ffffff' : '#0f172a' }}>{formPendingDelete.lastOpened}</strong></span>
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs font-bold pt-2.5 border-t border-slate-200 dark:border-slate-800" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>
+                <span>Terakhir dibuka: <strong style={{ color: isDark ? '#ffffff' : '#0f172a' }}>{formatDateTimeLabel(formPendingDelete.lastOpened)}</strong></span>
                 <span className="font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-2xs" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>
                   {formResponsesMap[formPendingDelete.id]?.length ?? formPendingDelete.responseCount ?? 0} Responden
                 </span>
@@ -3536,7 +3579,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
             ) : null}
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => {
@@ -3591,7 +3634,7 @@ const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png
       <CenterToastPopup
         toast={centerToast}
         onClose={() => setCenterToast(null)}
-        isDark={systemSettings?.themeMode === 'dark'}
+        isDark={isDark}
       />
 
     </div>

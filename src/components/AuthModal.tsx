@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  User, 
-  ShieldCheck, 
-  LogOut, 
-  Crown, 
-  CheckCircle2, 
-  KeyRound, 
-  Mail, 
-  Zap, 
-  Eye, 
-  EyeOff, 
+import {
+  X,
+  User,
+  ShieldCheck,
+  LogOut,
+  Crown,
+  CheckCircle2,
+  KeyRound,
+  Mail,
+  Zap,
+  Eye,
+  EyeOff,
   ArrowLeft,
   Check,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { UserAccount } from '../types/form';
 
@@ -56,46 +56,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Google sign in loading state
   const [isSimulatingGoogle, setIsSimulatingGoogle] = useState(false);
+  const [authNotice, setAuthNotice] = useState('');
 
   if (!isOpen) return null;
 
   const handleGoogleSignIn = () => {
     setIsSimulatingGoogle(true);
-    setTimeout(() => {
-      onUpdateUser({
-        ...user,
-        name: 'Rizka Farida Damayanti',
-        email: 'rizkafaridadamayantii@gmail.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-        isAuthenticated: true,
-      });
-      setIsSimulatingGoogle(false);
-      onClose();
-    }, 600);
+    window.location.href = '/api/v1/auth/google';
   };
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateUser({
-      ...user,
-      name: loginName.trim() || 'Rizka Farida Damayanti',
-      email: loginEmail.trim() || 'rizkafaridadamayantii@gmail.com',
-      avatarUrl: user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-      isAuthenticated: true,
-    });
-    onClose();
+    setAuthNotice('Saat ini login hanya tersedia melalui Google. Gunakan tombol "Lanjutkan dengan Google".');
   };
 
   const handleSigninSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateUser({
-      ...user,
-      name: signinName.trim() || 'Pengguna KeDataForm Baru',
-      email: signinEmail.trim() || 'user@kedataform.studio',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-      isAuthenticated: true,
-    });
-    onClose();
+    setAuthNotice('Saat ini pendaftaran hanya tersedia melalui Google. Gunakan tombol "Lanjutkan dengan Google".');
   };
 
   const handleForgotPasswordSubmit = (e: React.FormEvent) => {
@@ -108,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-[#F3F8FD] rounded-3xl shadow-2xl border border-blue-200/90 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 ring-1 ring-blue-500/10">
+      <div className="bg-[var(--system-bg-soft)] rounded-3xl shadow-2xl border border-blue-200/90 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 ring-1 ring-blue-500/10">
         
         {/* Modal Header Pastel */}
         <div className="p-5 border-b border-blue-200/80 flex items-center justify-between bg-gradient-to-r from-blue-100/70 via-blue-50 to-blue-100/70">
@@ -154,7 +131,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Content Area Pastel */}
-        <div className="p-6 space-y-5 bg-[#F3F8FD]">
+        <div className="p-6 space-y-5 bg-[var(--system-bg-soft)]">
           {user.isAuthenticated ? (
             /* ============================================================== */
             /* TAMPILAN PROFIL UNTUK PENGGUNA YANG SUDAH TERVERIFIKASI       */
@@ -163,13 +140,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {/* Kartu Profil Identitas Pengguna */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-blue-200/90 shadow-2xs">
                 <div className="relative">
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.name}
-                    className="w-13 h-13 rounded-full object-cover border-2 border-blue-200 shadow-2xs"
-                  />
-                  <div className="absolute -bottom-1 -right-1 bg-[#223A5E] text-white rounded-full p-0.5 border-2 border-white" title="Akun Terverifikasi">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  <div className="relative w-[3.25rem] h-[3.25rem] rounded-full overflow-hidden border-2 border-blue-200 shadow-2xs bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <User className="w-6 h-6" strokeWidth={1.8} />
+                    </div>
+                    {user.avatarUrl?.trim() ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={user.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : null}
                   </div>
                 </div>
 
@@ -183,7 +165,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 border border-blue-200 text-[#223A5E]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#223A5E] animate-pulse"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--system-primary)] animate-pulse"></span>
                       Google Connected
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">
@@ -215,7 +197,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </div>
                   </div>
 
-                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-[#223A5E] border border-[#8c5f10] text-white shadow-2xs">
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-[var(--system-primary)] border border-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-2xs">
                     {user.plan === 'pro' ? 'Unlimited' : `${user.responseCount} / ${user.maxFreeResponses} Terpakai`}
                   </span>
                 </div>
@@ -225,7 +207,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <div className="space-y-1.5 pt-1">
                     <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden border border-blue-200/60">
                       <div 
-                        className="h-full rounded-full transition-all duration-500 bg-[#223A5E]"
+                        className="h-full rounded-full transition-all duration-500 bg-[var(--system-primary)]"
                         style={{ width: `${quotaPercent}%` }}
                       />
                     </div>
@@ -244,7 +226,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onClose();
                       onUpgradeClick();
                     }}
-                    className="w-full mt-2 py-2 px-3 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-101 active:scale-99 border border-[#8c5f10]"
+                    className="w-full mt-2 py-2 px-3 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-101 active:scale-99 border border-[var(--system-primary)]"
                   >
                     <Crown className="w-3.5 h-3.5 text-blue-200" />
                     <span className="text-white font-bold">Tingkatkan ke Pro (Respon Tanpa Batas)</span>
@@ -328,7 +310,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setAuthMode('login');
                       setIsResetSent(false);
                     }}
-                    className="w-full mt-2 py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer transition-all border border-[#8c5f10]"
+                    className="w-full mt-2 py-2.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs cursor-pointer transition-all border border-[var(--system-primary)]"
                   >
                     <span className="text-white font-bold">Kembali ke Login</span>
                   </button>
@@ -345,7 +327,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => setForgotEmail(e.target.value)}
                       placeholder="nama@email.com"
                       required
-                      className="w-full text-xs bg-[#F3F8FD] border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                      className="w-full text-xs bg-[var(--system-bg-soft)] border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                     />
                     <p className="text-[11px] text-slate-500 mt-1">
                       Masukkan email yang terdaftar untuk menerima tautan pemulihan sandi.
@@ -354,7 +336,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer border border-[#8c5f10]"
+                    className="w-full py-2.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer border border-[var(--system-primary)]"
                   >
                     <span className="text-white font-bold">Kirim Tautan Reset Password</span>
                   </button>
@@ -405,6 +387,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="h-px flex-1 bg-blue-200" />
               </div>
 
+              {authNotice && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed">
+                  {authNotice}
+                </div>
+              )}
+
               {/* FORM 1: LOGIN (Nama, Email, Password, Forgot Password) */}
               {authMode === 'login' && (
                 <form onSubmit={handleLoginSubmit} className="space-y-3">
@@ -418,7 +406,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => setLoginName(e.target.value)}
                       placeholder="Nama Lengkap Anda"
                       required
-                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                     />
                   </div>
 
@@ -432,7 +420,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => setLoginEmail(e.target.value)}
                       placeholder="nama@email.com"
                       required
-                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                     />
                   </div>
 
@@ -459,7 +447,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         onChange={(e) => setLoginPassword(e.target.value)}
                         placeholder="••••••••"
                         required
-                        className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 pr-9 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                        className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 pr-9 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                       />
                       <button
                         type="button"
@@ -477,7 +465,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer mt-1 hover:scale-101 active:scale-99 border border-[#8c5f10]"
+                    className="w-full py-2.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer mt-1 hover:scale-101 active:scale-99 border border-[var(--system-primary)]"
                   >
                     <span className="text-white font-bold">Masuk ke KeDataForm</span>
                   </button>
@@ -510,7 +498,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => setSigninName(e.target.value)}
                       placeholder="Nama Lengkap Anda"
                       required
-                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                     />
                   </div>
 
@@ -524,7 +512,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => setSigninEmail(e.target.value)}
                       placeholder="nama@email.com"
                       required
-                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                     />
                   </div>
 
@@ -539,7 +527,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         onChange={(e) => setSigninPassword(e.target.value)}
                         placeholder="Minimal 6 karakter"
                         required
-                        className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 pr-9 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                        className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 pr-9 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                       />
                       <button
                         type="button"
@@ -565,13 +553,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => setSigninConfirmPassword(e.target.value)}
                       placeholder="Ulangi kata sandi baru"
                       required
-                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
+                      className="w-full text-xs bg-white border border-blue-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] focus:ring-1 focus:ring-[#223A5E] shadow-2xs"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer mt-1 hover:scale-101 active:scale-99 border border-[#8c5f10]"
+                    className="w-full py-2.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer mt-1 hover:scale-101 active:scale-99 border border-[var(--system-primary)]"
                   >
                     <span className="text-white font-bold">Daftar & Buat Akun</span>
                   </button>

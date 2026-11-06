@@ -404,8 +404,8 @@ export const ResponseModal: React.FC<ResponseModalProps> = ({
                                 <span 
                                   className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full inline-block mt-0.5 ${
                                     isGreen 
-                                      ? 'bg-neutral-900 text-white' 
-                                      : 'bg-neutral-400 text-white'
+                                      ? 'bg-[var(--system-primary)] text-[var(--system-primary-contrast)]' 
+                                      : 'bg-[#93c5fd] text-white'
                                   }`}
                                 >
                                   {accuracyBadge}
@@ -451,7 +451,7 @@ export const ResponseModal: React.FC<ResponseModalProps> = ({
                                         : 'text-neutral-400'
                                     }`}
                                   >
-                                    {isCorrect ? '✓' : '—'}
+                                    {isCorrect ? '✓' : '-'}
                                   </td>
                                 );
                               })}
@@ -562,7 +562,7 @@ export const ResponseModal: React.FC<ResponseModalProps> = ({
 
                                 {questions.map((q) => {
                                   const rawVal = r.answers[q.id];
-                                  let displayVal = '—';
+                                  let displayVal = '-';
                                   let isBadge = false;
 
                                   if (rawVal !== undefined && rawVal !== null && rawVal !== '') {
@@ -580,7 +580,7 @@ export const ResponseModal: React.FC<ResponseModalProps> = ({
 
                                   return (
                                     <td key={q.id} className="py-3 px-4 text-neutral-800 max-w-xs">
-                                      {isBadge && displayVal !== '—' ? (
+                                      {isBadge && displayVal !== '-' ? (
                                         <span className="inline-block px-2.5 py-0.5 rounded-lg bg-neutral-100 text-neutral-800 text-[11px] font-medium border border-neutral-200/60">
                                           {displayVal}
                                         </span>
@@ -635,7 +635,7 @@ export const ResponseModal: React.FC<ResponseModalProps> = ({
                 onClose();
                 onOpenEditor(form);
               }}
-              className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span>Buka Editor Lengkap</span>
               <ExternalLink className="w-3.5 h-3.5" />

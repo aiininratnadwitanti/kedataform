@@ -60,7 +60,7 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
       <div 
-        className="bg-[#F3F8FD] rounded-3xl max-w-lg w-full shadow-2xl border border-blue-200/90 overflow-hidden relative flex flex-col ring-1 ring-blue-500/10"
+        className="bg-[var(--system-bg-soft)] rounded-3xl max-w-lg w-full shadow-2xl border border-blue-200/90 overflow-hidden relative flex flex-col ring-1 ring-blue-500/10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Warm Decorative Bar */}
@@ -106,7 +106,7 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
               )}
             </label>
 
-            <div className="flex items-center gap-2 p-1.5 bg-white border border-blue-200 rounded-xl focus-within:border-[#223A5E] transition-colors shadow-2xs">
+            <div className="flex items-center gap-2 p-1.5 bg-white border border-blue-200 rounded-xl focus-within:border-[var(--system-primary)] transition-colors shadow-2xs">
               <div className="pl-2.5 text-blue-700">
                 <Globe className="w-4 h-4 text-[#223A5E]" />
               </div>
@@ -120,7 +120,7 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="px-3.5 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs bg-[#223A5E] hover:bg-[#1a2d4a] text-white hover:scale-101 active:scale-99 border border-[#8c5f10]"
+                className="px-3.5 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] hover:scale-101 active:scale-99 border border-[var(--system-primary)]"
               >
                 {copiedLink ? (
                   <>
@@ -195,7 +195,7 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
                 onClose();
                 onGoToEmbedTab();
               }}
-              className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold rounded-xl bg-[#223A5E] hover:bg-[#1a2d4a] text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs hover:scale-101 active:scale-99 border border-[#8c5f10]"
+              className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold rounded-xl bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs hover:scale-101 active:scale-99 border border-[var(--system-primary)]"
             >
               <span className="text-white font-bold">Buka Menu Bagikan & Embed</span>
               <ArrowRight className="w-3.5 h-3.5 text-white" />

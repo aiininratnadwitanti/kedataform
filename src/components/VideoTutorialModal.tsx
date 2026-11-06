@@ -14,8 +14,8 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({
   onStartBlank,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const youtubeUrl = 'https://youtu.be/X7LdoO-v4FU?si=t3Dk_7TWD6t_5dJC';
-  const embedUrl = 'https://www.youtube.com/embed/X7LdoO-v4FU?autoplay=1';
+  const youtubeUrl = 'https://youtu.be/WnY5gsyOJn8?si=t9C3JWvuIBbTS57W';
+  const embedUrl = 'https://www.youtube.com/embed/WnY5gsyOJn8?autoplay=1';
 
   if (!isOpen) return null;
 
@@ -78,7 +78,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsPlaying(true)}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#223A5E] hover:bg-[#1a2d4a] text-white flex items-center justify-center mx-auto shadow-2xl transition-all cursor-pointer hover:scale-110 active:scale-95 group/btn"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] flex items-center justify-center mx-auto shadow-2xl transition-all cursor-pointer hover:scale-110 active:scale-95 group/btn"
                   >
                     <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-white translate-x-0.5 group-hover/btn:scale-105 transition-transform" />
                   </button>

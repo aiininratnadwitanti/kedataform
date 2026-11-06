@@ -18,7 +18,8 @@ import {
   AlignCenter,
   Crop,
   ArrowLeft,
-  FileText
+  FileText,
+  Eye
 } from 'lucide-react';
 import { FormSchema, ThemeConfig, FontFamily, RadiusSize } from '../types/form';
 import { CANVA_STYLE_TEMPLATES, defaultCanvaTheme } from '../data/sampleForm';
@@ -36,6 +37,7 @@ interface ThemeTabProps {
   onBackToQuestions?: () => void;
   activeSubTab?: 'presets' | 'canvas' | 'card' | 'typography' | 'button' | 'header';
   onChangeActiveSubTab?: (tab: 'presets' | 'canvas' | 'card' | 'typography' | 'button' | 'header') => void;
+  readOnly?: boolean;
 }
 
 export const ThemeTab: React.FC<ThemeTabProps> = ({
@@ -48,6 +50,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
   onBackToQuestions,
   activeSubTab,
   onChangeActiveSubTab,
+  readOnly = false,
 }) => {
   const { theme, questions } = form;
   const themePrimary = theme.primaryColor || '#223A5E';
@@ -93,7 +96,16 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 space-y-4">
+    <div
+      className="max-w-7xl mx-auto py-4 px-4 sm:px-6 space-y-4"
+      style={{ pointerEvents: readOnly ? 'none' : undefined, userSelect: readOnly ? 'none' : undefined }}
+    >
+      {readOnly && (
+        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
+          <Eye className="w-4 h-4" />
+          <span>Mode lihat saja: Anda tidak memiliki akses untuk mengubah desain formulir ini.</span>
+        </div>
+      )}
       {/* Tombol Navigasi Kembali ke Pertanyaan */}
       {onBackToQuestions && (
         <div className="flex items-center justify-between bg-white p-3 rounded-2xl border border-blue-200/90 shadow-2xs">
@@ -248,7 +260,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                       onClick={() => handleUpdate({ canvasPattern: p.id as any })}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all ${
                         theme.canvasPattern === p.id
-                          ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-xs'
+                          ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs'
                           : 'border-neutral-200 text-neutral-700 hover:border-blue-300 hover:bg-blue-50/50'
                       }`}
                     >
@@ -285,7 +297,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                     onClick={() => handleUpdate({ headerBannerType: b.id as any })}
                     className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all ${
                       theme.headerBannerType === b.id
-                        ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-xs'
+                        ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs'
                         : 'border-neutral-200 text-neutral-700 hover:border-blue-300 hover:bg-blue-50/50'
                     }`}
                   >
@@ -350,14 +362,14 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                         <button
                           type="button"
                           onClick={() => handleUpdate({ logoPosition: 'left' })}
-                          className={`px-2.5 py-1 rounded border text-xs font-semibold ${theme.logoPosition === 'left' ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-2xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
+                          className={`px-2.5 py-1 rounded border text-xs font-semibold ${theme.logoPosition === 'left' ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-2xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
                         >
                           Kiri
                         </button>
                         <button
                           type="button"
                           onClick={() => handleUpdate({ logoPosition: 'center' })}
-                          className={`px-2.5 py-1 rounded border text-xs font-semibold ${theme.logoPosition === 'center' ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-2xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
+                          className={`px-2.5 py-1 rounded border text-xs font-semibold ${theme.logoPosition === 'center' ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-2xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
                         >
                           Tengah
                         </button>
@@ -421,7 +433,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                       onClick={() => handleUpdate({ cardShadow: s.id as any })}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all ${
                         theme.cardShadow === s.id
-                          ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-xs'
+                          ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs'
                           : 'border-neutral-200 text-neutral-700 hover:border-blue-300 hover:bg-blue-50/50'
                       }`}
                     >
@@ -448,7 +460,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                       onClick={() => handleUpdate({ cardBorderWidth: b.val })}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all ${
                         theme.cardBorderWidth === b.val
-                          ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-xs'
+                          ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs'
                           : 'border-neutral-200 text-neutral-700 hover:border-blue-300 hover:bg-blue-50/50'
                       }`}
                     >
@@ -505,7 +517,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                   <button
                     type="button"
                     onClick={() => handleUpdate({ textAlign: 'left' })}
-                    className={`p-2 rounded-lg border flex items-center gap-1.5 text-xs font-semibold transition-all ${theme.textAlign === 'left' ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
+                    className={`p-2 rounded-lg border flex items-center gap-1.5 text-xs font-semibold transition-all ${theme.textAlign === 'left' ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
                   >
                     <AlignLeft className="w-3.5 h-3.5" />
                     <span>Kiri</span>
@@ -513,7 +525,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                   <button
                     type="button"
                     onClick={() => handleUpdate({ textAlign: 'center' })}
-                    className={`p-2 rounded-lg border flex items-center gap-1.5 text-xs font-semibold transition-all ${theme.textAlign === 'center' ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
+                    className={`p-2 rounded-lg border flex items-center gap-1.5 text-xs font-semibold transition-all ${theme.textAlign === 'center' ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs' : 'border-neutral-200 text-neutral-700 hover:bg-blue-50/50'}`}
                   >
                     <AlignCenter className="w-3.5 h-3.5" />
                     <span>Tengah</span>
@@ -566,7 +578,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                   value={theme.submitButtonText}
                   onChange={(e) => handleUpdate({ submitButtonText: e.target.value })}
                   placeholder="Kirim Jawaban"
-                  className="w-full text-xs border border-neutral-300 rounded-lg p-2 text-neutral-800 focus:outline-none focus:border-[#223A5E]"
+                  className="w-full text-xs border border-neutral-300 rounded-lg p-2 text-neutral-800 focus:outline-none focus:border-[var(--system-primary)]"
                 />
               </div>
 
@@ -588,7 +600,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                       onClick={() => handleUpdate({ buttonStyle: btn.id as any })}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all ${
                         theme.buttonStyle === btn.id
-                          ? 'border-[#223A5E] bg-[#223A5E] text-white shadow-xs'
+                          ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs'
                           : 'border-neutral-200 text-neutral-700 hover:border-blue-300 hover:bg-blue-50/50'
                       }`}
                     >
@@ -613,21 +625,10 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
               </button>
             )}
 
-            {onSaveDesign && (
-              <button
-                type="button"
-                onClick={() => {
-                  onSaveDesign();
-                  if (onBackToQuestions) onBackToQuestions();
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs hover:scale-102 active:scale-98"
-                style={{ backgroundColor: themePrimary, color: contrastText }}
-                title="Simpan kustomisasi desain dan kembali ke editor pertanyaan formulir"
-              >
-                <Check className="w-3.5 h-3.5 stroke-[3]" style={{ color: contrastText }} />
-                <span>Simpan Desain</span>
-              </button>
-            )}
+            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold text-emerald-700 bg-emerald-500/10 border border-emerald-500/20">
+              <Check className="w-3.5 h-3.5 stroke-[3]" />
+              <span>Tersimpan otomatis</span>
+            </div>
           </div>
 
         </div>
@@ -823,8 +824,8 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                               key={opt.id}
                               className="flex items-center gap-2.5 p-2 rounded-lg border text-xs cursor-pointer transition-colors"
                               style={{
-                                borderColor: i === 0 ? theme.primaryColor : '#fed7aa',
-                                backgroundColor: i === 0 ? '#fff7ed' : 'transparent',
+                                borderColor: i === 0 ? theme.primaryColor : '#bfdbfe',
+                                backgroundColor: i === 0 ? '#eff6ff' : 'transparent',
                               }}
                             >
                               <div 

@@ -131,12 +131,24 @@ export interface FormScheduleConfig {
 
 export interface FormCollaborator {
   id: string;
+  userId?: string;
   name: string;
   email: string;
   avatarUrl?: string;
   role: 'editor' | 'viewer';
-  addedAt: string;
+  addedAt?: string;
+  createdAt?: string;
   status: 'active' | 'pending';
+}
+
+export interface CollaborationInvitation {
+  id: string;
+  formId: string;
+  formTitle: string;
+  role: 'editor' | 'viewer';
+  inviterName: string;
+  inviterEmail: string;
+  createdAt: string;
 }
 
 export interface FormCollaborationConfig {

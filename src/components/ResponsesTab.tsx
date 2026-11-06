@@ -347,7 +347,7 @@ export const ResponsesTab: React.FC<ResponsesTabProps> = ({
                     
                     {displayQuestions.map((q) => {
                       const ans = resp.answers[q.id];
-                      let formatted = '—';
+                      let formatted = '-';
                       if (Array.isArray(ans)) {
                         formatted = ans.join(', ');
                       } else if (ans !== undefined && ans !== null && ans !== '') {

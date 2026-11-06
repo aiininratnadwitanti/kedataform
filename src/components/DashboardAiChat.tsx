@@ -109,12 +109,12 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
   const hasMessages = messages.length > 0 || isLoading;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 ai-chat-scope">
       {/* JUDUL DI ATAS FORM AI */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-blue-400/20 border border-blue-400/50 flex items-center justify-center text-blue-800 shadow-xs backdrop-blur-md">
-            <Bot className="w-4 h-4 stroke-[2.2] text-[#223A5E]" />
+            <Bot className="w-4 h-4 stroke-[2.2] text-slate-900" />
           </div>
           <div>
             <h2 
@@ -133,14 +133,14 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
       {/* CONTAINER FORM AI */}
       <div 
         id="dashboard-ai-chat-section" 
-        className="rounded-3xl border border-slate-200/90 bg-[#F3F8FD] shadow-sm overflow-hidden"
+        className="ai-chat-scope rounded-3xl border border-slate-200/90 bg-[var(--system-bg-soft)] shadow-sm overflow-hidden dark:border-slate-500/60"
       >
         {/* NAVBAR JUDUL FORMAI: GARIS TIPIS BATAS BAWAH SESUAI PERMINTAAN */}
         <div className="px-6 py-3.5 bg-white/60 backdrop-blur-xs border-b border-slate-200 flex items-center justify-between gap-4 select-none">
           <div className="flex items-center gap-3">
             {/* Badge Transparan Gold Mengambang & Menonjol dengan Ikon Bot */}
-            <div className="relative -translate-y-0.5 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-400/25 via-blue-300/35 to-yellow-400/25 border border-blue-400/70 ring-1 ring-blue-300/40 backdrop-blur-md shadow-[0_4px_14px_-2px_rgba(217,119,6,0.28),inset_0_1px_1px_rgba(255,255,255,0.7)] hover:-translate-y-1 hover:shadow-[0_8px_20px_-3px_rgba(217,119,6,0.38)] transition-all duration-200 cursor-default">
-              <Bot className="w-4 h-4 text-[#223A5E] stroke-[2.2]" />
+            <div className="relative -translate-y-0.5 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-400/25 via-blue-300/35 to-yellow-400/25 border border-blue-400/70 ring-1 ring-blue-300/40 backdrop-blur-md shadow-[0_4px_14px_-2px_rgba(217,119,6,0.28),inset_0_1px_1px_rgba(255,255,255,0.7)] hover:-translate-y-1 hover:shadow-[0_8px_20px_-3px_rgba(217,119,6,0.38)] transition-all duration-200 cursor-default dark:from-blue-500/25 dark:via-blue-400/20 dark:to-cyan-400/20 dark:shadow-[0_4px_14px_-2px_rgba(59,130,246,0.28),inset_0_1px_1px_rgba(255,255,255,0.15)] dark:ring-blue-400/30">
+              <Bot className="w-4 h-4 text-slate-900 stroke-[2.2]" />
               <span className="font-semibold text-xs sm:text-sm tracking-wide text-blue-950 font-serif drop-shadow-xs">
                 FormAI
               </span>
@@ -179,7 +179,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
           {/* ============================================================ */}
           {/* SIDEBAR KIRI: RIWAYAT CHAT (TEKS TIDAK BOLD) */}
           {/* ============================================================ */}
-          <aside className="lg:col-span-4 bg-white/40 p-4 sm:p-5 flex flex-col justify-between select-none">
+          <aside className="lg:col-span-4 bg-white/40 p-4 sm:p-5 flex flex-col justify-between select-none border-b lg:border-b-0 lg:border-r border-slate-200/60">
             <div className="space-y-4">
               
               {/* Header Sidebar: Teks Tidak Bold */}
@@ -249,7 +249,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
 
             {/* Footer Sidebar: Teks Tidak Bold */}
             <div className="pt-3 border-t border-slate-200/60 text-[11px] text-slate-600 font-normal flex items-center justify-between">
-              <span>Model: Gemini 3.8 Flash</span>
+              <span>Model: Gemini 3.5 Flash</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-emerald-700" />
             </div>
           </aside>
@@ -257,7 +257,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
           {/* ============================================================ */}
           {/* AREA KANAN: LATAR MENYESUAIKAN DASHBOARD (#F3F8FD), BUKAN HITAM */}
           {/* ============================================================ */}
-          <main className="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[#F3F8FD] relative">
+          <main className="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[var(--system-bg-soft)] relative">
             
             {!hasMessages ? (
               /* -------------------------------------------------------- */
@@ -281,7 +281,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                   }}
                   className="w-full relative"
                 >
-                  <div className="relative shadow-sm rounded-2xl overflow-hidden border border-slate-300 focus-within:border-[#223A5E] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
+                  <div className="relative shadow-sm rounded-2xl overflow-hidden border border-slate-300 focus-within:border-[var(--system-primary)] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
                     <textarea
                       rows={3}
                       value={inputValue}
@@ -300,7 +300,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       <button
                         type="submit"
                         disabled={!inputValue.trim() || isLoading}
-                        className="p-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-40 text-white rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border border-[#8c5f10]"
+                        className="p-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border border-[var(--system-primary)]"
                         title="Kirim ke AI"
                       >
                         {isLoading ? (
@@ -327,7 +327,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                   <button
                     type="button"
                     onClick={() => aiChatStore.startNewChat()}
-                    className="text-xs text-[#223A5E] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                    className="text-xs text-slate-900 hover:underline font-semibold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Obrolan Baru</span>
@@ -343,7 +343,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                     >
                       <div className={`max-w-xl space-y-2.5 ${
                         msg.sender === 'user'
-                          ? 'bg-[#223A5E] text-white p-3.5 rounded-2xl rounded-tr-none shadow-xs text-xs sm:text-sm font-medium border-2 border-[#8c5f10]'
+                          ? 'bg-[var(--system-primary)] text-[var(--system-primary-contrast)] p-3.5 rounded-2xl rounded-tr-none shadow-xs text-xs sm:text-sm font-medium border-2 border-[var(--system-primary)]'
                           : 'bg-white border-2 border-slate-200 text-black p-4 rounded-2xl rounded-tl-none shadow-xs text-xs sm:text-sm'
                       }`}>
                         <p className="leading-relaxed whitespace-pre-line">
@@ -356,7 +356,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 {msg.generatedForm.quizConfig?.isQuizMode ? (
-                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-blue-100 text-[#b45309] border border-blue-300 flex items-center gap-1">
+                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-blue-100 text-[var(--system-primary)] border border-blue-300 flex items-center gap-1">
                                     <GraduationCap className="w-3 h-3" />
                                     <span>Kuis Berpenilaian</span>
                                   </span>
@@ -383,7 +383,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleOpenInSystem(msg.generatedForm!)}
-                                className="w-full py-2.5 px-4 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-[#8c5f10]"
+                                className="w-full py-2.5 px-4 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-[var(--system-primary)]"
                               >
                                 <Bot className="w-3.5 h-3.5 text-blue-200" />
                                 <span>Buka & Edit Formulir</span>
@@ -399,7 +399,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                   {isLoading && (
                     <div className="flex justify-start">
                       <div className="bg-white border-2 border-slate-200 p-3.5 rounded-2xl rounded-tl-none shadow-xs flex items-center gap-2.5 text-xs text-black font-semibold">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#223A5E]" />
+                        <Loader2 className="w-4 h-4 animate-spin text-slate-900" />
                         <span>AI sedang menyusun formulir...</span>
                       </div>
                     </div>
@@ -424,14 +424,14 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       onChange={(e) => setInputValue(e.target.value)}
                       disabled={isLoading}
                       placeholder="Ketik instruksi tambahan untuk formulir ini..."
-                      className="w-full text-xs sm:text-sm pl-4 pr-10 py-3 rounded-2xl border border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all placeholder:text-slate-400 bg-white text-slate-800 shadow-xs font-normal"
+                      className="w-full text-xs sm:text-sm pl-4 pr-10 py-3 rounded-2xl border border-slate-300 focus:border-[var(--system-primary)] focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all placeholder:text-slate-400 bg-white text-slate-800 shadow-xs font-normal"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={!inputValue.trim() || isLoading}
-                    className="px-5 py-3 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-40 text-white font-medium text-xs rounded-2xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95 border border-[#8c5f10]"
+                    className="px-5 py-3 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] font-medium text-xs rounded-2xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95 border border-[var(--system-primary)]"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

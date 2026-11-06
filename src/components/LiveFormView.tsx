@@ -6,6 +6,7 @@ import {
   Send,
   X,
   ArrowRight,
+  ArrowLeft,
   Lock,
   Clock,
   CalendarClock,
@@ -21,10 +22,11 @@ import { checkFormAvailability } from '../utils/formSchedule';
 interface LiveFormViewProps {
   form: FormSchema;
   onClose: () => void;
-  onSubmit: (answers: Record<string, any>, scoring?: { score: number; totalPossibleScore: number; isPassed: boolean }) => void;
+  onSubmit: (answers: Record<string, any>, scoring?: { score: number; totalPossibleScore: number; isPassed: boolean }) => void | Promise<void>;
   responseCount?: number;
   userPlan?: 'free' | 'pro' | 'business';
   onOpenUpgradeModal?: () => void;
+  isEmbed?: boolean;
 }
 
 export const LiveFormView: React.FC<LiveFormViewProps> = ({
@@ -34,9 +36,11 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
   responseCount,
   userPlan,
   onOpenUpgradeModal,
+  isEmbed = false,
 }) => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [quizResult, setQuizResult] = useState<{
     score: number;
@@ -56,7 +60,47 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
     setShowReviewAnswers(false);
   }, [form.id]);
 
+  // Mode embed: kirim tinggi konten ke halaman induk (Google Sites/WordPress)
+  React.useEffect(() => {
+    if (!isEmbed) return;
+    const postHeight = () => {
+      try {
+        window.parent?.postMessage(
+          { type: 'kedataform:resize', height: Math.ceil(document.documentElement.scrollHeight) },
+          '*'
+        );
+      } catch {
+        // ignore
+      }
+    };
+    postHeight();
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(postHeight) : null;
+    observer?.observe(document.body);
+    const timer = window.setTimeout(postHeight, 400);
+    window.addEventListener('load', postHeight);
+    return () => {
+      observer?.disconnect();
+      window.clearTimeout(timer);
+      window.removeEventListener('load', postHeight);
+    };
+  }, [isEmbed]);
+
+  // Judul tab mengikuti form saat dibuka publik/embed
+  React.useEffect(() => {
+    if (!isEmbed) return;
+    const previous = document.title;
+    document.title = form.title || 'Formulir';
+    return () => {
+      document.title = previous;
+    };
+  }, [form.title, isEmbed]);
+
   const { theme, questions } = form;
+  const legacyDefaultCovers = ['/assets/aistudio/image_3ec5f637.png', '/public/assets/aistudio/image_3ec5f637.png'];
+  const isDefaultCover = !theme.headerCoverUrl || legacyDefaultCovers.includes(theme.headerCoverUrl);
+  const cardBorderColor = !theme.cardBorderColor || ['#fde68a', '#fed7aa', '#eedaa2'].includes(theme.cardBorderColor)
+    ? '#bfdbfe'
+    : theme.cardBorderColor;
   const availability = checkFormAvailability(form.schedule);
   const isQuotaExceeded = userPlan !== 'pro' && (responseCount !== undefined && responseCount >= 100);
 
@@ -92,8 +136,9 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (isQuotaExceeded) {
       alert('Batas kuota 100 data formulir ini telah tercapai (Free Plan). Kolom isian formulir dinonaktifkan dan harus upgrade ke Premium untuk membuka penerimaan respon tanpa batas.');
       return;
@@ -163,7 +208,15 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
       });
     }
 
-    onSubmit(answers, scoringInfo);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(answers, scoringInfo);
+    } catch (error: any) {
+      setIsSubmitting(false);
+      alert(error?.message || 'Gagal mengirim jawaban. Silakan coba lagi.');
+      return;
+    }
+    setIsSubmitting(false);
     setSubmitted(true);
 
     try {
@@ -171,7 +224,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
-        colors: [theme.primaryColor, '#10b981', '#f59e0b'],
+        colors: [theme.primaryColor, '#10b981', '#60a5fa'],
       });
     } catch (e) {
       // ignore
@@ -197,13 +250,24 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex flex-col">
-      {/* Top Floating Control */}
+    <div className={isEmbed ? 'min-h-screen w-full flex flex-col' : 'fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex flex-col'}>
+      {/* Top Floating Control (disembunyikan di mode embed) */}
+      {!isEmbed && (
       <div className="sticky top-0 z-20 bg-white border-b border-blue-200/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-800">Pratinjau Hasil Desain Formulir</span>
-          <span className="text-blue-300">·</span>
-          <span className="text-xs text-slate-500 max-w-sm break-words">{form.title}</span>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-[#223A5E] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer shrink-0"
+            title="Kembali ke halaman sebelumnya"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Kembali</span>
+          </button>
+          <span className="h-4 w-px bg-blue-200 shrink-0" />
+          <span className="text-xs font-semibold text-slate-800 truncate">Pratinjau Hasil Desain Formulir</span>
+          <span className="hidden sm:inline text-blue-300">·</span>
+          <span className="hidden sm:inline text-xs text-slate-500 max-w-sm truncate">{form.title}</span>
         </div>
 
         <button
@@ -215,10 +279,11 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
           <X className="w-5 h-5" />
         </button>
       </div>
+      )}
 
       {/* Main Form Page with Canva Canvas BG */}
       <div 
-        className="flex-1 py-12 px-4 flex justify-center transition-colors relative"
+        className={`flex-1 px-4 flex justify-center transition-colors relative ${isEmbed ? 'py-6' : 'py-12'}`}
         style={{ 
           backgroundColor: theme.canvasBg,
           color: theme.textColor,
@@ -261,7 +326,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                 backgroundColor: theme.cardBg,
                 borderRadius: `${theme.borderRadiusNum}px`,
                 boxShadow: getCardShadowStyle(),
-                borderColor: theme.cardBorderColor,
+                borderColor: cardBorderColor,
               }}
             >
               {quizResult && form.quizConfig?.isQuizMode ? (
@@ -317,7 +382,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                             {quizResult.reviewList.map((item, i) => (
                               <div 
                                 key={i} 
-                                className="p-3.5 rounded-xl border border-blue-200 bg-[#fffdfa] text-xs space-y-1.5 transition-all shadow-2xs"
+                                className="p-3.5 rounded-xl border border-blue-200 bg-blue-50/40 text-xs space-y-1.5 transition-all shadow-2xs"
                               >
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="font-semibold text-slate-900 leading-snug">
@@ -397,20 +462,22 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   <RotateCcw className="w-3.5 h-3.5 text-[#223A5E]" />
                   <span>Kirim Jawaban Lain</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-xs font-bold text-white rounded-xl transition-all cursor-pointer shadow-xs"
-                  style={{ backgroundColor: theme.primaryColor }}
-                >
-                  Kembali ke Editor
-                </button>
+                {!isEmbed && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 text-xs font-bold text-white rounded-xl transition-all cursor-pointer shadow-xs"
+                    style={{ backgroundColor: theme.primaryColor }}
+                  >
+                    Kembali ke Editor
+                  </button>
+                )}
               </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Header Cover Banner jika aktif */}
-               {theme.headerBannerType === 'preset' && theme.headerCoverUrl && theme.headerCoverUrl !== '/assets/aistudio/image_3ec5f637.png' && (
+               {theme.headerBannerType === 'preset' && !isDefaultCover && (
                 <div 
                   className="w-full overflow-hidden shadow-2xs relative"
                   style={{ 
@@ -430,7 +497,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   />
                 </div>
               )}
-                {theme.headerBannerType === 'preset' && (!theme.headerCoverUrl || theme.headerCoverUrl === '/assets/aistudio/image_3ec5f637.png') && (
+                {theme.headerBannerType === 'preset' && isDefaultCover && (
                  <div 
                    className="w-full overflow-hidden shadow-2xs relative"
                    style={{ 
@@ -474,7 +541,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   backgroundColor: theme.cardBg,
                   borderRadius: `${theme.borderRadiusNum}px`,
                   boxShadow: getCardShadowStyle(),
-                  borderColor: theme.cardBorderColor,
+                  borderColor: cardBorderColor,
                   borderWidth: `${theme.cardBorderWidth}px`,
                   textAlign: theme.textAlign,
                 }}
@@ -581,7 +648,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                       backgroundColor: theme.cardBg,
                       borderRadius: `${theme.borderRadiusNum}px`,
                       boxShadow: getCardShadowStyle(),
-                      borderColor: errors[q.id] ? '#ef4444' : theme.cardBorderColor,
+                      borderColor: errors[q.id] ? '#ef4444' : cardBorderColor,
                       borderWidth: `${theme.cardBorderWidth}px`,
                     }}
                   >
@@ -639,9 +706,9 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={!availability.isOpen || isQuotaExceeded}
+                  disabled={!availability.isOpen || isQuotaExceeded || isSubmitting}
                   className={`w-full py-3.5 text-xs font-bold text-white shadow-md transition-all flex items-center justify-center gap-2 ${
-                    !availability.isOpen || isQuotaExceeded
+                    !availability.isOpen || isQuotaExceeded || isSubmitting
                       ? 'opacity-60 cursor-not-allowed bg-slate-500' 
                       : 'active:scale-98 cursor-pointer'
                   } ${
@@ -656,7 +723,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   {isQuotaExceeded ? (
                     <>
                       <Lock className="w-3.5 h-3.5" />
-                      <span>Formulir Terkunci (Kuota 100 Respon Tercapai — Butuh Premium)</span>
+                      <span>Formulir Terkunci (Kuota 100 Respon Tercapai - Butuh Premium)</span>
                     </>
                   ) : !availability.isOpen ? (
                     <>

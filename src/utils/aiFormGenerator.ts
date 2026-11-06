@@ -132,15 +132,15 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
 
   // Default theme
   const theme = {
-    primaryColor: isQuiz ? '#223A5E' : '#ea580c',
+    primaryColor: '#223A5E',
     canvasBg: '#F3F8FD',
     cardBg: '#ffffff',
     cardOpacity: 100,
     textColor: '#0f172a',
     canvasPattern: 'dots' as const,
     headerBannerType: 'preset' as const,
-    headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-    headerGradient: 'linear-gradient(135deg, #223A5E 0%, #ea580c 100%)',
+    headerCoverUrl: '/assets/landing/formulir.jpeg',
+    headerGradient: 'linear-gradient(135deg, #223A5E 0%, #1e40af 100%)',
     headerOverlayOpacity: 30,
     headerPosition: 'banner_top' as const,
     showLogo: false,
@@ -153,7 +153,7 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
     borderRadiusNum: 16,
     radius: 'lg' as const,
     cardBorderWidth: 1,
-    cardBorderColor: '#fed7aa',
+    cardBorderColor: '#bfdbfe',
     cardShadow: 'soft' as const,
     buttonStyle: 'solid' as const,
     submitButtonText: isQuiz ? 'Kirim Jawaban Kuis' : 'Kirim Formulir',
@@ -374,7 +374,7 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
         theme: {
           ...theme,
           primaryColor: '#223A5E',
-          headerGradient: 'linear-gradient(135deg, #223A5E 0%, #d97706 100%)',
+          headerGradient: 'linear-gradient(135deg, #223A5E 0%, #1e40af 100%)',
         },
         quizConfig: {
           isQuizMode: true,
@@ -972,7 +972,7 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
       id: formId,
       title: cleanTitle.includes('Untitled') ? 'Formulir Pemesanan Produk' : cleanTitle,
       description: 'Lengkapi formulir pemesanan berikut untuk memproses order dan pengiriman paket Anda dengan cepat dan aman.',
-      theme: { ...theme, primaryColor: '#d97706' },
+      theme: { ...theme, primaryColor: '#223A5E' },
       quizConfig: { isQuizMode: false },
       questions: [
         {
@@ -995,9 +995,9 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
           title: 'Pilihan Paket Produk',
           required: true,
           options: [
-            { id: 'opt_1', text: 'Paket Starter — Akses Komunitas & Materi' },
-            { id: 'opt_2', text: 'Paket Pro Bundle — Kaos Merchandise + E-Book' },
-            { id: 'opt_3', text: 'Paket VIP Exclusive — Mentoring 1-on-1 + Merchandise Lengkap' },
+            { id: 'opt_1', text: 'Paket Starter - Akses Komunitas & Materi' },
+            { id: 'opt_2', text: 'Paket Pro Bundle - Kaos Merchandise + E-Book' },
+            { id: 'opt_3', text: 'Paket VIP Exclusive - Mentoring 1-on-1 + Merchandise Lengkap' },
           ],
         },
         {
@@ -1104,15 +1104,15 @@ export async function generateFormWithAI(params: AiGenerationPrompt): Promise<Fo
           title: cleanTitle,
           description: parsed.description || (isQuiz ? 'Silakan kerjakan butir soal berikut dengan teliti.' : 'Silakan isi data yang dibutuhkan di bawah ini.'),
           theme: {
-            primaryColor: isQuiz ? '#223A5E' : '#ea580c',
+            primaryColor: '#223A5E',
             canvasBg: '#F3F8FD',
             cardBg: '#ffffff',
             cardOpacity: 100,
             textColor: '#0f172a',
             canvasPattern: 'dots',
             headerBannerType: 'preset',
-            headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-            headerGradient: 'linear-gradient(135deg, #223A5E 0%, #ea580c 100%)',
+            headerCoverUrl: '/assets/landing/formulir.jpeg',
+            headerGradient: 'linear-gradient(135deg, #223A5E 0%, #1e40af 100%)',
             headerOverlayOpacity: 30,
             headerPosition: 'banner_top',
             showLogo: false,
@@ -1125,7 +1125,7 @@ export async function generateFormWithAI(params: AiGenerationPrompt): Promise<Fo
             borderRadiusNum: 16,
             radius: 'lg',
             cardBorderWidth: 1,
-            cardBorderColor: '#fed7aa',
+            cardBorderColor: '#bfdbfe',
             cardShadow: 'soft',
             buttonStyle: 'solid',
             submitButtonText: isQuiz ? 'Kirim Jawaban Kuis' : 'Kirim Formulir',
@@ -1205,7 +1205,7 @@ Output ONLY raw JSON without markdown code fences.
 `;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.5-flash',
         contents: `Topic: ${prompt}. Mode Quiz: ${Boolean(isQuizRequested)}. Return a complete form with 3 to 5 realistic questions. For school/subject quizzes, generate authentic, grade-appropriate curriculum questions with clear mathematical or scientific problems. Ensure title is ONLY the concise topic keyword (e.g., "Form Webinar", "Kuis Matematika Kelas 6 SD", or "Untitled 1"). Do NOT add numbers to question titles.`,
         config: {
           systemInstruction,
@@ -1224,15 +1224,15 @@ Output ONLY raw JSON without markdown code fences.
             title: cleanTitle,
             description: parsed.description || 'Dibuat otomatis dengan asisten AI KeDataForm.',
             theme: {
-              primaryColor: isQuizRequested ? '#223A5E' : '#ea580c',
+              primaryColor: '#223A5E',
               canvasBg: '#F3F8FD',
               cardBg: '#ffffff',
               cardOpacity: 100,
               textColor: '#0f172a',
               canvasPattern: 'dots',
               headerBannerType: 'preset',
-              headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-              headerGradient: 'linear-gradient(135deg, #223A5E 0%, #ea580c 100%)',
+              headerCoverUrl: '/assets/landing/formulir.jpeg',
+              headerGradient: 'linear-gradient(135deg, #223A5E 0%, #1e40af 100%)',
               headerOverlayOpacity: 30,
               headerPosition: 'banner_top',
               showLogo: false,
@@ -1245,7 +1245,7 @@ Output ONLY raw JSON without markdown code fences.
               borderRadiusNum: 16,
               radius: 'lg',
               cardBorderWidth: 1,
-              cardBorderColor: '#fed7aa',
+              cardBorderColor: '#bfdbfe',
               cardShadow: 'soft',
               buttonStyle: 'solid',
               submitButtonText: isQuizRequested ? 'Kirim Jawaban Kuis' : 'Kirim Formulir',

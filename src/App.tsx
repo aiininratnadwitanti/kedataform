@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Check, AlertCircle, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sampleForm } from './data/sampleForm';
-import { FormSchema, FormSubmission, UserAccount, ThemeConfig } from './types/form';
+import { FormSchema, FormSubmission, UserAccount, ThemeConfig, CollaborationInvitation, FormCollaborator } from './types/form';
 import { 
   FormTemplateItem, 
   FORM_TEMPLATES, 
   INITIAL_RECENT_FORMS, 
   RecentFormItem,
-  createInitialResponsesMap, 
   generateIsolatedSubmissions 
 } from './data/formTemplates';
 import { LandingPage } from './components/LandingPage';
@@ -19,7 +18,6 @@ import { ThemeTab } from './components/ThemeTab';
 import { ResponsesTab } from './components/ResponsesTab';
 import { EmbedTab } from './components/EmbedTab';
 import { LiveFormView } from './components/LiveFormView';
-import { UpgradeModal } from './components/UpgradeModal';
 import { AuthModal } from './components/AuthModal';
 import { LoginPage } from './components/LoginPage';
 import { ScheduleRuleModal } from './components/ScheduleRuleModal';
@@ -27,49 +25,131 @@ import { ShareLinkModal } from './components/ShareLinkModal';
 import { SaveValidationModal } from './components/SaveValidationModal';
 import { AiFormGeneratorModal } from './components/AiFormGeneratorModal';
 import { CollaborationModal } from './components/CollaborationModal';
-import { SystemSettingsModal, SystemSettings, DEFAULT_SYSTEM_SETTINGS, getSystemFontFamily } from './components/SystemSettingsModal';
+import { SystemSettingsModal, SystemSettings, DEFAULT_SYSTEM_SETTINGS, getSystemFontFamily, getContrastTextColor, resolveIsDark } from './components/SystemSettingsModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { VideoTutorialModal } from './components/VideoTutorialModal';
 import { AvatarCropModal } from './components/AvatarCropModal';
 import { CenterToastPopup } from './components/CenterToastPopup';
-import { FormCollaborationConfig } from './types/form';
 import { exportActiveFormResponsesCSV } from './utils/csvExport';
 import { checkFormAvailability } from './utils/formSchedule';
+import { api, toUserAccount, ApiUser } from './utils/api';
+import { loadSnap } from './utils/snap';
+import { PublicFormPage } from './components/PublicFormPage';
+import { InvitePage } from './components/InvitePage';
+import { aiChatStore } from './utils/aiChatStore';
+
+const SYSTEM_STYLE_PALETTES: Record<string, { bg: string; soft: string; darkBg: string; darkSoft: string }> = {
+  warm_titanium: { bg: '#F7F3EC', soft: '#FBF8F2', darkBg: '#211B14', darkSoft: '#2F261C' },
+  slate: { bg: '#F1F5F9', soft: '#F8FAFC', darkBg: '#101C33', darkSoft: '#1A2B4A' },
+  zinc: { bg: '#F4F4F5', soft: '#FAFAFA', darkBg: '#1C1C22', darkSoft: '#2A2A33' },
+  monochrome: { bg: '#FFFFFF', soft: '#F5F5F5', darkBg: '#141414', darkSoft: '#242424' },
+  emerald: { bg: '#E9F5EE', soft: '#F3FAF6', darkBg: '#0A241A', darkSoft: '#113A2A' },
+  sunset_amber: { bg: '#FFF2E0', soft: '#FFF8EE', darkBg: '#2A1A08', darkSoft: '#3D290F' },
+  nordic_frost: { bg: '#EDF5FB', soft: '#F5FAFE', darkBg: '#0E2233', darkSoft: '#163A55' },
+  oled: { bg: '#FFFFFF', soft: '#F5F5F5', darkBg: '#050507', darkSoft: '#121217' },
+};
+
+const LEGACY_SYSTEM_STYLES: Record<string, string> = {
+  ocean_breeze: 'nordic_frost',
+  sakura_blush: 'warm_titanium',
+  desert_sand: 'warm_titanium',
+  forest_moss: 'emerald',
+  cyber_indigo: 'slate',
+  rose_velvet: 'warm_titanium',
+};
+
+function normalizeSystemStyle(style?: string): string {
+  return (style && LEGACY_SYSTEM_STYLES[style]) || style || DEFAULT_SYSTEM_SETTINGS.systemStyle;
+}
+
+function normalizeThemeMode(mode?: string): SystemSettings['themeMode'] {
+  if (mode === 'sepia') return 'light';
+  if (mode === 'dim') return 'dark';
+  if (mode === 'dark' || mode === 'light' || mode === 'auto') return mode;
+  return 'light';
+}
+
+function mixHex(hexA: string, hexB: string, weight: number): string {
+  const parse = (hex: string) => {
+    const clean = hex.replace('#', '').trim();
+    if (clean.length !== 6) return [0, 0, 0];
+    return [
+      parseInt(clean.slice(0, 2), 16),
+      parseInt(clean.slice(2, 4), 16),
+      parseInt(clean.slice(4, 6), 16),
+    ];
+  };
+  const [ar, ag, ab] = parse(hexA);
+  const [br, bg, bb] = parse(hexB);
+  const w = Math.max(0, Math.min(1, weight));
+  const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+  return `#${toHex(ar + (br - ar) * w)}${toHex(ag + (bg - ag) * w)}${toHex(ab + (bb - ab) * w)}`;
+}
+
+function lightenHex(hex: string, weight: number): string {
+  return mixHex(hex, '#FFFFFF', weight);
+}
+
+function normalizeFontScale(value: any): number {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.min(130, Math.max(85, Math.round(value)));
+  }
+  if (value === 'compact') return 90;
+  if (value === 'comfortable') return 110;
+  return 100;
+}
 
 export default function App() {
-  // Persistent recent forms list across entire system
-  const [recentForms, setRecentForms] = useState<RecentFormItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('kedataform_user_forms') || localStorage.getItem('formcraft_user_forms');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((item: RecentFormItem) => {
-            const cover = item.form?.theme?.headerCoverUrl || item.coverImage || '/assets/aistudio/image_3ec5f637.png';
-            return {
-              ...item,
-              coverImage: cover,
-              form: {
-                ...item.form,
-                theme: {
-                  ...item.form?.theme,
-                  headerCoverUrl: cover,
-                },
-              },
-            };
-          });
-        }
-      }
-    } catch (e) {}
-    return INITIAL_RECENT_FORMS;
-  });
+  const path = typeof window !== 'undefined' ? window.location.pathname : '';
+  const publicFormMatch = path.match(/^\/f\/([^/]+)\/?$/);
+  const inviteMatch = path.match(/^\/invite\/([^/]+)\/?$/);
 
-  // Sync recentForms to localStorage automatically
-  React.useEffect(() => {
+  if (publicFormMatch) {
+    const search = new URLSearchParams(window.location.search);
+    return (
+      <PublicFormPage
+        formId={decodeURIComponent(publicFormMatch[1])}
+        isEmbed={search.get('embed') === 'true'}
+      />
+    );
+  }
+
+  if (inviteMatch) {
+    return <InvitePage inviteId={decodeURIComponent(inviteMatch[1])} />;
+  }
+
+  return <MainApp />;
+}
+
+function MainApp() {
+  // Persistent recent forms list across entire system (source of truth: MySQL via /api/v1)
+  const [recentForms, setRecentForms] = useState<RecentFormItem[]>([]);
+  const [isBootstrapped, setIsBootstrapped] = useState(false);
+  const [invitations, setInvitations] = useState<CollaborationInvitation[]>([]);
+  const [activeFormCollaborators, setActiveFormCollaborators] = useState<FormCollaborator[]>([]);
+
+  const reloadInvitations = React.useCallback(async (): Promise<CollaborationInvitation[]> => {
     try {
-      localStorage.setItem('kedataform_user_forms', JSON.stringify(recentForms));
-    } catch (e) {}
-  }, [recentForms]);
+      const { invitations: list } = await api.listInvitations();
+      setInvitations(list || []);
+      return list || [];
+    } catch (e) {
+      console.error('Gagal memuat undangan kolaborasi', e);
+      return [];
+    }
+  }, []);
+
+  const reloadFormsFromServer = React.useCallback(async (): Promise<RecentFormItem[]> => {
+    try {
+      const { items } = await api.listForms();
+      const list = items as unknown as RecentFormItem[];
+      setRecentForms(list);
+      return list;
+    } catch (e) {
+      console.error('Gagal memuat daftar form dari server', e);
+      return [];
+    }
+  }, []);
 
   // Listen to background AI generation completions across all views
   React.useEffect(() => {
@@ -90,9 +170,7 @@ export default function App() {
             form: generated,
           };
           const next = [newItem, ...prev];
-          try {
-            localStorage.setItem('kedataform_user_forms', JSON.stringify(next));
-          } catch {}
+          api.createForm(newItem).catch((err) => console.error('Gagal menyimpan form AI', err));
           return next;
         });
       }
@@ -104,13 +182,20 @@ export default function App() {
   // Current active form
   const [form, setForm] = useState<FormSchema>(() => recentForms[0]?.form || INITIAL_RECENT_FORMS[0].form);
 
-  // Helper to sync changes of active form directly into recentForms & localStorage
+  // Peran pengguna pada formulir aktif (dari server: owner/editor/viewer)
+  const activeFormRole = React.useMemo<'owner' | 'editor' | 'viewer'>(() => {
+    const item = recentForms.find((i) => i.form.id === form.id);
+    return item?.accessRole || 'owner';
+  }, [recentForms, form.id]);
+  const canEditActiveForm = activeFormRole !== 'viewer';
+
+  // Helper to sync changes of active form directly into recentForms & MySQL
   const syncFormToRecentForms = (updatedForm: FormSchema) => {
     setRecentForms((prev) => {
       const idx = prev.findIndex((item) => item.form.id === updatedForm.id);
       if (idx !== -1) {
         const copy = [...prev];
-        copy[idx] = {
+        const updatedItem: RecentFormItem = {
           ...copy[idx],
           title: updatedForm.title,
           accentColor: updatedForm.theme?.primaryColor || '#223A5E',
@@ -118,9 +203,8 @@ export default function App() {
           form: updatedForm,
           lastOpened: 'Baru saja',
         };
-        try {
-          localStorage.setItem('kedataform_user_forms', JSON.stringify(copy));
-        } catch (e) {}
+        copy[idx] = updatedItem;
+        api.updateForm(updatedForm.id, updatedItem).catch((err) => console.error('Gagal menyimpan form', err));
         return copy;
       } else {
         const newItem: RecentFormItem = {
@@ -135,18 +219,14 @@ export default function App() {
           form: updatedForm,
         };
         const next = [newItem, ...prev];
-        try {
-          localStorage.setItem('kedataform_user_forms', JSON.stringify(next));
-        } catch (e) {}
+        api.createForm(newItem).catch((err) => console.error('Gagal membuat form', err));
         return next;
       }
     });
   };
   
   // Data responden terisolasi untuk setiap form (Key: formId, Value: FormSubmission[])
-  const [formResponsesMap, setFormResponsesMap] = useState<Record<string, FormSubmission[]>>(() =>
-    createInitialResponsesMap()
-  );
+  const [formResponsesMap, setFormResponsesMap] = useState<Record<string, FormSubmission[]>>({});
   
   // Tab di editor hanya Custom dan Bagikan
   const [activeTab, setActiveTab] = useState<'custom' | 'embed'>(() => {
@@ -178,7 +258,6 @@ export default function App() {
     }
   });
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -218,16 +297,13 @@ export default function App() {
         if (parsed.primaryAccentColor === '#0f172a' || parsed.primaryAccentColor === '#7c3aed' || parsed.primaryAccentColor === '#2563eb' || parsed.primaryAccentColor === '#18181b' || parsed.primaryAccentColor === '#4f46e5' || parsed.primaryAccentColor === '#c2410c' || parsed.primaryAccentColor === '#ea580c' || !parsed.primaryAccentColor) {
           parsed.primaryAccentColor = DEFAULT_SYSTEM_SETTINGS.primaryAccentColor;
         }
-        if (parsed.systemStyle === 'slate' || !parsed.systemStyle) {
-          parsed.systemStyle = DEFAULT_SYSTEM_SETTINGS.systemStyle;
-        }
         if (!parsed.systemFont || parsed.systemFont === 'serif') {
           parsed.systemFont = 'sans';
         }
-        if (parsed.themeMode === 'auto' || !parsed.themeMode || parsed.themeMode === 'dark') {
-          parsed.themeMode = 'light';
-        }
-        return { ...DEFAULT_SYSTEM_SETTINGS, ...parsed, themeMode: 'light' };
+        parsed.systemStyle = normalizeSystemStyle(parsed.systemStyle);
+        parsed.themeMode = normalizeThemeMode(parsed.themeMode);
+        parsed.fontSizeScale = normalizeFontScale(parsed.fontSizeScale);
+        return { ...DEFAULT_SYSTEM_SETTINGS, ...parsed };
       }
     } catch (e) {
       // fallback
@@ -243,7 +319,7 @@ export default function App() {
       // ignore
     }
 
-    const isDark = systemSettings.themeMode === 'dark';
+    const isDark = resolveIsDark(systemSettings);
     
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -251,9 +327,27 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
 
+    const palette = SYSTEM_STYLE_PALETTES[systemSettings.systemStyle] || SYSTEM_STYLE_PALETTES.warm_titanium;
+    const bgValue = isDark ? palette.darkBg : palette.bg;
+    const softValue = isDark ? palette.darkSoft : palette.soft;
+    document.documentElement.style.setProperty('--system-bg', bgValue);
+    document.documentElement.style.setProperty('--system-bg-soft', softValue);
+    document.documentElement.style.setProperty('--system-surface', isDark ? softValue : '#FFFFFF');
+    document.documentElement.style.setProperty('--system-surface-2', isDark ? bgValue : softValue);
+    document.documentElement.style.setProperty(
+      '--system-border',
+      isDark ? lightenHex(bgValue, 0.26) : mixHex(softValue, '#94A3B8', 0.3)
+    );
+    document.documentElement.style.setProperty('--system-text', isDark ? '#F8FAFC' : '#0F172A');
+    document.documentElement.style.setProperty('--system-text-muted', isDark ? '#CBD5E1' : '#64748B');
+
     if (systemSettings.primaryAccentColor) {
-      document.documentElement.style.setProperty('--system-primary', systemSettings.primaryAccentColor);
-      document.documentElement.style.setProperty('--color-primary', systemSettings.primaryAccentColor);
+      const accent = systemSettings.primaryAccentColor;
+      document.documentElement.style.setProperty('--system-primary', accent);
+      document.documentElement.style.setProperty('--color-primary', accent);
+      document.documentElement.style.setProperty('--system-primary-soft', `${accent}15`);
+      document.documentElement.style.setProperty('--system-primary-border', `${accent}40`);
+      document.documentElement.style.setProperty('--system-primary-contrast', getContrastTextColor(accent));
     }
 
     const radiusMap: Record<string, string> = {
@@ -283,6 +377,7 @@ export default function App() {
     document.documentElement.style.setProperty('--font-sans', targetFont);
     document.documentElement.style.setProperty('--font-system', targetFont);
     document.body.style.fontFamily = targetFont;
+    document.documentElement.style.fontSize = `${normalizeFontScale(systemSettings.fontSizeScale)}%`;
   }, [systemSettings]);
 
   // Persist navigation state so reload keeps the current page
@@ -299,6 +394,7 @@ export default function App() {
     setForm(newForm);
     setIsAiModalOpen(false);
     setFormResponsesMap((prev) => ({ ...prev, [newForm.id]: [] }));
+    syncFormToRecentForms(newForm);
     setActiveTab('custom');
     setCustomSubTab('questions');
     setCurrentView('editor');
@@ -313,13 +409,12 @@ export default function App() {
     }
   };
 
-  // Update team collaboration config
-  const handleUpdateFormCollaboration = (updatedColab: FormCollaborationConfig) => {
-    setForm((prev) => ({ ...prev, collaboration: updatedColab }));
-  };
-
   // Klik Simpan Perubahan di BuilderTab (Simpan perubahan dan tampilkan popup 2 detik)
   const handleSaveDesign = () => {
+    if (!canEditActiveForm) {
+      showCenterToast('Akses Dibatasi', 'Anda hanya memiliki akses lihat pada formulir ini.', 'error', 2500);
+      return;
+    }
     try {
       syncFormToRecentForms(form);
       setIsDesignSaved(true);
@@ -350,6 +445,10 @@ export default function App() {
 
   // Simpan kustomisasi desain di ThemeTab (Desain Studio) & langsung kembali ke editor pertanyaan form
   const handleSaveThemeDesign = () => {
+    if (!canEditActiveForm) {
+      showCenterToast('Akses Dibatasi', 'Anda hanya memiliki akses lihat pada formulir ini.', 'error', 2500);
+      return;
+    }
     try {
       setIsDesignSaved(true);
       setIsFormDirty(false);
@@ -383,6 +482,10 @@ export default function App() {
 
   // Konfirmasi simpan setelah validasi nilai/kuis selesai
   const handleConfirmSaveWithScoring = (updatedForm: FormSchema) => {
+    if (!canEditActiveForm) {
+      showCenterToast('Akses Dibatasi', 'Anda hanya memiliki akses lihat pada formulir ini.', 'error', 2500);
+      return;
+    }
     try {
       setForm(updatedForm);
       syncFormToRecentForms(updatedForm);
@@ -423,50 +526,205 @@ export default function App() {
   const currentResponseCount = activeFormResponses.length;
   const availability = checkFormAvailability(form.schedule);
 
-  // User account state - default to false so landing page is shown first
-  const [user, setUser] = useState<UserAccount>(() => {
-    let savedAvatar = '';
-    let savedAuth = false;
-    let savedPlan: 'free' | 'pro' = 'free';
-    try {
-      savedAvatar = localStorage.getItem('kedataform_user_avatar') || '';
-      savedAuth = localStorage.getItem('kedataform_auth') === 'true';
-      savedPlan = (localStorage.getItem('kedataform_plan') as 'free' | 'pro') || 'free';
-    } catch {}
-    return {
-      name: 'Rizka Farida Damayanti',
-      email: 'rizkafaridadamayantii@gmail.com',
-      avatarUrl: savedAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-      plan: savedPlan,
-      responseCount: 0,
-      maxFreeResponses: 100,
-      isAuthenticated: savedAuth,
-    };
-  });
+  // User account state - sumber kebenaran: sesi server (GET /api/v1/auth/me)
+  const [user, setUser] = useState<UserAccount>(() => ({
+    name: '',
+    email: '',
+    avatarUrl: '',
+    plan: 'free',
+    responseCount: 0,
+    maxFreeResponses: 100,
+    isAuthenticated: false,
+  }));
 
-  const handleUpgradeToPro = () => {
-    setUser((prev) => ({
-      ...prev,
-      plan: 'pro',
-    }));
+  const applyUser = (apiUser: ApiUser, responseCount = 0) => {
+    const account = toUserAccount(apiUser, responseCount);
+    try {
+      if (account.avatarUrl) {
+        localStorage.setItem('kedataform_user_avatar', account.avatarUrl);
+      } else {
+        localStorage.removeItem('kedataform_user_avatar');
+      }
+    } catch {}
+    setUser(account);
   };
 
-  const handleDowngradeToFree = () => {
-    setUser((prev) => ({
-      ...prev,
-      plan: 'free',
-    }));
+  // Muat daftar kolaborator formulir aktif untuk avatar di header
+  React.useEffect(() => {
+    if (!user.isAuthenticated || !form.id) {
+      setActiveFormCollaborators([]);
+      return;
+    }
+    let cancelled = false;
+    api
+      .listCollaborators(form.id)
+      .then((data) => {
+        if (!cancelled) setActiveFormCollaborators(data?.collaborators || []);
+      })
+      .catch(() => {
+        if (!cancelled) setActiveFormCollaborators([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user.isAuthenticated, form.id]);
+
+  // Simpan system settings ke MySQL setiap berubah (setelah login)
+  React.useEffect(() => {
+    if (user.isAuthenticated) api.saveSettings(systemSettings).catch(() => {});
+  }, [systemSettings, user.isAuthenticated]);
+
+  const loadSettingsAndChatFromServer = async () => {
+    try {
+      const { settings } = await api.getSettings();
+      if (settings && Object.keys(settings).length > 0) {
+        setSystemSettings({
+          ...DEFAULT_SYSTEM_SETTINGS,
+          ...settings,
+          systemStyle: normalizeSystemStyle(settings.systemStyle),
+          themeMode: normalizeThemeMode(settings.themeMode),
+          fontSizeScale: normalizeFontScale(settings.fontSizeScale),
+        });
+      } else {
+        // Akun baru / belum punya pengaturan tersimpan: pakai default putih-biru
+        setSystemSettings(DEFAULT_SYSTEM_SETTINGS);
+        try {
+          localStorage.removeItem('kedataform_system_settings');
+          localStorage.removeItem('formcraft_system_settings');
+        } catch {}
+      }
+    } catch (e) {
+      console.error('Gagal memuat settings', e);
+    }
+    try {
+      const { sessions } = await api.listChatSessions();
+      if (sessions && sessions.length) aiChatStore.hydrate(sessions as any);
+    } catch (e) {
+      console.error('Gagal memuat chat', e);
+    }
+  };
+
+  const migrateLocalDataToServer = async () => {
+    try {
+      const rawForms = localStorage.getItem('kedataform_user_forms') || localStorage.getItem('formcraft_user_forms');
+      const rawChat = localStorage.getItem('kedataform_ai_chat_sessions');
+      const forms = rawForms ? JSON.parse(rawForms) : [];
+      const chatSessions = rawChat ? JSON.parse(rawChat) : [];
+      await api.migrateImport({
+        forms: Array.isArray(forms) ? forms : [],
+        folders: [],
+        settings: systemSettings,
+        chatSessions: Array.isArray(chatSessions) ? chatSessions : [],
+        responses: formResponsesMap,
+      });
+    } catch (e) {
+      console.error('Migrasi localStorage gagal', e);
+    }
+  };
+
+  // Bootstrap: resolve sesi, migrasi sekali, lalu muat semua data dari MySQL
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const me = await api.me();
+        if (cancelled) return;
+        if (!me) {
+          setIsBootstrapped(true);
+          return;
+        }
+        applyUser(me.user, me.responseCount);
+
+        // Setelah login, lanjutkan undangan yang tertunda (link /invite/:id)
+        try {
+          const pendingInvite = localStorage.getItem('kedataform_pending_invite');
+          if (pendingInvite) {
+            localStorage.removeItem('kedataform_pending_invite');
+            window.location.replace(`/invite/${pendingInvite}`);
+            return;
+          }
+        } catch {
+          // ignore
+        }
+
+        if (!me.user.hasMigrated) {
+          await migrateLocalDataToServer();
+        }
+        const list = await reloadFormsFromServer();
+        await reloadInvitations();
+        if (!cancelled) {
+          setForm((prev) => list.find((i) => i.form.id === prev?.id)?.form || list[0]?.form || prev);
+        }
+        await loadSettingsAndChatFromServer();
+      } catch (e) {
+        console.error('Bootstrap gagal', e);
+      } finally {
+        if (!cancelled) setIsBootstrapped(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+
+  const startProCheckout = async () => {
+    if (isCheckoutLoading) return;
+    setIsCheckoutLoading(true);
+    try {
+      const cfg = await api.billingConfig();
+      if (!cfg.configured) {
+        showCenterToast('Pembayaran belum dikonfigurasi', 'Isi MIDTRANS_SERVER_KEY & MIDTRANS_CLIENT_KEY di .env.', 'error', 3000);
+        return;
+      }
+      const snap = await loadSnap(cfg.snapScriptUrl, cfg.clientKey);
+      const { orderId, token } = await api.billingCheckout({ plan: 'pro', billingCycle: 'monthly' });
+      snap.pay(token, {
+        onSuccess: async () => {
+          try {
+            const res = await api.billingVerify(orderId);
+            if (res?.user) applyUser(res.user);
+            showCenterToast('Pembayaran Berhasil', 'Paket Pro aktif. Terima kasih!', 'success', 3000);
+          } catch (e) {
+            console.error('Verifikasi pembayaran gagal', e);
+            showCenterToast('Pembayaran Diterima', 'Status sedang diverifikasi. Muat ulang beberapa saat lagi.', 'error', 3500);
+          }
+        },
+        onError: () => {
+          showCenterToast('Pembayaran Gagal', 'Silakan coba lagi.', 'error', 3000);
+        },
+        onClose: () => {},
+      });
+    } catch (e: any) {
+      showCenterToast('Gagal Memulai Pembayaran', e?.message || 'Terjadi kesalahan.', 'error', 3500);
+    } finally {
+      setIsCheckoutLoading(false);
+    }
   };
 
   const handleSignOut = () => {
-    setUser((prev) => ({
-      ...prev,
+    api.logout().catch(() => {});
+    setUser({
+      name: '',
+      email: '',
+      avatarUrl: '',
+      plan: 'free',
+      responseCount: 0,
+      maxFreeResponses: 100,
       isAuthenticated: false,
-    }));
+    });
+    setRecentForms([]);
+    setInvitations([]);
+    setActiveFormCollaborators([]);
+    setFormResponsesMap({});
     try {
-      localStorage.removeItem('kedataform_auth');
-      localStorage.removeItem('kedataform_plan');
+      localStorage.removeItem('kedataform_user_avatar');
+      localStorage.removeItem('kedataform_system_settings');
+      localStorage.removeItem('formcraft_system_settings');
     } catch {}
+    setSystemSettings(DEFAULT_SYSTEM_SETTINGS);
     setIsLoginPage(false);
     setCurrentView('dashboard');
   };
@@ -474,15 +732,44 @@ export default function App() {
   // Called when user signs in - SELALU ARAHKAN KE DASHBOARD
   const handleUpdateUser = (updatedUser: UserAccount) => {
     setUser(updatedUser);
-    try {
-      localStorage.setItem('kedataform_auth', String(updatedUser.isAuthenticated));
-      localStorage.setItem('kedataform_plan', updatedUser.plan);
-    } catch {}
     if (updatedUser.isAuthenticated) {
+      api
+        .updateMe({ name: updatedUser.name, avatarUrl: updatedUser.avatarUrl })
+        .catch((err) => console.error('Gagal memperbarui profil', err));
       setPendingTemplate(null);
       setIsLoginPage(false);
       setIsAuthModalOpen(false);
       setCurrentView('dashboard');
+      if (!user.isAuthenticated) {
+        reloadFormsFromServer();
+        reloadInvitations();
+      }
+    }
+  };
+
+  const handleAcceptInvitation = async (id: string) => {
+    try {
+      const res = await api.acceptInvitation(id);
+      const list = await reloadFormsFromServer();
+      await reloadInvitations();
+      const invitedItem = list.find((item) => item.form.id === res.formId);
+      if (invitedItem) {
+        setForm(invitedItem.form);
+        setCurrentView('editor');
+      }
+      showCenterToast('Undangan Diterima', 'Formulir kolaborasi berhasil ditambahkan ke daftar Anda.', 'success', 2500);
+    } catch (e: any) {
+      showCenterToast('Gagal Menerima Undangan', e?.message || 'Silakan coba lagi.', 'error', 3000);
+    }
+  };
+
+  const handleDeclineInvitation = async (id: string) => {
+    try {
+      await api.declineInvitation(id);
+      await reloadInvitations();
+      showCenterToast('Undangan Ditolak', 'Undangan kolaborasi telah ditolak.', 'success', 2000);
+    } catch (e: any) {
+      showCenterToast('Gagal Menolak Undangan', e?.message || 'Silakan coba lagi.', 'error', 3000);
     }
   };
 
@@ -495,16 +782,20 @@ export default function App() {
     setIsGlobalCropOpen(true);
   };
 
-  const handleApplyGlobalCrop = (croppedDataUrl: string) => {
-    const updated = {
-      ...user,
-      avatarUrl: croppedDataUrl,
-    };
+  const handleApplyGlobalCrop = async (croppedDataUrl: string) => {
+    const updated = { ...user, avatarUrl: croppedDataUrl };
     setUser(updated);
     try {
       localStorage.setItem('kedataform_user_avatar', croppedDataUrl);
     } catch {}
     setIsGlobalCropOpen(false);
+    if (updated.isAuthenticated) {
+      try {
+        await api.updateMe({ avatarUrl: croppedDataUrl });
+      } catch (e) {
+        console.error('Gagal menyimpan foto profil ke server', e);
+      }
+    }
     showCenterToast(
       'Berhasil Disimpan',
       'Foto profil akun Anda telah berhasil dipotong dan diperbarui.',
@@ -551,9 +842,7 @@ export default function App() {
   const handleOpenShareFromDashboard = (selectedForm: FormSchema) => {
     const fresh = recentForms.find((item) => item.form.id === selectedForm.id)?.form || selectedForm;
     setForm(fresh);
-    if (!formResponsesMap[fresh.id]) {
-      setFormResponsesMap((prev) => ({ ...prev, [fresh.id]: [] }));
-    }
+    ensureResponsesLoaded(fresh.id);
     setActiveTab('embed');
     setCustomSubTab('questions');
     setCurrentView('editor');
@@ -562,9 +851,7 @@ export default function App() {
   const handleOpenFormFromDashboard = (selectedForm: FormSchema) => {
     const fresh = recentForms.find((item) => item.form.id === selectedForm.id)?.form || selectedForm;
     setForm(fresh);
-    if (!formResponsesMap[fresh.id]) {
-      setFormResponsesMap((prev) => ({ ...prev, [fresh.id]: [] }));
-    }
+    ensureResponsesLoaded(fresh.id);
     setActiveTab('custom');
     setCustomSubTab('questions');
     setCurrentView('editor');
@@ -584,7 +871,7 @@ export default function App() {
 
     if (user.plan === 'free' && updated.length >= 100) {
       setTimeout(() => {
-        setIsUpgradeModalOpen(true);
+        startProCheckout();
       }, 300);
     }
   };
@@ -600,34 +887,56 @@ export default function App() {
     setUser((prev) => ({ ...prev, responseCount: initial.length }));
   };
 
-  // Submit jawaban melalui Pratinjau LiveForm
-  const handleLiveSubmit = (
-    answers: Record<string, any>, 
+  // Submit jawaban melalui Pratinjau LiveForm (disimpan ke MySQL, skor dihitung server)
+  const handleLiveSubmit = async (
+    answers: Record<string, any>,
     scoring?: { score: number; totalPossibleScore: number; isPassed: boolean }
   ) => {
-    const newSubmission: FormSubmission = {
-      id: `resp_${Date.now()}`,
-      submittedAt: new Date().toISOString(),
-      answers,
-      score: scoring?.score,
-      totalPossibleScore: scoring?.totalPossibleScore,
-      isPassed: scoring?.isPassed,
-    };
-
-    const currentList = formResponsesMap[form.id] || [];
-    const updated = [newSubmission, ...currentList];
-
-    setFormResponsesMap((prev) => ({
-      ...prev,
-      [form.id]: updated,
-    }));
-    setUser((prev) => ({ ...prev, responseCount: updated.length }));
-
-    if (user.plan === 'free' && updated.length > 100) {
-      setTimeout(() => {
-        setIsUpgradeModalOpen(true);
-      }, 500);
+    try {
+      const { submission } = await api.submit(form.id, answers);
+      setFormResponsesMap((prev) => ({
+        ...prev,
+        [form.id]: [submission, ...(prev[form.id] || [])],
+      }));
+      setUser((prev) => ({ ...prev, responseCount: prev.responseCount + 1 }));
+      if (user.plan === 'free' && (formResponsesMap[form.id]?.length || 0) + 1 >= 100) {
+        setTimeout(() => startProCheckout(), 500);
+      }
+    } catch (e: any) {
+      showCenterToast('Gagal Mengirim', e?.message || 'Respons gagal disimpan.', 'error', 2500);
     }
+  };
+
+  // Muat data respons sebuah form dari MySQL (sekali per form)
+  const ensureResponsesLoaded = async (formId: string) => {
+    if (formResponsesMap[formId]) return;
+    try {
+      const { submissions } = await api.listSubmissions(formId);
+      setFormResponsesMap((prev) => (prev[formId] ? prev : { ...prev, [formId]: submissions }));
+    } catch (e) {
+      console.error('Gagal memuat respons', e);
+    }
+  };
+
+  // Sinkronkan perubahan daftar form dari DashboardView ke MySQL (buat/ubah/hapus)
+  const handleUpdateRecentForms = (updater: RecentFormItem[] | ((prev: RecentFormItem[]) => RecentFormItem[])) => {
+    setRecentForms((prev) => {
+      const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
+      const prevMap = new Map(prev.map((i) => [i.form.id, i]));
+      const nextMap = new Map(next.map((i: RecentFormItem) => [i.form.id, i]));
+      for (const id of prevMap.keys()) {
+        if (!nextMap.has(id)) api.deleteForm(id).catch(() => {});
+      }
+      for (const item of next) {
+        const old = prevMap.get(item.form.id);
+        if (!old) {
+          api.createForm(item).catch(() => {});
+        } else if (JSON.stringify(old) !== JSON.stringify(item)) {
+          api.updateForm(item.form.id, item).catch(() => {});
+        }
+      }
+      return next;
+    });
   };
 
   // Ekspor data responden formulir yang aktif ke format CSV
@@ -663,6 +972,15 @@ export default function App() {
     }
   };
 
+  // JIKA BELUM SELESAI BOOTSTRAP (memuat sesi & data dari server)
+  if (!isBootstrapped) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--system-bg-soft)] text-slate-500 text-sm font-sans">
+        Memuat data...
+      </div>
+    );
+  }
+
   // JIKA PENGGUNA BELUM SIGN IN:
   if (!user.isAuthenticated) {
     if (isLoginPage) {
@@ -688,32 +1006,16 @@ export default function App() {
   }
 
   // JIKA PENGGUNA SUDAH SIGN IN:
-  const isDark = systemSettings.themeMode === 'dark';
+  const isDark = resolveIsDark(systemSettings);
 
-  // Dynamic system style background
   const getSystemBackgroundClass = () => {
-    if (isDark) return 'bg-slate-950 text-slate-100 selection:bg-slate-800';
-    switch (systemSettings.systemStyle) {
-      case 'monochrome':
-        return 'bg-white text-slate-950 selection:bg-slate-200';
-      case 'slate':
-        return 'bg-slate-50 text-slate-900 selection:bg-slate-200';
-      case 'zinc':
-        return 'bg-zinc-50 text-zinc-900 selection:bg-zinc-200';
-      case 'sunset_amber':
-        return 'bg-blue-50/50 text-slate-900 selection:bg-blue-200';
-      case 'emerald':
-        return 'bg-emerald-50/40 text-slate-900 selection:bg-emerald-200';
-      case 'warm_titanium':
-      default:
-        return 'bg-[#F3F8FD] text-slate-900 selection:bg-orange-100';
-    }
+    return isDark ? 'text-slate-100 selection:bg-slate-800' : 'text-slate-900 selection:bg-blue-200';
   };
 
   return (
     <div 
       className={`min-h-screen flex flex-col transition-colors duration-200 ${isDark ? 'dark ' : ''}${getSystemBackgroundClass()}`}
-      style={{ fontFamily: getSystemFontFamily(systemSettings.systemFont) }}
+      style={{ fontFamily: getSystemFontFamily(systemSettings.systemFont), backgroundColor: 'var(--system-bg)' }}
     >
       
       {/* VIEW 1: DASHBOARD (FORMS HUB DENGAN FOLDER & TEMPLATE GALLERY) */}
@@ -722,7 +1024,7 @@ export default function App() {
           user={user}
                 onOpenForm={handleOpenFormFromDashboard}
                 onOpenShare={handleOpenShareFromDashboard}
-          onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
+          onOpenUpgradeModal={startProCheckout}
           onSignOut={handleSignOut}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           formResponsesMap={formResponsesMap}
@@ -732,12 +1034,15 @@ export default function App() {
           systemSettings={systemSettings}
           onUpdateSystemSettings={setSystemSettings}
           recentForms={recentForms}
-          onUpdateRecentForms={setRecentForms}
+          onUpdateRecentForms={handleUpdateRecentForms}
           onOpenTour={() => setIsTourOpen(true)}
           onOpenVideoTutorial={() => setIsVideoModalOpen(true)}
           onUpdateUser={handleUpdateUser}
           initialSidebarView={dashboardSidebarView}
           onSidebarViewChange={setDashboardSidebarView}
+          collaborationInvitations={invitations}
+          onAcceptInvitation={handleAcceptInvitation}
+          onDeclineInvitation={handleDeclineInvitation}
         />
       ) : (
         /* VIEW 2: FORM STUDIO EDITOR (HANYA MENU CUSTOM & BAGIKAN) */
@@ -756,7 +1061,7 @@ export default function App() {
             isPreviewOpen={isPreviewOpen}
             onTogglePreview={() => setIsPreviewOpen((prev) => !prev)}
             user={user}
-            onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
+            onOpenUpgradeModal={startProCheckout}
             onSignOut={handleSignOut}
             onUpdateUser={handleUpdateUser}
             onOpenCropModal={() => handleOpenGlobalCrop(user.avatarUrl)}
@@ -770,7 +1075,9 @@ export default function App() {
                 setCustomSubTab('questions');
                 return;
               }
-              syncFormToRecentForms(form);
+              if (canEditActiveForm) {
+                syncFormToRecentForms(form);
+              }
               setCurrentView('dashboard');
             }}
             onExportCSV={handleExportActiveFormCSV}
@@ -787,12 +1094,15 @@ export default function App() {
             customSubTab={customSubTab}
             onSaveThemeDesign={handleSaveThemeDesign}
             primaryAccentColor={systemSettings.primaryAccentColor}
+            accessRole={activeFormRole}
+            canEdit={canEditActiveForm}
+            collaborators={activeFormCollaborators}
           />
 
 
 
           {/* Konten Editor: Menu Custom & Bagikan */}
-          <main className="flex-1 flex flex-col bg-[#F3F8FD] min-h-[calc(100vh-64px)]">
+          <main className="flex-1 flex flex-col bg-[var(--system-bg-soft)] min-h-[calc(100vh-64px)]">
             {activeTab === 'custom' && (
               <div className="flex-1 flex flex-col">
                 {customSubTab === 'questions' ? (
@@ -811,6 +1121,7 @@ export default function App() {
                     }}
                     onOpenAiGenerator={() => setIsAiModalOpen(true)}
                     onShowToast={showCenterToast}
+                    readOnly={!canEditActiveForm}
                   />
                 ) : (
                   <ThemeTab
@@ -823,12 +1134,13 @@ export default function App() {
                       setIsDesignSaved(false); // Reset saved indicator when design is actively changed
                     }}
                     isProUser={user.plan === 'pro'}
-                    onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
+                    onOpenUpgradeModal={startProCheckout}
                     onSaveDesign={handleSaveThemeDesign}
                     isDesignSaved={isDesignSaved}
                     onBackToQuestions={() => setCustomSubTab('questions')}
                     activeSubTab={themeActiveTab}
                     onChangeActiveSubTab={setThemeActiveTab}
+                    readOnly={!canEditActiveForm}
                   />
                 )}
               </div>
@@ -867,20 +1179,10 @@ export default function App() {
           userPlan={user.plan}
           onOpenUpgradeModal={() => {
             setIsPreviewOpen(false);
-            setIsUpgradeModalOpen(true);
+            startProCheckout();
           }}
         />
       )}
-
-      {/* Modal Upgrade Kuota 100+ Respon */}
-      <UpgradeModal
-        isOpen={isUpgradeModalOpen}
-        onClose={() => setIsUpgradeModalOpen(false)}
-        user={user}
-        onUpgradeToPro={handleUpgradeToPro}
-        onDowngradeToFree={handleDowngradeToFree}
-        currentResponseCount={currentResponseCount}
-      />
 
       {/* Modal Masuk / Profil Akun */}
       <AuthModal
@@ -898,6 +1200,10 @@ export default function App() {
           onClose={() => setIsScheduleModalOpen(false)}
           schedule={form.schedule}
           onSaveSchedule={(newSchedule) => {
+            if (!canEditActiveForm) {
+              showCenterToast('Akses Dibatasi', 'Anda hanya memiliki akses lihat pada formulir ini.', 'error', 2500);
+              return;
+            }
             try {
               const updated = { ...form, schedule: newSchedule };
               setForm(updated);
@@ -942,7 +1248,8 @@ export default function App() {
         onClose={() => setIsColabModalOpen(false)}
         form={form}
         user={user}
-        onUpdateFormCollaboration={handleUpdateFormCollaboration}
+        canManage={activeFormRole === 'owner'}
+        onCollaboratorsChange={setActiveFormCollaborators}
       />
 
       {/* Modal Pengaturan Sistem & Profil Pengguna */}

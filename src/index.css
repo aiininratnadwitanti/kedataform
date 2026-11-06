@@ -7,6 +7,18 @@
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-serif: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --color-primary: #223A5E;
+    --system-primary: #223A5E;
+    --system-primary-soft: #223A5E15;
+    --system-primary-border: #223A5E40;
+    --system-primary-contrast: #ffffff;
+    --system-bg: #F3F8FD;
+    --system-bg-soft: #F3F8FD;
+    --system-surface: #FFFFFF;
+    --system-surface-2: #F3F8FD;
+    --system-border: #e2e8f0;
+    --system-text: #0F172A;
+    --system-text-muted: #64748B;
   }
 
   * {
@@ -16,6 +28,145 @@
   body {
     font-family: var(--font-sans);
   }
+}
+
+/* Adaptasi teks otomatis pada area konten studio saat mode gelap */
+.dark .dark-text-scope .text-slate-900,
+.dark .dark-text-scope .text-slate-800,
+.dark .dark-text-scope .text-neutral-900,
+.dark .dark-text-scope .text-neutral-800 {
+  color: #f8fafc !important;
+}
+.dark .dark-text-scope .text-slate-700,
+.dark .dark-text-scope .text-slate-600,
+.dark .dark-text-scope .text-neutral-700,
+.dark .dark-text-scope .text-neutral-600 {
+  color: #e2e8f0 !important;
+}
+.dark .dark-text-scope .text-slate-500,
+.dark .dark-text-scope .text-slate-400,
+.dark .dark-text-scope .text-neutral-500,
+.dark .dark-text-scope .text-neutral-400 {
+  color: #cbd5e1 !important;
+}
+.dark .dark-text-scope .text-blue-900,
+.dark .dark-text-scope .text-blue-950,
+.dark .dark-text-scope .text-blue-800 {
+  color: #bfdbfe !important;
+}
+.dark .dark-text-scope .hover\:text-slate-900:hover,
+.dark .dark-text-scope .hover\:text-slate-800:hover {
+  color: #f8fafc !important;
+}
+.dark .dark-text-scope .hover\:bg-slate-100:hover,
+.dark .dark-text-scope .hover\:bg-slate-200\/60:hover,
+.dark .dark-text-scope .hover\:bg-slate-800:hover {
+  background-color: var(--system-surface-2) !important;
+}
+
+/* Dropdown native pada area gelap agar opsinya tidak putih-di-atas-putih */
+.dark .dark-text-scope select,
+.dark .dark-text-scope input[type="date"],
+.dark .dark-text-scope input[type="time"] {
+  color-scheme: dark;
+}
+.dark .dark-text-scope select option {
+  background-color: var(--system-surface-2);
+  color: #f8fafc;
+}
+
+/* Panel chat AI: permukaan ikut gelap & teks terang */
+.dark .ai-chat-scope .bg-white,
+.dark .ai-chat-scope .bg-white\/60,
+.dark .ai-chat-scope .bg-white\/40 {
+  background-color: var(--system-surface) !important;
+}
+.dark .ai-chat-scope .bg-slate-100,
+.dark .ai-chat-scope .bg-slate-100\/80 {
+  background-color: var(--system-surface-2) !important;
+}
+.dark .ai-chat-scope .bg-blue-100\/90 {
+  background-color: var(--system-primary-soft) !important;
+}
+.dark .ai-chat-scope .border-slate-200,
+.dark .ai-chat-scope .border-slate-300,
+.dark .ai-chat-scope .border-slate-200\/60,
+.dark .ai-chat-scope .border-slate-200\/90,
+.dark .ai-chat-scope.border-slate-200\/90,
+.dark .ai-chat-scope.border-slate-200 {
+  border-color: rgba(203, 213, 225, 0.55) !important;
+}
+.dark .ai-chat-scope.shadow-sm,
+.dark .ai-chat-scope .shadow-sm {
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.38), 0 14px 28px -16px rgba(0, 0, 0, 0.95) !important;
+}
+.dark .ai-chat-scope .border-blue-400\/70,
+.dark .ai-chat-scope .border-blue-400\/50,
+.dark .ai-chat-scope .border-blue-300\/60 {
+  border-color: rgba(147, 197, 253, 0.85) !important;
+}
+.dark .ai-chat-scope .border-emerald-500\/40 {
+  border-color: rgba(52, 211, 153, 0.55) !important;
+}
+.dark .ai-chat-scope .bg-emerald-500\/15 {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+}
+.dark .ai-chat-scope .ring-1,
+.dark .ai-chat-scope .ring-blue-300\/40 {
+  --tw-ring-color: rgba(147, 197, 253, 0.45) !important;
+}
+.dark .ai-chat-scope .text-slate-900,
+.dark .ai-chat-scope .text-slate-800,
+.dark .ai-chat-scope .text-black {
+  color: #f8fafc !important;
+}
+.dark .ai-chat-scope .text-slate-700,
+.dark .ai-chat-scope .text-slate-600 {
+  color: #e2e8f0 !important;
+}
+.dark .ai-chat-scope .text-slate-500,
+.dark .ai-chat-scope .text-slate-400 {
+  color: #cbd5e1 !important;
+}
+.dark .ai-chat-scope .text-blue-900,
+.dark .ai-chat-scope .text-blue-950,
+.dark .ai-chat-scope .text-blue-800 {
+  color: #bfdbfe !important;
+}
+.dark .ai-chat-scope .text-emerald-800 {
+  color: #6ee7b7 !important;
+}
+.dark .ai-chat-scope .placeholder\:text-slate-400::placeholder {
+  color: #cbd5e1 !important;
+}
+.dark .ai-chat-scope .hover\:bg-slate-100\/80:hover,
+.dark .ai-chat-scope .hover\:bg-slate-100:hover,
+.dark .ai-chat-scope .hover\:bg-blue-50:hover {
+  background-color: var(--system-surface-2) !important;
+}
+
+/* Permukaan gelap studio mengikuti Gaya Nuansa UI */
+.dark .bg-\[\#121214\] {
+  background-color: var(--system-bg) !important;
+}
+.dark .bg-\[\#18181b\],
+.dark .bg-\[\#18181b\]\/95 {
+  background-color: var(--system-surface) !important;
+}
+.dark .bg-\[\#161619\],
+.dark .bg-\[\#1f1f23\],
+.dark .bg-\[\#1e1e22\],
+.dark .bg-\[\#1c1c20\],
+.dark .bg-\[\#202025\],
+.dark .bg-\[\#222226\] {
+  background-color: var(--system-surface-2) !important;
+}
+.dark .border-slate-800,
+.dark .border-slate-700 {
+  border-color: var(--system-border) !important;
+}
+.dark .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--system-border) !important;
 }
 
 /* Custom smooth scrollbars */

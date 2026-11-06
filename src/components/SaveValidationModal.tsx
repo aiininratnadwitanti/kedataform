@@ -353,7 +353,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
       {/* ========================================================================= */}
       {modalStage === 'rules_and_schedule' && (
         <div 
-          className="relative w-full max-w-2xl bg-[#F3F8FD] rounded-3xl shadow-2xl border border-blue-200/90 flex flex-col max-h-[92vh] overflow-hidden ring-1 ring-blue-500/10 animate-in zoom-in-95 duration-150"
+          className="relative w-full max-w-2xl bg-[var(--system-bg-soft)] rounded-3xl shadow-2xl border border-blue-200/90 flex flex-col max-h-[92vh] overflow-hidden ring-1 ring-blue-500/10 animate-in zoom-in-95 duration-150"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Popup 1 */}
@@ -385,7 +385,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
           </div>
 
           {/* Konten Popup 1 */}
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 bg-[#F3F8FD]">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 bg-[var(--system-bg-soft)]">
 
             {/* Link Formulir untuk Dikirim ke Responden */}
             <div className="p-4 bg-white rounded-2xl border border-blue-200/80 shadow-2xs space-y-2">
@@ -405,7 +405,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   onClick={() => {
                     navigator.clipboard.writeText(`https://kedataform.app/f/${form.id}`);
                   }}
-                  className="px-3 py-2 bg-[#223A5E] hover:bg-[#1a2d4a] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3 py-2 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   <span>Salin</span>
@@ -455,12 +455,12 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   onClick={() => setIsQuizMode(false)}
                   className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                     !isQuizMode 
-                      ? 'border-[#223A5E] bg-white shadow-xs ring-1 ring-[#223A5E]/30' 
+                      ? 'border-[var(--system-primary)] bg-white shadow-xs ring-1 ring-[#223A5E]/30' 
                       : 'border-blue-200/80 hover:border-blue-300 bg-white/70'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center shrink-0 ${
-                    !isQuizMode ? 'border-[#223A5E] bg-[#223A5E]' : 'border-slate-300'
+                    !isQuizMode ? 'border-[var(--system-primary)] bg-[var(--system-primary)]' : 'border-slate-300'
                   }`}>
                     {!isQuizMode && <Check className="w-3 h-3 text-white stroke-[3]" />}
                   </div>
@@ -474,12 +474,12 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   onClick={() => setIsQuizMode(true)}
                   className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                     isQuizMode 
-                      ? 'border-[#223A5E] bg-white shadow-xs ring-1 ring-[#223A5E]/30' 
+                      ? 'border-[var(--system-primary)] bg-white shadow-xs ring-1 ring-[#223A5E]/30' 
                       : 'border-blue-200/80 hover:border-blue-300 bg-white/70'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center shrink-0 ${
-                    isQuizMode ? 'border-[#223A5E] bg-[#223A5E]' : 'border-slate-300'
+                    isQuizMode ? 'border-[var(--system-primary)] bg-[var(--system-primary)]' : 'border-slate-300'
                   }`}>
                     {isQuizMode && <Check className="w-3 h-3 text-white stroke-[3]" />}
                   </div>
@@ -510,7 +510,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   onClick={() => setScheduleMode('always_open')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between gap-2 ${
                     scheduleMode === 'always_open'
-                      ? 'border-[#223A5E] bg-white shadow-xs ring-1 ring-[#223A5E]/30'
+                      ? 'border-[var(--system-primary)] bg-white shadow-xs ring-1 ring-[#223A5E]/30'
                       : 'border-blue-200/80 hover:border-blue-300 bg-white/70'
                   }`}
                 >
@@ -519,7 +519,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                       <Unlock className="w-3.5 h-3.5" />
                     </div>
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      scheduleMode === 'always_open' ? 'border-[#223A5E] bg-[#223A5E]' : 'border-slate-300'
+                      scheduleMode === 'always_open' ? 'border-[var(--system-primary)] bg-[var(--system-primary)]' : 'border-slate-300'
                     }`}>
                       {scheduleMode === 'always_open' && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
                     </div>
@@ -534,7 +534,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   onClick={() => setScheduleMode('custom_schedule')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between gap-2 ${
                     scheduleMode === 'custom_schedule'
-                      ? 'border-[#223A5E] bg-white shadow-xs ring-1 ring-[#223A5E]/30'
+                      ? 'border-[var(--system-primary)] bg-white shadow-xs ring-1 ring-[#223A5E]/30'
                       : 'border-blue-200/80 hover:border-blue-300 bg-white/70'
                   }`}
                 >
@@ -543,7 +543,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                       <CalendarRange className="w-3.5 h-3.5" />
                     </div>
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      scheduleMode === 'custom_schedule' ? 'border-[#223A5E] bg-[#223A5E]' : 'border-slate-300'
+                      scheduleMode === 'custom_schedule' ? 'border-[var(--system-primary)] bg-[var(--system-primary)]' : 'border-slate-300'
                     }`}>
                       {scheduleMode === 'custom_schedule' && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
                     </div>
@@ -558,7 +558,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   onClick={() => setScheduleMode('closed')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between gap-2 ${
                     scheduleMode === 'closed'
-                      ? 'border-[#223A5E] bg-white shadow-xs ring-1 ring-[#223A5E]/30'
+                      ? 'border-[var(--system-primary)] bg-white shadow-xs ring-1 ring-[#223A5E]/30'
                       : 'border-blue-200/80 hover:border-blue-300 bg-white/70'
                   }`}
                 >
@@ -567,7 +567,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                       <Lock className="w-3.5 h-3.5" />
                     </div>
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      scheduleMode === 'closed' ? 'border-[#223A5E] bg-[#223A5E]' : 'border-slate-300'
+                      scheduleMode === 'closed' ? 'border-[var(--system-primary)] bg-[var(--system-primary)]' : 'border-slate-300'
                     }`}>
                       {scheduleMode === 'closed' && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
                     </div>
@@ -593,13 +593,13 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                           type="date"
                           value={openDate}
                           onChange={(e) => setOpenDate(e.target.value)}
-                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#223A5E]"
+                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[var(--system-primary)]"
                         />
                         <input
                           type="time"
                           value={openTime}
                           onChange={(e) => setOpenTime(e.target.value)}
-                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#223A5E]"
+                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[var(--system-primary)]"
                         />
                       </div>
                     </div>
@@ -615,13 +615,13 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                           type="date"
                           value={closeDate}
                           onChange={(e) => setCloseDate(e.target.value)}
-                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#223A5E]"
+                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[var(--system-primary)]"
                         />
                         <input
                           type="time"
                           value={closeTime}
                           onChange={(e) => setCloseTime(e.target.value)}
-                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#223A5E]"
+                          className="w-full text-xs bg-white border border-blue-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[var(--system-primary)]"
                         />
                       </div>
                     </div>
@@ -668,7 +668,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
               <button
                 type="button"
                 onClick={() => setModalStage('quiz_answers_preview')}
-                className="px-5 py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-xs transition-all cursor-pointer hover:scale-102 active:scale-98"
+                className="px-5 py-2.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] text-xs font-bold rounded-xl flex items-center gap-2 shadow-xs transition-all cursor-pointer hover:scale-102 active:scale-98"
               >
                 <span>Lanjut ke Preview Kunci Jawaban</span>
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />
@@ -693,7 +693,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
       {/* ========================================================================= */}
       {modalStage === 'quiz_answers_preview' && (
         <div 
-          className="relative w-full max-w-3xl bg-[#F3F8FD] rounded-3xl shadow-2xl border-2 border-blue-300 flex flex-col max-h-[92vh] overflow-hidden ring-2 ring-blue-500/20 animate-in zoom-in-95 duration-150"
+          className="relative w-full max-w-3xl bg-[var(--system-bg-soft)] rounded-3xl shadow-2xl border-2 border-blue-300 flex flex-col max-h-[92vh] overflow-hidden ring-2 ring-blue-500/20 animate-in zoom-in-95 duration-150"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Popup 2: Preview Kunci Jawaban */}
@@ -736,7 +736,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
           </div>
 
           {/* Konten Popup 2: Verifikasi & Preview Jawaban Benar */}
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 bg-[#F3F8FD]">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 bg-[var(--system-bg-soft)]">
             
             {/* ALERT PERINGATAN UTAMA JIKA ADA SOAL BELUM ADA KUNCI */}
             {unassignedKeys.length > 0 ? (
@@ -792,7 +792,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                       max={100}
                       value={passingScore}
                       onChange={(e) => setPassingScore(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
-                      className="w-16 px-2 py-0.5 bg-blue-50/60 border border-blue-200 rounded-md text-xs font-bold font-mono text-center focus:outline-none focus:border-[#223A5E]"
+                      className="w-16 px-2 py-0.5 bg-blue-50/60 border border-blue-200 rounded-md text-xs font-bold font-mono text-center focus:outline-none focus:border-[var(--system-primary)]"
                     />
                     <span className="text-xs text-slate-500 font-bold">Poin</span>
                   </div>
@@ -883,7 +883,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                               max={100}
                               value={q.points || 0}
                               onChange={(e) => handleUpdatePoints(q.id, Number(e.target.value) || 0)}
-                              className="w-12 text-center text-xs font-mono font-bold bg-white border border-blue-200 rounded px-1 py-0.5 focus:outline-none focus:border-[#223A5E]"
+                              className="w-12 text-center text-xs font-mono font-bold bg-white border border-blue-200 rounded px-1 py-0.5 focus:outline-none focus:border-[var(--system-primary)]"
                             />
                             <span className="text-[10px] font-bold text-slate-600">pts</span>
                           </div>
@@ -918,16 +918,16 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                                   onClick={() => handleToggleOptionAnswer(q.id, opt.id, opt.text)}
                                   className={`w-full text-left p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all cursor-pointer ${
                                     isThisCorrect
-                                      ? 'bg-blue-100/90 border-[#223A5E] text-blue-950 font-bold shadow-xs ring-1 ring-[#223A5E]/50'
+                                      ? 'bg-blue-100/90 border-[var(--system-primary)] text-blue-950 font-bold shadow-xs ring-1 ring-[#223A5E]/50'
                                       : isMissing
                                       ? 'bg-white hover:bg-rose-50/70 border-rose-200 text-slate-800'
-                                      : 'bg-[#F3F8FD] hover:bg-blue-50/60 border-blue-200/80 text-slate-700'
+                                      : 'bg-[var(--system-bg-soft)] hover:bg-blue-50/60 border-blue-200/80 text-slate-700'
                                   }`}
                                 >
                                   <div className="flex items-center gap-2 truncate">
                                     <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                                       isThisCorrect 
-                                        ? 'bg-[#223A5E] text-white' 
+                                        ? 'bg-[var(--system-primary)] text-[var(--system-primary-contrast)]' 
                                         : isMissing 
                                         ? 'bg-rose-100 text-rose-800 border border-rose-200' 
                                         : 'bg-slate-200 text-slate-700'
@@ -938,7 +938,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                                   </div>
 
                                   {isThisCorrect && (
-                                    <span className="px-1.5 py-0.5 rounded bg-[#223A5E] text-white text-[9px] font-bold shrink-0">
+                                    <span className="px-1.5 py-0.5 rounded bg-[var(--system-primary)] text-[var(--system-primary-contrast)] text-[9px] font-bold shrink-0">
                                       KUNCI BENAR ✓
                                     </span>
                                   )}
@@ -964,7 +964,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                             value={typeof q.correctAnswer === 'string' ? q.correctAnswer : ''}
                             onChange={(e) => handleUpdateTextAnswer(q.id, e.target.value)}
                             placeholder="Ketik teks jawaban benar yang harus diketik responden..."
-                            className={`w-full text-xs rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#223A5E] ${
+                            className={`w-full text-xs rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[var(--system-primary)] ${
                               isMissing ? 'bg-rose-50 border border-rose-300' : 'bg-blue-50/50 border border-blue-200'
                             }`}
                           />
@@ -978,7 +978,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                           value={q.explanation || ''}
                           onChange={(e) => handleUpdateExplanation(q.id, e.target.value)}
                           placeholder="Pembahasan soal (opsional, ditampilkan setelah evaluasi)..."
-                          className="w-full text-[11px] bg-[#F3F8FD] border border-blue-200/80 rounded-lg px-2.5 py-1 text-slate-700 focus:bg-white focus:outline-none focus:border-[#223A5E]"
+                          className="w-full text-[11px] bg-[var(--system-bg-soft)] border border-blue-200/80 rounded-lg px-2.5 py-1 text-slate-700 focus:bg-white focus:outline-none focus:border-[var(--system-primary)]"
                         />
                       </div>
                     </div>
@@ -1072,7 +1072,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
               <button
                 type="button"
                 onClick={handleScrollToFirstMissing}
-                className="w-full sm:w-auto px-5 py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer order-1 sm:order-2 flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto px-5 py-2.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer order-1 sm:order-2 flex items-center justify-center gap-1.5"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Pilih Jawaban Sekarang</span>

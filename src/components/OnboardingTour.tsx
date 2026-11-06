@@ -177,7 +177,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           left: bubbleLeft,
           width: bubbleWidth,
         }}
-        className="z-30 bg-[#F3F8FD] text-slate-900 rounded-2xl border border-blue-300/90 shadow-lg p-4 space-y-3 animate-in fade-in duration-150"
+        className="z-30 bg-[var(--system-bg-soft)] text-slate-900 rounded-2xl border border-blue-300/90 shadow-lg p-4 space-y-3 animate-in fade-in duration-150"
       >
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -217,7 +217,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           <button
             type="button"
             onClick={handleNext}
-            className="px-4 py-1.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+            className="px-4 py-1.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
           >
             {isLast ? 'Selesai' : 'Lanjut'}
           </button>

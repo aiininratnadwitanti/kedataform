@@ -26,13 +26,13 @@ import { CenterToastPopup } from './CenterToastPopup';
 
 export interface SystemSettings {
   // 1. Tema & Tampilan Sistem
-  themeMode: 'light' | 'dark' | 'auto';
-  systemStyle: 'slate' | 'zinc' | 'monochrome' | 'oled' | 'warm_titanium' | 'emerald' | 'cyber_indigo' | 'rose_velvet' | 'sunset_amber' | 'nordic_frost' | string;
+  themeMode: 'light' | 'dark' | 'auto' | 'sepia' | 'dim';
+  systemStyle: 'slate' | 'zinc' | 'monochrome' | 'oled' | 'warm_titanium' | 'emerald' | 'cyber_indigo' | 'rose_velvet' | 'sunset_amber' | 'nordic_frost' | 'ocean_breeze' | 'sakura_blush' | 'desert_sand' | 'forest_moss' | string;
   primaryAccentColor: string; // Bebas kustom warna apa saja
   borderRadius: 'sharp' | 'modern' | 'rounded';
   interfaceDensity: 'comfortable' | 'compact';
   systemFont: 'sans' | 'inter' | 'poppins' | 'outfit' | 'roboto' | 'serif' | 'merriweather' | 'lora' | 'mono' | 'fira' | 'handwritten' | string;
-  fontSizeScale?: 'compact' | 'standard' | 'comfortable';
+  fontSizeScale?: number;
   enableAnimations: boolean;
 
   // 2. Workspace & Identitas
@@ -57,7 +57,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   borderRadius: 'modern',
   interfaceDensity: 'comfortable',
   systemFont: 'sans', // Default: Plus Jakarta Sans
-  fontSizeScale: 'standard',
+  fontSizeScale: 100,
   enableAnimations: true,
 
   workspaceName: 'KeDataForm Studio',
@@ -140,6 +140,91 @@ export function getContrastTextColor(hex?: string): string {
   return yiq >= 120 ? '#09090b' : '#ffffff';
 }
 
+function hexToRgb(hex: string): [number, number, number] | null {
+  const clean = hex.replace('#', '').trim();
+  if (clean.length !== 6) return null;
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  if ([r, g, b].some(Number.isNaN)) return null;
+  return [r, g, b];
+}
+
+function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      default:
+        h = (r - g) / d + 4;
+    }
+    h /= 6;
+  }
+  return [h, s, l];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  let r: number;
+  let g: number;
+  let b: number;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+  const toHex = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+/** Terangkan/gelapkan warna aksen agar tetap kontras dengan mode tema. */
+export function adjustAccentForTheme(hex: string, target: 'dark' | 'light'): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return target === 'dark' ? '#38bdf8' : '#223A5E';
+  const [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+  const targetL = target === 'dark' ? Math.max(l, 0.62) : Math.min(l, 0.42);
+  const targetS = Math.max(0.35, Math.min(1, s));
+  return hslToHex(h, targetS, targetL);
+}
+
+export function isThemeModeDark(mode: string): boolean {
+  if (mode === 'dark' || mode === 'dim') return true;
+  if (mode === 'auto' && typeof window !== 'undefined') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  return false;
+}
+
+export function resolveIsDark(settings: SystemSettings): boolean {
+  if (settings.systemStyle === 'oled') return true;
+  return isThemeModeDark(settings.themeMode);
+}
+
 // Preset palette colors for LIGHT MODE (Dark/Deep accents for high contrast on snow-white background)
 export const LIGHT_THEME_ACCENTS = [
   { name: 'Emas Arsip Klasik', hex: '#223A5E', desc: 'Warna emas & kuningan identik arsip resmi' },
@@ -212,16 +297,24 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
 
   if (!isOpen) return null;
 
-  const isDark = current.themeMode === 'dark';
+  const isDark = resolveIsDark(current);
   const activeSwatches = isDark ? DARK_THEME_ACCENTS : LIGHT_THEME_ACCENTS;
+  const fontScale = typeof current.fontSizeScale === 'number' ? current.fontSizeScale : 100;
 
   const handleUpdate = (patch: Partial<SystemSettings>) => {
+    if (patch.systemStyle === 'oled') {
+      patch.themeMode = 'dark';
+      if (isDarkColor(current.primaryAccentColor)) {
+        patch.primaryAccentColor = adjustAccentForTheme(current.primaryAccentColor, 'dark');
+      }
+    }
     // When theme mode is switched: automatically adapt accent color to ensure high contrast!
-    if (patch.themeMode && patch.themeMode !== current.themeMode) {
-      if (patch.themeMode === 'dark' && isDarkColor(current.primaryAccentColor)) {
-        patch.primaryAccentColor = '#223A5E'; // Switch to blue for dark mode
-      } else if (patch.themeMode === 'light' && isLightColor(current.primaryAccentColor)) {
-        patch.primaryAccentColor = '#223A5E'; // Switch to Emas Arsip Klasik for light mode
+    if (!patch.systemStyle && patch.themeMode && patch.themeMode !== current.themeMode) {
+      const targetIsDark = isThemeModeDark(patch.themeMode);
+      if (targetIsDark && isDarkColor(current.primaryAccentColor)) {
+        patch.primaryAccentColor = adjustAccentForTheme(current.primaryAccentColor, 'dark');
+      } else if (!targetIsDark && isLightColor(current.primaryAccentColor)) {
+        patch.primaryAccentColor = adjustAccentForTheme(current.primaryAccentColor, 'light');
       }
     }
     setCurrent((prev) => ({ ...prev, ...patch }));
@@ -329,7 +422,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
       label: 'Mode & Tema', 
       desc: 'Terang, Gelap & Gaya OS', 
       icon: <Contrast className="w-4 h-4" />,
-      badge: current.themeMode === 'dark' ? 'Dark' : current.themeMode === 'light' ? 'Light' : 'Auto'
+      badge: ({ dark: 'Dark', light: 'Light', auto: 'Auto', sepia: 'Sepia', dim: 'Dim' } as Record<string, string>)[current.themeMode] || 'Auto'
     },
     { 
       id: 'appearance', 
@@ -339,9 +432,9 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
     },
     { 
       id: 'workspace', 
-      label: 'Workspace & Bahasa', 
-      desc: 'Identitas, Bahasa & Waktu', 
-      icon: <Building2 className="w-4 h-4" /> 
+      label: 'Preferensi Workspace', 
+      desc: 'Zona Waktu & Bahasa', 
+      icon: <Building2 className="w-4 h-4" />
     },
     { 
       id: 'notifications', 
@@ -632,30 +725,35 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                   <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
                     Skala Ukuran Teks Tampilan
                   </label>
-                  <div className="grid grid-cols-3 gap-2.5">
-                    {[
-                      { id: 'compact', label: 'Ringkas (95%)', desc: 'Memuat lebih banyak info' },
-                      { id: 'standard', label: 'Standar (100%)', desc: 'Rasio seimbang optimal' },
-                      { id: 'comfortable', label: 'Nyaman (105%)', desc: 'Ukuran huruf lebih besar' },
-                    ].map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => handleUpdate({ fontSizeScale: s.id as any })}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                          (current.fontSizeScale || 'standard') === s.id
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                            : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="text-xs font-bold">{s.label}</div>
-                        <div className={`text-[10px] mt-0.5 ${
-                          (current.fontSizeScale || 'standard') === s.id ? 'text-slate-300' : 'text-slate-500'
-                        }`}>
-                          {s.desc}
-                        </div>
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-slate-500">Kompak (85%)</span>
+                    <span
+                      className="text-[11px] font-bold px-2 py-0.5 rounded-md border"
+                      style={{
+                        color: current.primaryAccentColor,
+                        borderColor: `${current.primaryAccentColor}40`,
+                        backgroundColor: `${current.primaryAccentColor}12`,
+                      }}
+                    >
+                      {fontScale}%
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-500">Lapang (130%)</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={85}
+                    max={130}
+                    step={5}
+                    value={fontScale}
+                    onChange={(e) => handleUpdate({ fontSizeScale: Number(e.target.value) })}
+                    className="w-full h-2 cursor-pointer"
+                    style={{ accentColor: 'var(--system-primary)' }}
+                  />
+                  <div className="flex justify-between text-[9px] font-mono text-slate-400">
+                    <span>85%</span>
+                    <span>100%</span>
+                    <span>115%</span>
+                    <span>130%</span>
                   </div>
                 </div>
 
@@ -675,7 +773,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                     }}
                   >
                     <h5 className="text-base font-extrabold text-slate-900">
-                      KeDataForm Studio — Buat Formulir Cerdas & Kustom
+                      KeDataForm Studio - Buat Formulir Cerdas & Kustom
                     </h5>
                     <p className="text-xs text-slate-600 leading-relaxed">
                       Ini adalah sampel tampilan teks pertanyaan formulir, deskripsi, dan tombol dengan jenis huruf <span className="font-bold text-slate-900">{current.systemFont === 'sans' ? 'Plus Jakarta Sans' : current.systemFont === 'serif' ? 'Playfair Display' : 'JetBrains Mono'}</span>.
@@ -886,7 +984,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                       { id: 'slate', name: 'Minimalist Slate', desc: 'Netral slate modern dengan abu-abu halus alami' },
                       { id: 'monochrome', name: 'Monokrom Kontras', desc: 'Hitam-putih tegas bergaya majalah editorial' },
                       { id: 'oled', name: 'Midnight OLED', desc: 'Hitam murni pekat hemat daya untuk layar OLED' },
-                      { id: 'warm_titanium', name: 'Warm Titanium', desc: 'Abu-abu hangat bernuansa logam titanium mewah' },
+                      { id: 'warm_titanium', name: 'Warm Titanium', desc: 'Putih hangat bernuansa titanium untuk studio terang' },
                       { id: 'zinc', name: 'Modern Zinc', desc: 'Gaya industrial premium ala aplikasi produktivitas modern' },
                     ].map((style) => {
                       const isSelected = current.systemStyle === style.id;
@@ -897,14 +995,14 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                           onClick={() => handleUpdate({ systemStyle: style.id as any })}
                           className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                             isSelected
-                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                              ? 'border-[var(--system-primary)] bg-[var(--system-primary)] text-[var(--system-primary-contrast)] shadow-xs'
                               : 'border-slate-200 hover:border-slate-300 bg-white text-slate-800'
                           }`}
                         >
                           <div>
                             <div className="text-xs font-bold">{style.name}</div>
                             <div className={`text-[10px] mt-0.5 ${
-                              isSelected ? 'text-slate-300' : 'text-slate-500'
+                              isSelected ? 'text-[var(--system-primary-contrast)] opacity-80' : 'text-slate-500'
                             }`}>
                               {style.desc}
                             </div>
@@ -1016,37 +1114,14 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                 <div className="border-b border-slate-100 pb-3">
                   <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-slate-700" />
-                    <span>Workspace & Identitas Lembaga</span>
+                    <span>Preferensi Workspace</span>
                   </h4>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Kelola nama workspace, email admin resmi, zona waktu, dan bahasa sistem.
+                    Atur zona waktu dan bahasa default untuk workspace Anda.
                   </p>
                 </div>
 
                 <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200 space-y-4">
-                  <div>
-                    <label className="text-xs font-bold text-slate-800 block mb-1">
-                      Nama Workspace / Instansi
-                    </label>
-                    <input
-                      type="text"
-                      value={current.workspaceName}
-                      onChange={(e) => handleUpdate({ workspaceName: e.target.value })}
-                      className="w-full text-xs bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-800 block mb-1">
-                      Email Kontak Administrator
-                    </label>
-                    <input
-                      type="email"
-                      value={current.adminEmail}
-                      onChange={(e) => handleUpdate({ adminEmail: e.target.value })}
-                      className="w-full text-xs bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                    />
-                  </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -1241,7 +1316,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                     <button
                       type="button"
                       onClick={handleResetToDefault}
-                      className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg border border-red-200 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded-lg border border-red-200 transition-colors cursor-pointer dark:bg-red-500/15 dark:hover:bg-red-500/25 dark:text-red-200 dark:border-red-400/30"
                     >
                       Reset Default
                     </button>
@@ -1265,25 +1340,16 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
           </button>
 
           <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-semibold">
+              <Check className="w-3.5 h-3.5 stroke-[2]" />
+              <span>Tersimpan otomatis</span>
+            </div>
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
             >
-              Batal
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSave()}
-              style={{
-                backgroundColor: current.primaryAccentColor,
-                color: getContrastTextColor(current.primaryAccentColor)
-              }}
-              className="px-5 py-2.5 font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer hover:scale-101 active:scale-98 hover:opacity-95"
-            >
-              <Check className="w-4 h-4 stroke-[3]" style={{ color: getContrastTextColor(current.primaryAccentColor) }} />
-              <span>Simpan & Terapkan Pengaturan</span>
+              Tutup
             </button>
           </div>
         </div>

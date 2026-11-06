@@ -1,8 +1,13 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import { GoogleGenAI } from '@google/genai';
+import { ensureDatabase } from './server/db';
+import { ensureSchema } from './server/schema';
+import apiRouter from './server/api';
 
 dotenv.config();
 
@@ -13,11 +18,15 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: '10mb' }));
+app.use(cookieParser());
 
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
+
+// REST API v1 (envelope: { data, message, error })
+app.use('/api/v1', apiRouter);
 
 // API Proxy Route for Gemini Form & Quiz Generation
 app.post('/api/generate-form', async (req, res) => {
@@ -74,7 +83,7 @@ Output ONLY valid raw JSON matching FormSchema without markdown formatting or co
     let response;
     try {
       response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.5-flash',
         contents: `User Prompt: "${prompt}". Mode Kuis: ${Boolean(isQuizRequested)}. Target Jumlah Soal: ${targetCount}.
 Create a complete form or quiz with exactly ${targetCount} questions strictly matching the requested topic. If prompt mentions English / Bahasa Inggris, generate English questions only!`,
         config: {
@@ -83,9 +92,9 @@ Create a complete form or quiz with exactly ${targetCount} questions strictly ma
         },
       });
     } catch (primaryErr: any) {
-      console.warn('gemini-3.8-flash failed, attempting fallback to gemini-flash-latest:', primaryErr?.message);
+      console.warn('gemini-3.5-flash failed, attempting fallback to gemini-3-flash-preview:', primaryErr?.message);
       response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
+        model: 'gemini-3-flash-preview',
         contents: `User Prompt: "${prompt}". Mode Kuis: ${Boolean(isQuizRequested)}. Target Jumlah Soal: ${targetCount}.
 Create a complete form or quiz strictly matching the requested subject.`,
         config: {
@@ -110,12 +119,14 @@ Create a complete form or quiz strictly matching the requested subject.`,
 
 // Mount Vite in development or serve static in production
 async function startServer() {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const distPath = path.resolve(__dirname, 'dist');
+  const hasDist = fs.existsSync(path.join(distPath, 'index.html'));
+  const isProduction = process.env.NODE_ENV === 'production' && hasDist;
 
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { 
+      server: {
         middlewareMode: true,
         host: '0.0.0.0',
         port: PORT,
@@ -124,7 +135,6 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve(__dirname, 'dist');
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
       res.sendFile(path.resolve(distPath, 'index.html'));
@@ -136,4 +146,15 @@ async function startServer() {
   });
 }
 
-startServer();
+async function bootstrap() {
+  try {
+    await ensureDatabase();
+    await ensureSchema();
+    console.log('Database ready (schema + seed).');
+  } catch (err: any) {
+    console.error('Database initialization failed:', err?.message);
+  }
+  await startServer();
+}
+
+bootstrap();

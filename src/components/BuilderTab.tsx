@@ -31,7 +31,6 @@ import {
 import { FormSchema, Question, QuestionType, QuestionOption, isQuizForm } from '../types/form';
 import { sampleForm } from '../data/sampleForm';
 import { ImageUploader } from './ImageUploader';
-import { getContrastTextColor } from './SystemSettingsModal';
 
 interface BuilderTabProps {
   form: FormSchema;
@@ -42,6 +41,7 @@ interface BuilderTabProps {
   onSaveDesign?: () => void;
   isDesignSaved?: boolean;
   onShowToast?: (title: string, description: string, type?: 'success' | 'error') => void;
+  readOnly?: boolean;
 }
 
 // Katalog Elemen yang bisa ditambah atau disisipkan (Putih & Abu-abu Soft Netral)
@@ -67,10 +67,17 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
   onSaveDesign,
   isDesignSaved,
   onShowToast,
+  readOnly = false,
 }) => {
   const [activeQuestionId, setActiveQuestionId] = useState<string>(form.questions[0]?.id || '');
-  const primaryAccent = form.theme?.primaryColor || '#223A5E';
-  const contrastText = getContrastTextColor(primaryAccent);
+  const DEFAULT_COVER_URL = '/assets/landing/formulir.jpeg';
+  const legacyDefaultCovers = ['/assets/aistudio/image_3ec5f637.png', '/public/assets/aistudio/image_3ec5f637.png'];
+  const rawCoverUrl = form.theme?.headerCoverUrl || '';
+  const isDefaultCover = !rawCoverUrl || legacyDefaultCovers.includes(rawCoverUrl);
+  const coverUrl = isDefaultCover ? DEFAULT_COVER_URL : rawCoverUrl;
+  const rawCardBorderColor = form.theme?.cardBorderColor;
+  const legacyCardBorderColors = ['#fde68a', '#fed7aa', '#eedaa2'];
+  const cardBorderColor = !rawCardBorderColor || legacyCardBorderColors.includes(rawCardBorderColor) ? '#bfdbfe' : rawCardBorderColor;
   const [insertAtIndex, setInsertAtIndex] = useState<number | null>(null);
   const [showBottomAddMenu, setShowBottomAddMenu] = useState(false);
   const [openTypeDropdownId, setOpenTypeDropdownId] = useState<string | null>(null);
@@ -362,9 +369,17 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
     <div 
       className="max-w-3xl mx-auto py-8 px-4 sm:px-6 space-y-6 transition-colors"
       style={{
-        fontFamily: form.theme?.fontFamily === 'serif' ? 'var(--font-serif, serif)' : form.theme?.fontFamily === 'mono' ? 'var(--font-mono, monospace)' : undefined
+        fontFamily: form.theme?.fontFamily === 'serif' ? 'var(--font-serif, serif)' : form.theme?.fontFamily === 'mono' ? 'var(--font-mono, monospace)' : undefined,
+        pointerEvents: readOnly ? 'none' : undefined,
+        userSelect: readOnly ? 'none' : undefined,
       }}
     >
+      {readOnly && (
+        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
+          <Eye className="w-4 h-4" />
+          <span>Mode lihat saja: Anda tidak memiliki akses untuk mengubah formulir ini.</span>
+        </div>
+      )}
       {/* Dynamic Theme Ribbon showing active customization status */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-blue-50/80 backdrop-blur-md border border-blue-200/80 shadow-2xs">
         <div className="flex items-center gap-2.5">
@@ -378,7 +393,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
           </span>
           {isQuizMode && (
             <span className="text-[10px] font-bold text-blue-900 bg-blue-200/70 border border-blue-300 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-              <Award className="w-3 h-3 text-[#223A5E]" />
+              <Award className="w-3 h-3 text-[var(--system-primary)]" />
               Mode Kuis Aktif
             </span>
           )}
@@ -387,21 +402,15 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
           <button
             type="button"
             onClick={() => onOpenThemeTab()}
-            className="text-xs font-bold text-[#223A5E] hover:text-[#1a2d4a] hover:underline flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 hover:border-blue-300 transition-all shadow-2xs cursor-pointer flex items-center gap-1"
           >
-            <span>Ubah di Desain Studio</span>
+            <span>Sesuaikan di Tab Desain</span>
             <span>→</span>
           </button>
-          {onSaveDesign && (
-            <button
-              type="button"
-              onClick={onSaveDesign}
-              style={{ backgroundColor: primaryAccent, color: contrastText }}
-              className="px-3 py-1 rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer hover:opacity-95"
-            >
-              {isDesignSaved ? '✓ Tersimpan' : 'Simpan Perubahan'}
-            </button>
-          )}
+          <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1">
+            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Tersimpan otomatis</span>
+          </span>
         </div>
       </div>
       
@@ -413,7 +422,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
         style={{
           borderRadius: `${form.theme?.borderRadiusNum ?? 24}px`,
           backgroundColor: form.theme?.cardBg || '#ffffff',
-          borderColor: form.theme?.cardBorderColor || '#fde68a',
+          borderColor: cardBorderColor,
         }}
       >
         {/* Hidden input for hero cover upload */}
@@ -426,10 +435,10 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
         />
 
         {/* Cover Banner Hero */}
-        {form.theme.headerBannerType === 'preset' && form.theme.headerCoverUrl ? (
+        {form.theme.headerBannerType === 'preset' ? (
           <div className="h-36 sm:h-48 w-full overflow-hidden bg-neutral-100 relative group">
             <img
-              src={form.theme.headerCoverUrl}
+              src={coverUrl}
               alt="Hero Cover"
               className="w-full h-full object-cover"
             />
@@ -440,23 +449,25 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                 className="h-7 px-3 bg-white hover:bg-blue-50 text-slate-900 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer border border-blue-200/80"
                 title="Atur dan ganti gambar cover di panel Desain Studio"
               >
-                <ImageIcon className="w-3.5 h-3.5 text-[#223A5E]" />
+                <ImageIcon className="w-3.5 h-3.5 text-[var(--system-primary)]" />
                 <span>Ganti Cover</span>
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  onChangeForm({
-                    ...form,
-                    theme: { ...form.theme, headerCoverUrl: '' },
-                  })
-                }
-                className="h-7 px-2.5 bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                title="Hapus cover hero"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Hapus</span>
-              </button>
+              {!isDefaultCover && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChangeForm({
+                      ...form,
+                      theme: { ...form.theme, headerCoverUrl: '' },
+                    })
+                  }
+                  className="h-7 px-2.5 bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                  title="Hapus cover hero"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Hapus</span>
+                </button>
+              )}
             </div>
           </div>
         ) : (
@@ -464,7 +475,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
             <button
               type="button"
               onClick={() => onOpenThemeTab('header')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#223A5E] hover:text-white bg-blue-50/80 hover:bg-[#223A5E] border border-blue-200/90 transition-all cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[var(--system-primary)] hover:text-[var(--system-primary-contrast)] bg-blue-50/80 hover:bg-[var(--system-primary)] border border-blue-200/90 transition-all cursor-pointer shadow-2xs"
               title="Atur gambar cover banner formulir di Desain Studio"
             >
               <ImageIcon className="w-3.5 h-3.5" />
@@ -504,7 +515,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
       {/* 2. PANEL SKOR & PENILAIAN (HANYA MUNCUL JIKA MODE KUIS AKTIF) */}
       {/* ============================================================== */}
       {isQuizMode && (
-        <div className="bg-[#fffdfa] rounded-2xl border border-blue-200/80 p-4 sm:p-5 shadow-xs space-y-4">
+        <div className="bg-blue-50/40 rounded-2xl border border-blue-200/80 p-4 sm:p-5 shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-100 text-blue-900 shadow-2xs">
@@ -529,7 +540,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
           {/* Panel Kustomisasi Nilai & Tampilan Skor ke Responden */}
           <div className="pt-3 border-t border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Widget 1: Akumulasi Total Poin */}
-            <div className="p-3 rounded-xl bg-orange-50/70 border border-orange-200/80 flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 block">
                   Total Nilai Maksimal
@@ -538,7 +549,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                   {totalPoints} Poin
                 </span>
               </div>
-              <span className="text-[11px] text-slate-700 bg-white px-2 py-1 rounded-md border border-orange-200 font-medium">
+              <span className="text-[11px] text-slate-700 bg-white px-2 py-1 rounded-md border border-blue-200 font-medium">
                 Akumulasi Otomatis
               </span>
             </div>
@@ -556,7 +567,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                     max="100"
                     value={passingScore}
                     onChange={(e) => handleUpdatePassingScore(parseInt(e.target.value) || 0)}
-                    className="w-14 bg-white border border-blue-300 rounded-lg px-2 py-0.5 text-xs font-bold text-slate-900 font-mono focus:outline-none focus:border-[#223A5E]"
+                    className="w-14 bg-white border border-blue-300 rounded-lg px-2 py-0.5 text-xs font-bold text-slate-900 font-mono focus:outline-none focus:border-[var(--system-primary)]"
                   />
                   <span className="text-xs text-slate-500 font-medium">/ 100</span>
                 </div>
@@ -567,7 +578,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
             </div>
 
             {/* Widget 3: Tampilkan Nilai Setelah Selesai (Opsi Ditampilkan / Disembunyikan) */}
-            <div className="p-3 rounded-xl bg-orange-50/70 border border-orange-200/80 flex flex-col justify-between gap-1.5">
+            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 flex flex-col justify-between gap-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 block">
                   Tampilkan Nilai ke Responden
@@ -575,9 +586,8 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                 <button
                   type="button"
                   onClick={() => handleToggleShowScoreImmediately(!showScoreImmediately)}
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    showScoreImmediately ? 'bg-[#223A5E]' : 'bg-slate-300'
-                  }`}
+                  style={{ backgroundColor: showScoreImmediately ? 'var(--system-primary)' : '#cbd5e1' }}
+                  className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
                   title="Pilih apakah skor langsung diperlihatkan setelah responden submit formulir"
                 >
                   <span
@@ -590,7 +600,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
               <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700">
                 {showScoreImmediately ? (
                   <>
-                    <Eye className="w-3.5 h-3.5 text-[#223A5E]" />
+                    <Eye className="w-3.5 h-3.5 text-[var(--system-primary)]" />
                     <span className="text-slate-800">Skor langsung ditampilkan</span>
                   </>
                 ) : (
@@ -626,7 +636,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                   <button
                     type="button"
                     onClick={() => setInsertAtIndex(insertAtIndex === index - 1 ? null : index - 1)}
-                    className="relative z-10 px-3 py-1 bg-[#fffbf7] hover:bg-[#223A5E] text-slate-700 hover:text-white border border-blue-300 hover:border-[#223A5E] rounded-full text-[11px] font-semibold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                    className="relative z-10 px-3 py-1 bg-blue-50 hover:bg-[var(--system-primary)] text-slate-700 hover:text-[var(--system-primary-contrast)] border border-blue-300 hover:border-[var(--system-primary)] rounded-full text-[11px] font-semibold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
                     <span>Sisipkan Elemen di Sini</span>
@@ -636,7 +646,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
 
               {/* Menu Pemilih Elemen yang Disisipkan */}
               {insertAtIndex === index - 1 && (
-                <div className="p-4 bg-[#F3F8FD] rounded-2xl border border-orange-200/90 space-y-3 animate-in fade-in shadow-sm">
+                <div className="p-4 bg-[var(--system-bg-soft)] rounded-2xl border border-blue-200/90 space-y-3 animate-in fade-in shadow-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-800">
                       Pilih Elemen yang Ingin Disisipkan:
@@ -656,9 +666,9 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                         key={item.type}
                         type="button"
                         onClick={() => handleInsertAtPosition(index - 1, item.type)}
-                        className="p-2.5 rounded-xl bg-white border border-orange-100 hover:border-[#223A5E] hover:bg-orange-50/60 text-left transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+                        className="p-2.5 rounded-xl bg-white border border-blue-100 hover:border-[var(--system-primary)] hover:bg-blue-50/60 text-left transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
                       >
-                        <div className="p-1 rounded bg-orange-50 text-[#223A5E] shrink-0">{item.icon}</div>
+                        <div className="p-1 rounded bg-blue-50 text-[var(--system-primary)] shrink-0">{item.icon}</div>
                         <span className="text-xs font-semibold text-slate-800 truncate">{item.label}</span>
                       </button>
                     ))}
@@ -677,9 +687,9 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                   backgroundColor: form.theme?.cardBg || '#ffffff',
                   borderColor: isActive 
                     ? (form.theme?.primaryColor || '#223A5E') 
-                    : (form.theme?.cardBorderColor || '#fed7aa'),
+                    : cardBorderColor,
                   boxShadow: isActive 
-                    ? `0 0 0 2px ${form.theme?.primaryColor || '#223A5E'}25, 0 8px 24px -4px rgba(194, 65, 12, 0.08)` 
+                    ? `0 0 0 2px ${form.theme?.primaryColor || '#223A5E'}25, 0 8px 24px -4px rgba(34, 58, 94, 0.12)` 
                     : '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
                 }}
               >
@@ -704,7 +714,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                               const val = Math.max(0, parseInt(e.target.value) || 0);
                               handleUpdateQuestion(question.id, { points: val });
                             }}
-                            className="w-10 bg-white border border-blue-300 rounded text-center text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#223A5E] py-0.5"
+                            className="w-10 bg-white border border-blue-300 rounded text-center text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[var(--system-primary)] py-0.5"
                           />
                           <span className="text-[10px] font-medium text-blue-800">pts</span>
                         </div>
@@ -751,7 +761,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                               e.stopPropagation();
                               setOpenTypeDropdownId(isOpen ? null : question.id);
                             }}
-                            className="bg-white hover:bg-orange-50/80 active:bg-orange-100 border border-orange-200 hover:border-orange-300 text-slate-800 text-xs font-semibold rounded-xl px-3.5 py-2 flex items-center justify-between gap-2.5 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#223A5E]/10 cursor-pointer"
+                            className="bg-white hover:bg-blue-50/80 active:bg-blue-100 border border-blue-200 hover:border-blue-300 text-slate-800 text-xs font-semibold rounded-xl px-3.5 py-2 flex items-center justify-between gap-2.5 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#223A5E]/10 cursor-pointer"
                             title="Ganti tipe pertanyaan"
                           >
                             <span className="whitespace-nowrap font-medium text-slate-900">{currentItem.label}</span>
@@ -772,7 +782,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                               {/* Modern White Menu Panel - Text Only */}
                               <div 
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 top-full mt-1.5 w-60 bg-white rounded-xl shadow-2xl border border-orange-200/90 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
+                                className="absolute right-0 top-full mt-1.5 w-60 bg-white rounded-xl shadow-2xl border border-blue-200/90 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
                               >
                                 {ELEMENT_CATALOG.map((item) => {
                                   const isSelected = item.type === question.type;
@@ -786,13 +796,13 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                       }}
                                       className={`w-full px-4 py-2 text-left text-xs flex items-center justify-between transition-colors cursor-pointer ${
                                         isSelected 
-                                          ? 'bg-orange-50 text-[#223A5E] font-bold' 
-                                          : 'hover:bg-orange-50/60 text-slate-700 font-medium'
+                                          ? 'bg-blue-50 text-[var(--system-primary)] font-bold' 
+                                          : 'hover:bg-blue-50/60 text-slate-700 font-medium'
                                       }`}
                                     >
                                       <span>{item.label}</span>
                                       {isSelected && (
-                                        <Check className="w-3.5 h-3.5 text-[#223A5E] shrink-0" />
+                                        <Check className="w-3.5 h-3.5 text-[var(--system-primary)] shrink-0" />
                                       )}
                                     </button>
                                   );
@@ -939,7 +949,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                   type="text"
                                   value={opt.text}
                                   onChange={(e) => handleUpdateOptionText(question.id, opt.id, e.target.value)}
-                                  className="flex-1 text-xs sm:text-sm text-slate-800 border-b border-transparent focus:border-[#223A5E] focus:outline-none py-1 hover:border-blue-200"
+                                  className="flex-1 text-xs sm:text-sm text-slate-800 border-b border-transparent focus:border-[var(--system-primary)] focus:outline-none py-1 hover:border-blue-200"
                                 />
                               ) : (
                                 <span className="flex-1 text-xs sm:text-sm text-slate-700 py-1">{opt.text}</span>
@@ -960,7 +970,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                   }`}
                                   title="Tandai pilihan ini sebagai kunci jawaban yang benar"
                                 >
-                                  <Check className="w-3 h-3 stroke-[2.5] text-[#223A5E]" />
+                                  <Check className="w-3 h-3 stroke-[2.5] text-[var(--system-primary)]" />
                                   <span>{isCorrect ? 'Kunci Benar' : 'Jadikan Kunci'}</span>
                                 </button>
                               )}
@@ -986,7 +996,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                           <button
                             type="button"
                             onClick={() => handleAddOption(question.id)}
-                            className="text-xs text-[#223A5E] hover:text-[#1a2d4a] font-semibold pt-1 flex items-center gap-1 cursor-pointer"
+                            className="text-xs text-[var(--system-primary)] hover:opacity-75 font-semibold pt-1 flex items-center gap-1 cursor-pointer"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>Tambah Opsi Pilihan</span>
@@ -1011,7 +1021,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                   type="text"
                                   value={opt.text}
                                   onChange={(e) => handleUpdateOptionText(question.id, opt.id, e.target.value)}
-                                  className="flex-1 text-xs sm:text-sm text-slate-800 border-b border-transparent focus:border-[#223A5E] focus:outline-none py-1 hover:border-blue-200"
+                                  className="flex-1 text-xs sm:text-sm text-slate-800 border-b border-transparent focus:border-[var(--system-primary)] focus:outline-none py-1 hover:border-blue-200"
                                 />
                               ) : (
                                 <span className="flex-1 text-xs sm:text-sm text-slate-700 py-1">{opt.text}</span>
@@ -1032,7 +1042,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                   }`}
                                   title="Tandai opsi centang ini sebagai kunci jawaban yang benar"
                                 >
-                                  <Check className="w-3 h-3 stroke-[2.5] text-[#223A5E]" />
+                                  <Check className="w-3 h-3 stroke-[2.5] text-[var(--system-primary)]" />
                                   <span>{isCorrect ? 'Kunci Benar' : 'Jadikan Kunci'}</span>
                                 </button>
                               )}
@@ -1189,7 +1199,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                     <div className="mt-4 pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-600">
                       
                       {/* FITUR GESER URUTAN (MOVE UP / DOWN) */}
-                      <div className="flex items-center gap-1.5 bg-orange-50/80 p-1 rounded-lg border border-orange-200/70">
+                      <div className="flex items-center gap-1.5 bg-blue-50/80 p-1 rounded-lg border border-blue-200/70">
                         <span className="text-[11px] font-medium text-slate-500 px-1">Geser:</span>
                         <button
                           type="button"
@@ -1223,7 +1233,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                       <button
                         type="button"
                         onClick={() => setEditingImageForId(editingImageForId === question.id ? null : question.id)}
-                        className="flex items-center gap-1 text-slate-800 hover:text-[#223A5E] font-semibold bg-orange-50 hover:bg-orange-100/80 border border-orange-200/70 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                        className="flex items-center gap-1 text-slate-800 hover:text-[var(--system-primary)] font-semibold bg-blue-50 hover:bg-blue-100/80 border border-blue-200/70 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
                         title="Sisipkan gambar ilustrasi ke label ini"
                       >
                         <ImageIcon className="w-3.5 h-3.5 text-blue-700" />
@@ -1238,7 +1248,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                             e.stopPropagation();
                             handleDuplicate(question.id);
                           }}
-                          className="hover:text-[#223A5E] text-slate-600 flex items-center gap-1 cursor-pointer transition-colors"
+                          className="hover:text-[var(--system-primary)] text-slate-600 flex items-center gap-1 cursor-pointer transition-colors"
                           title="Duplikat label ini"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -1258,7 +1268,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                           <span className="hidden sm:inline">Hapus</span>
                         </button>
 
-                        <div className="h-3.5 w-px bg-orange-200" />
+                        <div className="h-3.5 w-px bg-blue-200" />
 
                         {/* Wajib diisi switch */}
                         <label 
@@ -1270,7 +1280,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                             type="checkbox"
                             checked={question.required}
                             onChange={(e) => handleUpdateQuestion(question.id, { required: e.target.checked })}
-                            className="rounded border-orange-300 text-[#223A5E] focus:ring-0"
+                            className="rounded border-blue-300 text-[var(--system-primary)] focus:ring-0"
                           />
                         </label>
                       </div>
@@ -1289,7 +1299,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
       {/* 3. BUTTON TAMBAH LABEL / ELEMEN BARU DI BAGIAN BAWAH          */}
       {/* ============================================================== */}
       <div className="pt-2 space-y-3">
-        <div className="bg-[#fffdfa] rounded-2xl border border-blue-200/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-blue-50/40 rounded-2xl border border-blue-200/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h4 className="text-sm font-bold text-slate-900">
               Tambahkan Pertanyaan atau Label Berikutnya
@@ -1311,7 +1321,8 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                 }, 60);
               }
             }}
-            className="px-4 py-2.5 bg-[#223A5E] hover:bg-[#ea580c] text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all shrink-0 cursor-pointer hover:scale-102 active:scale-98"
+            style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+            className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all shrink-0 cursor-pointer hover:opacity-90 hover:scale-102 active:scale-98"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Tambah Pertanyaan / Elemen</span>
@@ -1320,19 +1331,19 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
 
         {/* Menu Pilihan Tipe Tambah Bawah */}
         {showBottomAddMenu && (
-          <div ref={bottomMenuRef} className="p-4 bg-[#F3F8FD] rounded-2xl border border-orange-200 shadow-md grid grid-cols-2 sm:grid-cols-3 gap-2.5 animate-in fade-in">
+          <div ref={bottomMenuRef} className="p-4 bg-[var(--system-bg-soft)] rounded-2xl border border-blue-200 shadow-md grid grid-cols-2 sm:grid-cols-3 gap-2.5 animate-in fade-in">
             {ELEMENT_CATALOG.map((item) => (
               <button
                 key={item.type}
                 type="button"
                 onClick={() => handleAddAtBottom(item.type)}
-                className="p-3 rounded-xl bg-white border border-orange-100 hover:border-[#223A5E] hover:bg-orange-50/60 text-left transition-all flex items-start gap-2.5 group cursor-pointer shadow-2xs"
+                className="p-3 rounded-xl bg-white border border-blue-100 hover:border-[var(--system-primary)] hover:bg-blue-50/60 text-left transition-all flex items-start gap-2.5 group cursor-pointer shadow-2xs"
               >
-                <div className="p-1.5 rounded-lg bg-orange-50 group-hover:bg-white border border-orange-200/80 text-[#223A5E] shrink-0">
+                <div className="p-1.5 rounded-lg bg-blue-50 group-hover:bg-white border border-blue-200/80 text-[var(--system-primary)] shrink-0">
                   {item.icon}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#223A5E] transition-colors">
+                  <div className="text-xs font-bold text-slate-900 group-hover:text-[var(--system-primary)] transition-colors">
                     {item.label}
                   </div>
                   <div className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">

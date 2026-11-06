@@ -32,8 +32,30 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
-  const formUrl = `https://kedataform.app/f/${form.id}`;
-  const iframeCode = `<iframe\n  src="${formUrl}?embed=true"\n  width="100%"\n  height="650"\n  frameborder="0"\n  style="border: none; border-radius: 12px; width: 100%;"\n  title="${form.title}"\n></iframe>`;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.app';
+  const formUrl = `${origin}/f/${form.id}`;
+  const embedUrl = `${formUrl}?embed=true`;
+  const safeTitle = form.title.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const frameId = `kedataform-${form.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+  const iframeCode = `<iframe
+  id="${frameId}"
+  src="${embedUrl}"
+  width="100%"
+  height="650"
+  frameborder="0"
+  loading="lazy"
+  style="border: none; border-radius: 12px; width: 100%; display: block;"
+  title="${safeTitle}"
+></iframe>
+<script>
+  window.addEventListener('message', function (event) {
+    if (event.origin !== '${origin}' || !event.data || event.data.type !== 'kedataform:resize') return;
+    var frame = document.getElementById('${frameId}');
+    if (frame && typeof event.data.height === 'number') {
+      frame.style.height = Math.max(480, event.data.height) + 'px';
+    }
+  });
+</script>`;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(iframeCode);
@@ -45,11 +67,12 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
     navigator.clipboard.writeText(formUrl);
     setCopiedLink(true);
     try {
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--system-primary').trim() || '#223A5E';
       confetti({
         particleCount: 35,
         spread: 50,
         origin: { y: 0.65 },
-        colors: ['#223A5E', '#c28b18', '#fef3c7', '#d97706', '#fbbf24']
+        colors: [accent, '#10b981', '#60a5fa']
       });
     } catch (e) {
       // Ignore
@@ -77,7 +100,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
       {/* Header Halaman Bagikan */}
       <div className="border-b border-blue-200/80 pb-4">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#223A5E] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--system-primary)] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
             Distribusi & Publikasi
           </span>
         </div>
@@ -93,12 +116,12 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
       <div className="bg-white p-5 sm:p-6 rounded-2xl border border-blue-200 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-100/80 text-[#223A5E] border border-blue-200 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-blue-100/80 text-[var(--system-primary)] border border-blue-200 flex items-center justify-center shrink-0">
               <Link2 className="w-4 h-4 stroke-[2.2]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[#223A5E]">Langkah 1</span>
+                <span className="text-xs font-bold text-[var(--system-primary)]">Langkah 1</span>
                 <span className="text-slate-300">·</span>
                 <h3 className="font-bold text-sm text-slate-900">Salin Tautan Formulir Langsung</h3>
               </div>
@@ -111,7 +134,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
           <button
             type="button"
             onClick={() => setShowQR(!showQR)}
-            className="self-start sm:self-auto text-xs font-bold text-[#223A5E] hover:text-[#1a2d4a] flex items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
+            className="self-start sm:self-auto text-xs font-bold text-[var(--system-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>{showQR ? 'Sembunyikan QR' : 'Tampilkan Kode QR'}</span>
@@ -124,16 +147,17 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
             type="text"
             readOnly
             value={formUrl}
-            className="flex-1 bg-blue-50/50 border border-blue-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 select-all focus:outline-none focus:border-[#223A5E]"
+            className="flex-1 bg-blue-50/50 border border-blue-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 select-all focus:outline-none focus:border-[var(--system-primary)]"
             onClick={(e) => (e.target as HTMLInputElement).select()}
           />
           <button
             type="button"
             onClick={handleCopyLink}
+            style={!copiedLink ? { backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' } : undefined}
             className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer flex items-center gap-1.5 shadow-xs ${
               copiedLink
                 ? 'bg-emerald-600 text-white'
-                : 'bg-[#223A5E] hover:bg-[#1a2d4a] text-white hover:scale-102 active:scale-98'
+                : 'hover:opacity-90 hover:scale-102 active:scale-98'
             }`}
           >
             {copiedLink ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
@@ -141,8 +165,8 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
           </button>
         </div>
 
-        {/* Tombol Bagikan ke WhatsApp */}
-        <div className="pt-2">
+        {/* Tombol Bagikan ke WhatsApp & Toggle QR Sejajar */}
+        <div className="pt-2 flex flex-wrap items-center gap-2.5">
           <a
             href={`https://api.whatsapp.com/send?text=${whatsappMessage}`}
             target="_blank"
@@ -152,14 +176,11 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
             <Send className="w-3.5 h-3.5" />
             <span>Kirim Cepat ke WhatsApp</span>
           </a>
-        </div>
 
-        {/* Toggle Kode QR */}
-        <div className="pt-1">
           <button
             type="button"
             onClick={() => setShowQR(!showQR)}
-            className="text-xs font-bold text-[#223A5E] hover:text-[#1a2d4a] flex items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
+            className="inline-flex text-xs font-bold text-[var(--system-primary)] hover:opacity-75 items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-2.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>{showQR ? 'Sembunyikan QR' : 'Tampilkan Kode QR'}</span>
@@ -189,12 +210,12 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
       {/* ALUR 2: SEMATKAN KE WEBSITE (IFRAME) */}
       <div className="bg-white p-5 sm:p-6 rounded-2xl border border-blue-200 shadow-xs space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-100/80 text-[#223A5E] border border-blue-200 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-blue-100/80 text-[var(--system-primary)] border border-blue-200 flex items-center justify-center shrink-0">
             <Code2 className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#223A5E]">Langkah 2</span>
+              <span className="text-xs font-bold text-[var(--system-primary)]">Langkah 2</span>
               <span className="text-slate-300">·</span>
               <h3 className="font-bold text-sm text-slate-900">Sematkan ke Situs Web (iFrame)</h3>
             </div>
@@ -211,6 +232,23 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
           </pre>
         </div>
 
+        <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/80 text-[11px] text-slate-600 space-y-1">
+          <span className="font-bold text-slate-800 block">Cara pasang di Google Sites:</span>
+          <ol className="list-decimal list-inside space-y-0.5">
+            <li>Buka halaman Google Sites, klik <strong>Sisipkan</strong> → <strong>Sematkan</strong> → <strong>Kode sematan</strong>.</li>
+            <li>Tempel kode di atas, klik <strong>Berikutnya</strong> lalu <strong>Sisipkan</strong>.</li>
+            <li>Atur tinggi iframe dengan menarik sudutnya, lalu <strong>Publikasikan</strong> situs.</li>
+          </ol>
+          <p className="pt-1 text-[10px] text-slate-500">
+            Formulir harus sudah disimpan dan dapat diakses publik. Kode ini memakai alamat asal <span className="font-mono">{origin}</span>.
+          </p>
+          {origin.includes('localhost') && (
+            <p className="text-[10px] font-semibold text-rose-600">
+              Alamat lokal tidak bisa diakses Google Sites. Deploy aplikasi ke domain online (HTTPS) lalu salin ulang kodenya.
+            </p>
+          )}
+        </div>
+
         <div className="flex items-center justify-between gap-3 pt-1">
           <span className="text-[11px] text-slate-500">
             Kompatibel dengan semua platform website modern (responsif & auto-resize).
@@ -218,7 +256,8 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
           <button
             type="button"
             onClick={handleCopyCode}
-            className="py-2.5 px-4 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-98 shrink-0"
+            style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+            className="py-2.5 px-4 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-98 shrink-0 hover:opacity-90"
           >
             {copiedCode ? <Check className="w-3.5 h-3.5 text-white stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedCode ? 'Kode Berhasil Disalin!' : 'Salin Kode iFrame'}</span>
@@ -230,20 +269,20 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
       {onExportCSV && (
         <div className="bg-white border border-blue-200 p-5 sm:p-6 rounded-2xl shadow-xs">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-[#223A5E] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
-              <FileSpreadsheet className="w-5 h-5 text-[#223A5E]" />
+            <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-[var(--system-primary)] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+              <FileSpreadsheet className="w-5 h-5 text-[var(--system-primary)]" />
             </div>
             
             <div className="flex-1 space-y-1">
               {/* Baris Judul & Tombol Ekspor CSV Tepat di Samping Kanan Judul */}
               <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold text-[#223A5E]">Langkah 3</span>
+                  <span className="text-xs font-bold text-[var(--system-primary)]">Langkah 3</span>
                   <span className="text-slate-300">·</span>
                   <h3 className="font-bold text-sm text-slate-900">
                     Unduh Data Spreadsheet Respon (.CSV)
                   </h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#223A5E] border border-blue-200">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[var(--system-primary)] border border-blue-200">
                     {responseCount} Respon Masuk
                   </span>
                 </div>
@@ -252,7 +291,8 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
                 <button
                   type="button"
                   onClick={onExportCSV}
-                  className="py-1.5 px-3.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-98"
+                  style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+                  className="py-1.5 px-3.5 font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-98 hover:opacity-90"
                   title="Unduh seluruh respon dalam format file CSV"
                 >
                   <Download className="w-3.5 h-3.5 stroke-[2.5]" />

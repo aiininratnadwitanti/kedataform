@@ -104,11 +104,11 @@ export const ScheduleRuleModal: React.FC<ScheduleRuleModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 max-w-xl w-full overflow-hidden animate-in fade-in zoom-in-95 ring-1 ring-slate-900/5">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-xs flex items-start sm:items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 ring-1 ring-slate-900/5">
         
         {/* Header */}
-        <div className="p-5 border-b border-slate-200/90 flex items-center justify-between bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100">
+        <div className="p-5 border-b border-slate-200/90 flex items-center justify-between bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white text-slate-800 flex items-center justify-center border border-slate-200 shadow-2xs">
               <CalendarRange className="w-5 h-5 text-slate-800" />
@@ -133,7 +133,7 @@ export const ScheduleRuleModal: React.FC<ScheduleRuleModalProps> = ({
         </div>
 
         {/* Content Form */}
-        <form onSubmit={handleSave} className="p-6 space-y-5 text-left bg-slate-50/40">
+        <form onSubmit={handleSave} className="flex-1 min-h-0 overflow-y-auto p-6 pb-4 space-y-5 text-left bg-slate-50/40">
           
           {/* Main Toggle: Aktifkan Aturan Jadwal */}
           <div className="p-4 bg-white border border-slate-200/90 rounded-2xl flex items-center justify-between shadow-2xs ring-1 ring-slate-900/5">
@@ -153,7 +153,7 @@ export const ScheduleRuleModal: React.FC<ScheduleRuleModalProps> = ({
                 onChange={(e) => setIsEnabled(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div>
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--system-primary)]"></div>
             </label>
           </div>
 
@@ -318,7 +318,7 @@ export const ScheduleRuleModal: React.FC<ScheduleRuleModalProps> = ({
           )}
 
           {/* Action Buttons */}
-          <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-200">
+          <div className="sticky bottom-0 z-10 -mx-6 -mb-4 px-6 py-3 flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/95 backdrop-blur">
             <button
               type="button"
               onClick={onClose}
@@ -329,7 +329,8 @@ export const ScheduleRuleModal: React.FC<ScheduleRuleModalProps> = ({
 
             <button
               type="submit"
-              className="px-5 py-2.5 bg-gradient-to-b from-slate-800 to-slate-950 hover:from-slate-700 hover:to-slate-900 border border-slate-700/60 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer active:scale-98"
+              style={{ backgroundColor: 'var(--system-primary)', color: 'var(--system-primary-contrast)' }}
+              className="px-5 py-2.5 text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer active:scale-98 hover:opacity-90"
             >
               Simpan Jadwal & Batas Waktu
             </button>

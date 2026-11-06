@@ -62,14 +62,14 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
   const activeQuestion: Question | undefined = chartableQuestions[currentQIndex];
 
   // Warna solid profesional (TANPA GRADIENT)
-  // Palet netral monochrome soft gray & dark neutral
+  // Palet biru senada tema KeDataForm
   const SOLID_PALETTE = [
-    '#18181b', // Neutral 900
-    '#3f3f46', // Neutral 700
-    '#52525b', // Neutral 600
-    '#71717a', // Neutral 500
-    '#a1a1aa', // Neutral 400
-    '#27272a', // Neutral 800
+    '#223A5E', // Navy
+    '#1e40af', // Blue 800
+    '#2563eb', // Blue 600
+    '#3b82f6', // Blue 500
+    '#60a5fa', // Blue 400
+    '#93c5fd', // Blue 300
   ];
 
   const activeQuestionStats = useMemo(() => {
@@ -315,7 +315,7 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
                   </div>
                   <div className="w-full flex justify-center h-28 items-end">
                     <div 
-                      className="w-full max-w-[40px] rounded-t-sm bg-neutral-900"
+                      className="w-full max-w-[40px] rounded-t-sm bg-[#223A5E]"
                       style={{ height: `${heightPct}%` }}
                     />
                   </div>
@@ -335,7 +335,7 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
             Pilihan Terbanyak
           </div>
           <div className="text-xs font-bold text-neutral-900 truncate mt-0.5">
-            {activeQuestionStats.topOption?.label || '—'}
+            {activeQuestionStats.topOption?.label || '-'}
           </div>
           <div className="text-xs font-mono font-semibold text-neutral-600">
             {activeQuestionStats.topOption?.count || 0} suara ({activeQuestionStats.topOption?.percentage || 0}%)
@@ -347,7 +347,7 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
             Pilihan Kedua
           </div>
           <div className="text-xs font-bold text-neutral-900 truncate mt-0.5">
-            {activeQuestionStats.secondOption?.label || '—'}
+            {activeQuestionStats.secondOption?.label || '-'}
           </div>
           <div className="text-xs font-mono font-semibold text-neutral-600">
             {activeQuestionStats.secondOption?.count || 0} suara ({activeQuestionStats.secondOption?.percentage || 0}%)

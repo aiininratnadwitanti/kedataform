@@ -102,7 +102,7 @@ export const ScoreDiagramChart: React.FC<ScoreDiagramChartProps> = ({
       {/* 1. HEADER: MINIMAL & TO THE POINT */}
       <div className="flex items-center justify-between gap-3 border-b border-neutral-100 pb-3">
         <div className="flex items-center gap-2">
-          <BarChart2 className="w-4 h-4 text-neutral-700" />
+          <BarChart2 className="w-4 h-4 text-[#223A5E]" />
           <h3 className="font-bold text-sm text-neutral-900">
             Analisis Butir Soal (Benar vs Salah)
           </h3>
@@ -114,11 +114,11 @@ export const ScoreDiagramChart: React.FC<ScoreDiagramChartProps> = ({
         {/* Legenda Ringkas */}
         <div className="flex items-center gap-3 text-xs font-medium text-neutral-600">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-xs bg-neutral-900 shrink-0" />
+            <span className="w-2.5 h-2.5 rounded-xs bg-[#223A5E] shrink-0" />
             <span>Benar</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-xs bg-neutral-400 shrink-0" />
+            <span className="w-2.5 h-2.5 rounded-xs bg-[#93c5fd] shrink-0" />
             <span>Salah</span>
           </div>
         </div>
@@ -153,26 +153,26 @@ export const ScoreDiagramChart: React.FC<ScoreDiagramChartProps> = ({
                 {/* Dua Batang Bersisian: Solid Neutral 900 & Neutral 400 */}
                 <div className="w-full flex items-end justify-center gap-2 h-36">
                   
-                  {/* Batang Benar (Solid Neutral 900) */}
+                  {/* Batang Benar (Solid Biru) */}
                   <div className="flex-1 max-w-[40px] flex flex-col items-center justify-end h-full">
                     <span className="text-xs font-mono font-bold text-neutral-900 block mb-1">
                       {item.correctCount}
                     </span>
                     <div
-                      className={`w-full rounded-t-sm transition-all duration-200 bg-neutral-900 ${
+                      className={`w-full rounded-t-sm transition-all duration-200 bg-[#223A5E] ${
                         isHovered ? 'opacity-90' : ''
                       }`}
                       style={{ height: `${hCorrect}%` }}
                     />
                   </div>
 
-                  {/* Batang Salah (Solid Neutral 400) */}
+                  {/* Batang Salah (Solid Biru Muda) */}
                   <div className="flex-1 max-w-[40px] flex flex-col items-center justify-end h-full">
                     <span className="text-xs font-mono font-bold text-neutral-500 block mb-1">
                       {item.wrongCount}
                     </span>
                     <div
-                      className={`w-full rounded-t-sm transition-all duration-200 bg-neutral-400 ${
+                      className={`w-full rounded-t-sm transition-all duration-200 bg-[#93c5fd] ${
                         isHovered ? 'opacity-90' : ''
                       }`}
                       style={{ height: `${hWrong}%` }}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LogOut, Crown, Zap, Crop, ImagePlus, User, SlidersHorizontal, Check } from 'lucide-react';
+import { LogOut, Crown, Crop, ImagePlus, User } from 'lucide-react';
 import { UserAccount } from '../types/form';
 
 export interface ProfileDropdownProps {
@@ -73,16 +73,18 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         className="group relative flex items-center gap-2 p-1 pl-1 pr-2.5 rounded-full border border-slate-300 hover:border-blue-400 bg-white hover:bg-slate-50 shadow-2xs transition-all cursor-pointer select-none"
         title="Klik untuk membuka menu profil & crop foto"
       >
-        <div className="relative w-8 h-8 rounded-full overflow-hidden border border-blue-300 bg-slate-100 shrink-0">
-          <img
-            src={user.avatarUrl}
-            alt={user.name}
-            className="w-full h-full object-cover"
-          />
-          {/* Badge Icon Crop yang Jelas */}
-          <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-            <Crop className="w-3.5 h-3.5 stroke-[2.5]" />
+        <div className="relative w-8 h-8 rounded-full overflow-hidden border border-blue-300 bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200 shrink-0">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <User className="w-4 h-4" strokeWidth={2} />
           </div>
+          {user.avatarUrl?.trim() ? (
+            <img
+              src={user.avatarUrl}
+              alt={user.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          ) : null}
         </div>
 
         <div className="text-left hidden md:block max-w-[100px] truncate">
@@ -101,12 +103,18 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           
           {/* Header Profil Ringkas */}
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-blue-400 bg-slate-100 shadow-xs shrink-0">
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-blue-400 bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200 shadow-xs shrink-0">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <User className="w-6 h-6" strokeWidth={1.8} />
+              </div>
+              {user.avatarUrl?.trim() ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              ) : null}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-black text-slate-900 truncate">
@@ -115,7 +123,13 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               <p className="text-[11px] text-slate-500 truncate">
                 {user.email || 'Akun Aktif'}
               </p>
-              <span className="inline-block mt-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-950 border border-blue-300">
+              <span
+                className={`inline-block mt-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                  user.plan === 'pro'
+                    ? 'bg-amber-500 text-white border-amber-600'
+                    : 'bg-slate-700 text-white border-slate-800'
+                }`}
+              >
                 {user.plan === 'pro' ? 'PRO KREATOR' : 'FREE (Maks 100/Form)'}
               </span>
             </div>

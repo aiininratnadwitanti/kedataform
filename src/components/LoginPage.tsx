@@ -41,8 +41,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [forgotEmail, setForgotEmail] = useState('');
   const [isResetSent, setIsResetSent] = useState(false);
 
-  // Google sign in simulation
+  // Google sign in - alihkan ke OAuth 2.0 Google (server)
   const [isSimulatingGoogle, setIsSimulatingGoogle] = useState(false);
+  const [authNotice, setAuthNotice] = useState('');
 
   // Responsive check for desktop smooth sliding layout
   const [isDesktop, setIsDesktop] = useState(() => {
@@ -62,48 +63,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   const handleGoogleSignIn = () => {
     setIsSimulatingGoogle(true);
-    setTimeout(() => {
-      onLogin({
-        ...user,
-        name: 'Rizka Farida Damayanti',
-        email: 'rizkafaridadamayantii@gmail.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-        isAuthenticated: true,
-      });
-      setIsSimulatingGoogle(false);
-    }, 500);
+    window.location.href = '/api/v1/auth/google';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (mode === 'login') {
-      onLogin({
-        ...user,
-        name: name.trim() || 'Rizka Farida Damayanti',
-        email: email.trim() || 'rizkafaridadamayantii@gmail.com',
-        avatarUrl: user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-        isAuthenticated: true,
-      });
-    } else if (mode === 'signup') {
-      onLogin({
-        ...user,
-        name: name.trim() || 'Pengguna KeDataForm Baru',
-        email: email.trim() || 'user@kedataform.studio',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-        isAuthenticated: true,
-      });
-    } else if (mode === 'forgot_password') {
+    if (mode === 'forgot_password') {
       if (forgotEmail.trim()) {
         setIsResetSent(true);
       }
+      return;
     }
+    setAuthNotice('Saat ini pendaftaran & login hanya tersedia melalui Google. Klik tombol "Lanjutkan dengan Akun Google" di atas.');
   };
 
   // Status apakah di mode signup (gambar ke kanan, form ke kiri)
   const isSignUp = mode === 'signup';
 
   return (
-    <div className="min-h-screen w-full bg-[#F3F8FD] text-slate-900 selection:bg-blue-100 selection:text-blue-950 font-sans antialiased overflow-x-hidden relative flex flex-col lg:flex-row">
+    <div className="min-h-screen w-full bg-[var(--system-bg)] text-[var(--system-text)] selection:bg-blue-100 selection:text-blue-950 font-sans antialiased overflow-x-hidden relative flex flex-col lg:flex-row">
       
       {/* ========================================================================= */}
       {/* PANEL GAMBAR: FOTO KE-3 (TIM DENGAN CLIPBOARD & PENA MEWAH)               */}
@@ -219,7 +197,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           duration: 0.65, 
           ease: [0.16, 1, 0.3, 1] 
         }}
-        className="w-full lg:w-1/2 min-h-screen flex flex-col justify-center items-center p-6 sm:p-10 lg:p-14 bg-[#F3F8FD] overflow-y-auto z-10"
+        className="w-full lg:w-1/2 min-h-screen flex flex-col justify-center items-center p-6 sm:p-10 lg:p-14 bg-[var(--system-bg)] overflow-y-auto z-10"
         style={{ willChange: 'transform' }}
       >
         <div className="w-full max-w-md">
@@ -236,21 +214,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               {/* Logo & Headline */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#223A5E] text-white flex items-center justify-center shadow-md shadow-blue-950/15">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--system-primary)] text-[var(--system-primary-contrast)] flex items-center justify-center shadow-md shadow-blue-950/15">
                     <PenTool className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-xs font-serif font-bold tracking-[0.2em] text-[#223A5E] uppercase">
+                  <span className="text-xs font-serif font-bold tracking-[0.2em] text-[var(--system-primary)] uppercase">
                     KeDataForm Studio
                   </span>
                 </div>
 
-                <h2 className="text-2xl sm:text-3xl font-serif font-extrabold text-slate-900 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-serif font-extrabold text-[var(--system-text)] tracking-tight">
                   {mode === 'login' && 'Masuk ke Studio'}
                   {mode === 'signup' && 'Daftar Akun'}
                   {mode === 'forgot_password' && 'Pulihkan Kata Sandi'}
                 </h2>
 
-                <p className="text-xs sm:text-sm text-slate-500">
+                <p className="text-xs sm:text-sm text-[var(--system-text-muted)]">
                   {mode === 'login' && 'Kelola formulir, pantau respon partisipan, dan atur kuis Anda.'}
                   {mode === 'signup' && 'Mulai rancang formulir estetis dan kelola respon terisolasi.'}
                   {mode === 'forgot_password' && 'Masukkan email terdaftar untuk menerima tautan pemulihan kata sandi.'}
@@ -264,7 +242,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     type="button"
                     disabled={isSimulatingGoogle}
                     onClick={handleGoogleSignIn}
-                    className="w-full py-2.5 px-4 rounded-xl border border-slate-300 hover:border-slate-400 bg-white text-slate-700 hover:text-slate-900 text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
+                    className="w-full py-2.5 px-4 rounded-xl border border-[var(--system-border)] hover:border-[var(--system-primary)] bg-[var(--system-surface)] text-[var(--system-text)] text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                       <path
@@ -288,30 +266,35 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   </button>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 h-px bg-slate-200" />
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">atau dengan email</span>
-                    <div className="flex-1 h-px bg-slate-200" />
+                    <div className="flex-1 h-px bg-[var(--system-border)]" />
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--system-text-muted)]">atau dengan email</span>
+                    <div className="flex-1 h-px bg-[var(--system-border)]" />
                   </div>
                 </div>
               )}
 
               {/* Form Input Fields */}
+              {authNotice && (
+                <div className="p-3 rounded-xl bg-amber-50/90 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-100 text-[11px] leading-relaxed">
+                  {authNotice}
+                </div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Field Nama (Sign Up) */}
                 {mode === 'signup' && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-[var(--system-text)] mb-1.5">
                       Nama Lengkap
                     </label>
                     <div className="relative">
-                      <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <UserIcon className="w-4 h-4 text-[var(--system-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Contoh: Rizka Farida Damayanti"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-500/20 text-xs bg-white text-slate-900 outline-none transition-all placeholder:text-slate-400"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--system-border)] focus:border-[var(--system-primary)] focus:ring-2 focus:ring-[var(--system-primary)]/20 text-xs bg-[var(--system-surface)] text-[var(--system-text)] outline-none transition-all placeholder:text-[var(--system-text-muted)]"
                       />
                     </div>
                   </div>
@@ -320,35 +303,35 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {/* Field Email */}
                 {mode !== 'forgot_password' ? (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-[var(--system-text)] mb-1.5">
                       Alamat Email
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Mail className="w-4 h-4 text-[var(--system-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="nama@domain.com"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-500/20 text-xs bg-white text-slate-900 outline-none transition-all placeholder:text-slate-400"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--system-border)] focus:border-[var(--system-primary)] focus:ring-2 focus:ring-[var(--system-primary)]/20 text-xs bg-[var(--system-surface)] text-[var(--system-text)] outline-none transition-all placeholder:text-[var(--system-text-muted)]"
                       />
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-[var(--system-text)] mb-1.5">
                       Alamat Email Terdaftar
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Mail className="w-4 h-4 text-[var(--system-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
                         required
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         placeholder="nama@domain.com"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-500/20 text-xs bg-white text-slate-900 outline-none transition-all placeholder:text-slate-400"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--system-border)] focus:border-[var(--system-primary)] focus:ring-2 focus:ring-[var(--system-primary)]/20 text-xs bg-[var(--system-surface)] text-[var(--system-text)] outline-none transition-all placeholder:text-[var(--system-text-muted)]"
                       />
                     </div>
                   </div>
@@ -358,7 +341,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {mode !== 'forgot_password' && (
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-semibold text-slate-700">
+                      <label className="text-xs font-semibold text-[var(--system-text)]">
                         Kata Sandi
                       </label>
                       {mode === 'login' && (
@@ -369,26 +352,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                             setIsResetSent(false);
                             setMode('forgot_password');
                           }}
-                          className="text-[11px] text-[#223A5E] hover:text-[#1a2d4a] hover:underline font-semibold cursor-pointer"
+                          className="text-[11px] text-[var(--system-primary)] hover:opacity-80 hover:underline font-semibold cursor-pointer"
                         >
                           Lupa kata sandi?
                         </button>
                       )}
                     </div>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-4 h-4 text-[var(--system-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Minimal 8 karakter"
-                        className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-500/20 text-xs bg-white text-slate-900 outline-none transition-all placeholder:text-slate-400"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[var(--system-border)] focus:border-[var(--system-primary)] focus:ring-2 focus:ring-[var(--system-primary)]/20 text-xs bg-[var(--system-surface)] text-[var(--system-text)] outline-none transition-all placeholder:text-[var(--system-text-muted)]"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--system-text-muted)] hover:text-[var(--system-text)] cursor-pointer p-1"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -399,18 +382,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {/* Konfirmasi Kata Sandi (Sign Up) */}
                 {mode === 'signup' && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-[var(--system-text)] mb-1.5">
                       Ulangi Kata Sandi
                     </label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-4 h-4 text-[var(--system-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="password"
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Ulangi kata sandi"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-500/20 text-xs bg-white text-slate-900 outline-none transition-all placeholder:text-slate-400"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--system-border)] focus:border-[var(--system-primary)] focus:ring-2 focus:ring-[var(--system-primary)]/20 text-xs bg-[var(--system-surface)] text-[var(--system-text)] outline-none transition-all placeholder:text-[var(--system-text-muted)]"
                       />
                     </div>
                   </div>
@@ -424,9 +407,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       id="rememberMe"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded text-[#223A5E] focus:ring-blue-500 border-slate-300 accent-[#223A5E]"
+                      className="w-4 h-4 rounded text-[var(--system-primary)] focus:ring-[var(--system-primary)] border-[var(--system-border)] accent-[var(--system-primary)]"
                     />
-                    <label htmlFor="rememberMe" className="text-xs text-slate-600 select-none cursor-pointer">
+                    <label htmlFor="rememberMe" className="text-xs text-[var(--system-text-muted)] select-none cursor-pointer">
                       Ingat sesi masuk di browser ini
                     </label>
                   </div>
@@ -434,8 +417,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
                 {/* Notifikasi Reset Email Terkirim */}
                 {mode === 'forgot_password' && isResetSent && (
-                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="p-3.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-100 text-xs flex items-center gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>Instruksi pemulihan kata sandi telah dikirim ke <b>{forgotEmail}</b>. Silakan periksa inbox Anda.</span>
                   </div>
                 )}
@@ -443,17 +426,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {/* Tombol Submit dengan Aksen Gold dan Teks Putih Tegas */}
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 rounded-xl bg-[#223A5E] hover:bg-[#1a2d4a] active:scale-[0.99] text-white text-xs font-bold tracking-wide transition-all shadow-md shadow-blue-950/20 border border-[#8c5f10] flex items-center justify-center gap-2 cursor-pointer mt-2"
+                  className="w-full py-3 px-4 rounded-xl bg-[var(--system-primary)] hover:opacity-90 active:scale-[0.99] text-[var(--system-primary-contrast)] text-xs font-bold tracking-wide transition-all shadow-md shadow-blue-950/20 border border-[var(--system-primary)] flex items-center justify-center gap-2 cursor-pointer mt-2"
                 >
-                  {mode === 'login' && <span className="text-white font-bold">Masuk ke Studio Sekarang</span>}
-                  {mode === 'signup' && <span className="text-white font-bold">Daftar Akun</span>}
-                  {mode === 'forgot_password' && <span className="text-white font-bold">Kirim Tautan Pemulihan</span>}
-                  <ArrowRight className="w-3.5 h-3.5 text-white" />
+                  {mode === 'login' && <span className="font-bold">Masuk ke Studio Sekarang</span>}
+                  {mode === 'signup' && <span className="font-bold">Daftar Akun</span>}
+                  {mode === 'forgot_password' && <span className="font-bold">Kirim Tautan Pemulihan</span>}
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </form>
 
               {/* Footer Pergantian Masuk & Daftar Akun */}
-              <div className="pt-2 text-center text-xs text-slate-500 space-y-3">
+              <div className="pt-2 text-center text-xs text-[var(--system-text-muted)] space-y-3">
                 {mode === 'forgot_password' ? (
                   <button
                     type="button"
@@ -461,7 +444,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       setMode('login');
                       setIsResetSent(false);
                     }}
-                    className="text-[#223A5E] hover:text-[#1a2d4a] hover:underline font-semibold cursor-pointer"
+                    className="text-[var(--system-primary)] hover:opacity-80 hover:underline font-semibold cursor-pointer"
                   >
                     ← Kembali ke Halaman Masuk
                   </button>
@@ -471,7 +454,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     <button
                       type="button"
                       onClick={() => setMode('signup')}
-                      className="text-[#223A5E] hover:text-[#1a2d4a] hover:underline font-bold cursor-pointer"
+                      className="text-[var(--system-primary)] hover:opacity-80 hover:underline font-bold cursor-pointer"
                     >
                       Daftar akun
                     </button>
@@ -482,16 +465,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     <button
                       type="button"
                       onClick={() => setMode('login')}
-                      className="text-[#223A5E] hover:text-[#1a2d4a] hover:underline font-bold cursor-pointer"
+                      className="text-[var(--system-primary)] hover:opacity-80 hover:underline font-bold cursor-pointer"
                     >
                       Masuk
                     </button>
                   </p>
                 )}
 
-                <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400 pt-2 border-t border-slate-200">
+                <div className="flex items-center justify-center gap-4 text-[11px] text-[var(--system-text-muted)] pt-2 border-t border-[var(--system-border)]">
                   <span className="flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-[var(--system-text-muted)]" />
                     Enkripsi SSL 256-Bit
                   </span>
                   <span>•</span>

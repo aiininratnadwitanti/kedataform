@@ -31,7 +31,7 @@ export const defaultCanvaTheme: ThemeConfig = {
   borderRadiusNum: 20,
   radius: 'lg',
   cardBorderWidth: 1,
-  cardBorderColor: '#fde68a',
+  cardBorderColor: '#bfdbfe',
   cardShadow: 'soft',
 
   // Tombol

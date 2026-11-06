@@ -13,12 +13,9 @@ import {
   Award,
   ShieldCheck,
   FileSpreadsheet,
-  Phone,
   BookOpen,
   PenTool,
   Archive,
-  Mail,
-  MapPin,
   Unlock,
   Lock,
   FolderLock,
@@ -110,7 +107,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [simDays, setSimDays] = useState<string[]>(['Sen', 'Sel', 'Rab', 'Kam', 'Jum']);
   const [simHour, setSimHour] = useState<number>(14);
   const [pricingBillingCycle, setPricingBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
-  const [newsletterEmail, setNewsletterEmail] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const landingRef = useRef<HTMLDivElement>(null);
 
@@ -146,14 +142,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     setTimeout(() => setToastMsg(null), 3000);
   };
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail.trim()) return;
-    setToastMsg(`Terima kasih! Pembaruan template dikirim ke ${newsletterEmail}`);
-    setNewsletterEmail('');
-    setTimeout(() => setToastMsg(null), 3500);
-  };
-
   const isScheduleActive = simDays.includes('Sen') && simHour >= 8 && simHour < 17;
 
   const blue = '#223A5E';
@@ -177,63 +165,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Utility Bar */}
-      <div className="fixed top-0 left-0 right-0 z-40 w-full text-white text-[11px] py-2 px-4 sm:px-8" style={{ backgroundColor: blue }}>
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> Sleman, Yogyakarta</span>
-            <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> info@kedata.online</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Senin - Jumat: 09:00 - 17:00 WIB</span>
-            <div className="flex items-center gap-2">
-              <a href="#" className="hover:opacity-80">f</a>
-              <a href="#" className="hover:opacity-80">t</a>
-              <a href="#" className="hover:opacity-80">in</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Header */}
       <motion.header
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.65, ease: morphEase }}
-        className={`fixed left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'top-8 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm py-3 px-4 sm:px-8' : 'top-8 bg-white/70 backdrop-blur-xs border-b border-white/10 py-4 px-4 sm:px-8'}`}
+        className={`fixed left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'top-0 bg-[#223A5E]/55 backdrop-blur-md shadow-md py-3 px-4 sm:px-8' : 'top-0 bg-[#223A5E]/90 backdrop-blur-sm py-4 px-4 sm:px-8'}`}
       >
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
           <motion.div whileHover={{ scale: 1.03 }} className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: blue }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white shadow-sm" style={{ color: blue }}>
               <PenTool className="w-4.5 h-4.5" />
             </div>
-            <span className="tracking-[0.15em] text-sm uppercase font-bold" style={{ color: blue }}>KEDATAFORM</span>
+            <span className="tracking-[0.15em] text-sm uppercase font-bold text-white">KEDATAFORM</span>
           </motion.div>
 
-          <nav className="hidden md:flex items-center gap-7 text-[12px] font-medium tracking-wide text-slate-700">
-            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-slate-900 transition-colors">Home</button>
-            <button onClick={() => { const el = document.getElementById('about-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-slate-900 transition-colors">Tentang</button>
-            <button onClick={() => { const el = document.getElementById('why-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-slate-900 transition-colors">Fitur</button>
-            <button onClick={() => setIsPricingModalOpen(true)} className="hover:text-slate-900 transition-colors">Paket</button>
-            <button onClick={() => { const el = document.getElementById('process'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-slate-900 transition-colors">Proses</button>
+          <nav className="hidden md:flex items-center gap-7 text-[12px] font-medium tracking-wide text-white/80">
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-white transition-colors">Home</button>
+            <button onClick={() => { const el = document.getElementById('about-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors">Tentang</button>
+            <button onClick={() => { const el = document.getElementById('why-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors">Fitur</button>
+            <button onClick={() => setIsPricingModalOpen(true)} className="hover:text-white transition-colors">Paket</button>
+            <button onClick={() => { const el = document.getElementById('process'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors">Proses</button>
           </nav>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 text-xs">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: blue }}>
-                <Phone className="w-4 h-4" />
-              </div>
-              <div className="leading-tight">
-                <div className="text-[10px] text-slate-500">Hubungi kami</div>
-                <div className="font-bold text-slate-900">info@kedata.online</div>
-              </div>
-            </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onOpenSignIn}
-              className="px-5 py-2 rounded-full text-white text-[11px] font-bold tracking-wider uppercase transition-all cursor-pointer shadow-sm"
-              style={{ backgroundColor: blue }}
+              className="px-5 py-2 rounded-full bg-white text-[11px] font-bold tracking-wider uppercase transition-all cursor-pointer shadow-sm"
+              style={{ color: blue }}
             >
               Masuk
             </motion.button>
@@ -242,23 +203,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </motion.header>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-32 px-4 sm:px-8 overflow-hidden" style={{ backgroundColor: lightBg, minHeight: '70vh' }}>
-        <div className="max-w-4xl mx-auto text-center space-y-6">
+      <section className="relative pt-28 pb-20 px-4 sm:px-8 overflow-hidden flex items-center justify-center" style={{ backgroundColor: lightBg, minHeight: '70vh' }}>
+        <div className="w-full max-w-4xl mx-auto text-center space-y-6">
           <motion.h1 variants={morphLineVariants} initial="hidden" animate="visible" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-[#0f172a]">
             Membuat Pengumpulan Data <br />
             <span style={{ color: blue }}>Lebih Cerdas &amp; Rapi</span>
           </motion.h1>
 
           <motion.p variants={morphLineVariants} initial="hidden" animate="visible" className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Rancang formulir estetis dengan kanvas visual, aturan jadwal otomatis, dan wadah 100 kuota respon terisolasi untuk pengguna gratis — premium mendapat 100 data ++ per form. Semua dalam satu platform yang rapi dan siap pakai.
+            Rancang formulir estetis dengan kanvas visual, aturan jadwal otomatis, dan wadah 100 kuota respon terisolasi untuk pengguna gratis, premium mendapat 100 data ++ per form. Semua dalam satu platform yang rapi dan siap pakai.
           </motion.p>
 
-          <motion.div variants={morphLineVariants} initial="hidden" animate="visible" className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xl mx-auto">
-            <input
-              type="email"
-              placeholder="Masukkan email Anda"
-              className="w-full sm:flex-1 px-5 py-3 rounded-full border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
+          <motion.div variants={morphLineVariants} initial="hidden" animate="visible" className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
+            <motion.a
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              href="https://youtu.be/WnY5gsyOJn8?si=t9C3JWvuIBbTS57W"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-bold tracking-wide shadow-lg transition-all cursor-pointer whitespace-nowrap"
+              style={{ backgroundColor: blue }}
+            >
+              <Play className="w-4 h-4 fill-current" />
+              <span>Video Tutorial</span>
+            </motion.a>
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
@@ -278,8 +246,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div variants={morphImageLeftVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} className="relative">
             <div className="relative">
-              <img src="/assets/landing/about-1.png?v=3" alt="Tim KeDataForm" className="rounded-2xl shadow-lg w-full object-cover aspect-[4/3]" />
-              <img src="/assets/landing/about-2.png?v=3" alt="Kolaborasi" className="rounded-2xl shadow-xl w-2/3 object-cover aspect-[4/3] absolute -bottom-8 -right-6 border-4 border-white" />
+              <img src="/assets/landing/formulir.jpeg" alt="Pratinjau Formulir KeDataForm" className="rounded-2xl shadow-lg w-full object-cover aspect-[4/3]" />
               <div className="absolute top-6 -left-4 bg-white rounded-xl shadow-lg px-4 py-3">
                 <div className="text-2xl font-bold" style={{ color: blue }}>100+</div>
                 <div className="text-[11px] text-slate-500 font-medium">Respon Gratis<br/>per Formulir</div>
@@ -315,13 +282,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
             </motion.div>
-            <motion.div variants={morphLineVariants} className="pt-4 flex items-center gap-4">
-              <div className="font-serif italic text-lg text-slate-700">Spark Moun</div>
-              <div>
-                <div className="font-bold text-sm text-[#0f172a]">Ketua &amp; Pendiri</div>
-                <div className="text-[11px] text-slate-500">KeDataForm Studio</div>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -340,18 +300,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <motion.p variants={morphLineVariants} className="text-sm text-slate-600 leading-relaxed">
               Beralih dari tumpukan kertas formulir yang rentan rusak dan tercecer ke sistem pengumpulan data modern yang rapi, terisolasi, dan otomatis. Setiap formulir memiliki wadah database tersendiri dan ekspor CSV format standar internasional.
             </motion.p>
-            <motion.div variants={morphLineVariants} className="pt-2">
-              <button
-                onClick={() => onOpenVideoTutorial?.()}
-                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider cursor-pointer"
-                style={{ color: blue }}
-              >
-                <span className="w-9 h-9 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: blue }}>
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                </span>
-                Video Showcase
-              </button>
-            </motion.div>
           </motion.div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -369,14 +317,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="font-bold text-sm mb-1 text-[#0f172a]">Cloud &amp; Ekspor</div>
               <div className="text-[11px] text-slate-500 leading-relaxed">Ekspor CSV UTF-8 BOM langsung terbaca di Excel.</div>
             </motion.div>
-            <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 bg-white shadow-md border border-slate-200">
+            <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 bg-white shadow-md border border-slate-200 mt-6">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: lightBg, color: blue }}>
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div className="font-bold text-sm mb-1 text-[#0f172a]">Keamanan Data</div>
               <div className="text-[11px] text-slate-500 leading-relaxed">Enkripsi TLS dan pemisahan database mandiri.</div>
             </motion.div>
-            <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 text-white shadow-lg mt-6" style={{ backgroundColor: blue }}>
+            <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 text-white shadow-lg" style={{ backgroundColor: blue }}>
               <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center mb-3">
                 <RefreshCw className="w-5 h-5" />
               </div>
@@ -394,7 +342,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <motion.h2 variants={morphLineVariants} className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0f172a]">Bagaimana kami bekerja</motion.h2>
           <motion.div variants={morphLineVariants} className="w-12 h-0.5 mx-auto" style={{ backgroundColor: blue }} />
           <motion.p variants={morphLineVariants} className="text-sm text-slate-600 leading-relaxed">
-            Mulai dari pembuatan formulir, pengaturan jadwal, hingga ekspor data — semua dalam satu alur yang rapi dan otomatis.
+            Mulai dari pembuatan formulir, pengaturan jadwal, hingga ekspor data, semua dalam satu alur yang rapi dan otomatis.
           </motion.p>
         </motion.div>
 
@@ -433,7 +381,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Footer */}
       <footer className="bg-[#0f172a] text-slate-300 pt-14 pb-10 px-4 sm:px-8 border-t border-slate-800 text-left">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="space-y-3">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white" style={{ backgroundColor: blue }}>
@@ -441,18 +389,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <span className="font-bold text-sm tracking-[0.15em] uppercase text-white">KEDATAFORM</span>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-300 leading-relaxed">
               Platform manajemen formulir modern dengan pemisahan database respon mandiri, kanvas desain visual, dan otomasi jadwal presisi.
             </p>
-            <div className="space-y-1.5 text-xs text-slate-400">
-              <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: blue }} /> Gg. Anggur No. 16, Krodan, Maguwoharjo, Depok District, Sleman Regency, Special Region of Yogyakarta 55281</div>
-              <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5" style={{ color: blue }} /> info@kedata.online</div>
-              <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" style={{ color: blue }} /> Senin - Jumat: 09:00 - 17:00 WIB</div>
-            </div>
           </div>
           <div className="space-y-2">
             <h5 className="font-bold text-xs uppercase tracking-[0.15em] text-white">Fitur</h5>
-            <ul className="space-y-1.5 text-xs text-slate-400">
+            <ul className="space-y-1.5 text-xs text-slate-300">
               <li><button onClick={() => { const el = document.getElementById('about-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white cursor-pointer">Wadah Respon Terisolasi</button></li>
               <li><button onClick={() => setIsScheduleSimModalOpen(true)} className="hover:text-white cursor-pointer">Mesin Jadwal &amp; Auto-Close</button></li>
               <li><button onClick={() => { const el = document.getElementById('why-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white cursor-pointer">Kanvas Desain</button></li>
@@ -461,23 +404,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
           <div className="space-y-2">
             <h5 className="font-bold text-xs uppercase tracking-[0.15em] text-white">Template</h5>
-            <ul className="space-y-1.5 text-xs text-slate-400">
+            <ul className="space-y-1.5 text-xs text-slate-300">
               {FORM_TEMPLATES.slice(0, 5).map(t => (
                 <li key={t.id}><button onClick={() => onSelectTemplate(t)} className="hover:text-white cursor-pointer text-left">{t.name}</button></li>
               ))}
             </ul>
           </div>
-          <div className="space-y-3">
-            <h5 className="font-bold text-xs uppercase tracking-[0.15em] text-white">Pembaruan</h5>
-            <p className="text-xs text-slate-400 leading-relaxed">Dapatkan notifikasi template baru langsung ke email Anda.</p>
-            <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-1.5 p-1 bg-slate-800 rounded-full border border-slate-700">
-              <input type="email" value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} placeholder="nama@email.com" className="bg-transparent px-3 py-1 text-xs text-white placeholder-slate-500 focus:outline-none w-full" />
-              <button type="submit" className="px-3 py-1.5 rounded-full text-white text-[11px] font-bold cursor-pointer transition-all shrink-0" style={{ backgroundColor: blue }}>Kirim</button>
-            </form>
-            <button onClick={onOpenSignIn} className="px-3.5 py-1.5 rounded-full border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-white text-[11px] font-medium transition-all cursor-pointer">Masuk Dashboard</button>
+          <div className="space-y-2">
+            <h5 className="font-bold text-xs uppercase tracking-[0.15em] text-white">Lokasi</h5>
+            <div className="rounded-xl overflow-hidden border border-slate-700">
+              <iframe
+                title="Peta Lokasi KeDataForm"
+                src="https://www.google.com/maps?q=Maguwoharjo,%20Depok,%20Sleman,%20Daerah%20Istimewa%20Yogyakarta&output=embed"
+                className="w-full h-36"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
           <div>© 2026 PT. Kedata Indonesia Digital</div>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Sistem Operasional Normal</span>
@@ -591,14 +537,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {isPricingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onClick={() => setIsPricingModalOpen(false)} />
-          <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ duration: 0.35, ease: morphEase }} className="relative z-10 bg-white rounded-2xl max-w-3xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] text-left">
+          <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ duration: 0.35, ease: morphEase }} className="relative z-10 bg-white rounded-2xl max-w-5xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-left">
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between" style={{ backgroundColor: blue, color: 'white' }}>
               <div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white text-[11px] font-mono uppercase tracking-wider font-bold mb-1.5">
                   <Crown className="w-3.5 h-3.5 stroke-[2]" /><span>Plans &amp; Kuota Resmi Sistem</span>
                 </div>
                 <h3 className="font-bold text-lg sm:text-xl text-white">Pilihan Paket KeDataForm Studio</h3>
-                <p className="text-xs text-white/80 mt-0.5">Mulai gratis dengan kuota 100 respon per form atau upgrade untuk kuota tanpa batas.</p>
+                <p className="text-xs text-white/90 mt-0.5">Mulai gratis dengan kuota 100 respon per form atau upgrade untuk kuota tanpa batas.</p>
               </div>
               <button onClick={() => setIsPricingModalOpen(false)} className="p-1.5 rounded-full hover:bg-white/15 text-white cursor-pointer"><X className="w-5 h-5 stroke-[2]" /></button>
             </div>
@@ -616,14 +562,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between space-y-4 shadow-sm">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">STARTER FIELD</span>
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">STARTER FIELD</span>
                       <span className="text-[10px] uppercase font-bold text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-full">Gratis</span>
                     </div>
                     <div>
                       <div className="text-3xl font-bold text-slate-900">Rp 0</div>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">Aktif selamanya tanpa batas waktu</span>
+                      <span className="text-[11px] text-slate-500 block mt-0.5">Aktif selamanya tanpa batas waktu</span>
                     </div>
-                    <p className="text-xs text-slate-500 leading-relaxed">Cocok untuk kuesioner skala kecil, riset skripsi, formulir pendaftaran, atau survei komunitas.</p>
+                    <p className="text-xs text-slate-600 leading-relaxed">Cocok untuk kuesioner skala kecil, riset skripsi, formulir pendaftaran, atau survei komunitas.</p>
                     <ul className="space-y-2.5 text-xs text-slate-700 border-t border-slate-200/70 pt-3">
                       {['Maksimal 100 Respon / Formulir', 'Arsip Formulir Terisolasi', 'Aturan Jadwal Buka & Jam Kerja', 'Ekspor CSV Standard UTF-8 BOM', 'Embed iFrame Standar'].map(i => (
                         <li key={i} className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] shrink-0" style={{ color: blue }} /><span>{i}</span></li>
@@ -639,11 +585,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div>
                       <div className="text-3xl font-bold text-white flex items-baseline gap-1">
                         <span>{pricingBillingCycle === 'yearly' ? 'Rp 79.000' : 'Rp 99.000'}</span>
-                        <span className="text-xs font-normal text-slate-400">/ bln</span>
+                        <span className="text-xs font-normal text-slate-300">/ bln</span>
                       </div>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">{pricingBillingCycle === 'yearly' ? 'Ditagih Rp 948.000 per tahun' : 'Ditagih bulanan, batalkan kapan saja'}</span>
+                      <span className="text-[11px] text-slate-300 block mt-0.5">{pricingBillingCycle === 'yearly' ? 'Ditagih Rp 948.000 per tahun' : 'Ditagih bulanan, batalkan kapan saja'}</span>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">Solusi profesional untuk bisnis, riset akademik skala besar, dan pengumpulan pesanan harian.</p>
+                    <p className="text-xs text-slate-200 leading-relaxed">Solusi profesional untuk bisnis, riset akademik skala besar, dan pengumpulan pesanan harian.</p>
                     <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800 pt-3">
                       {['Tanggapan Tanpa Batas (Unlimited)', 'Formulir & Kuesioner Tanpa Batas', 'Hapus Watermark KeDataForm', 'Ekspor Excel & Google Sheets', 'Kustomisasi Domain & Branding Penuh', 'Dukungan Prioritas 24/7'].map(i => (
                         <li key={i} className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] shrink-0" style={{ color: blue }} /><span>{i.includes('Tanpa Batas') || i.includes('Watermark') ? <strong>{i}</strong> : i}</span></li>
@@ -655,14 +601,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between space-y-4 shadow-sm">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">ENTERPRISE</span>
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">ENTERPRISE</span>
                       <span className="text-[10px] uppercase font-bold text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-full">Tim &amp; Instansi</span>
                     </div>
                     <div>
                       <div className="text-3xl font-bold text-slate-900">Rp 299.000</div>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">Per bulan / atau kontrak tahunan</span>
+                      <span className="text-[11px] text-slate-500 block mt-0.5">Per bulan / atau kontrak tahunan</span>
                     </div>
-                    <p className="text-xs text-slate-500 leading-relaxed">Untuk institusi pendidikan, instansi riset, dan tim perusahaan yang butuh akses bersama.</p>
+                    <p className="text-xs text-slate-600 leading-relaxed">Untuk institusi pendidikan, instansi riset, dan tim perusahaan yang butuh akses bersama.</p>
                     <ul className="space-y-2.5 text-xs text-slate-700 border-t border-slate-200/70 pt-3">
                       {['Seluruh fitur Pro Expedition', 'Multi-user & Manajemen Hak Akses Tim', 'Integrasi Webhook & API Kustom', 'Jaminan Uptime SLA 99.9%', 'Account Manager Dedikasi'].map(i => (
                         <li key={i} className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] shrink-0" style={{ color: blue }} /><span>{i}</span></li>
@@ -676,12 +622,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
                   <div className="font-bold text-slate-900">Garansi Keamanan Database Terisolasi</div>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">Setiap paket telah dilengkapi dengan pemisahan database tanggapan formulir mandiri, enkripsi TLS modern, dan ekspor CSV format standar internasional.</p>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">Setiap paket telah dilengkapi dengan pemisahan database tanggapan formulir mandiri, enkripsi TLS modern, dan ekspor CSV format standar internasional.</p>
                 </div>
               </div>
             </div>
             <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-              <span className="text-xs text-slate-500">Ada pertanyaan seputar paket? Hubungi info@kedata.online</span>
+              <span className="text-xs text-slate-600">Ada pertanyaan seputar paket? Hubungi info@kedata.online</span>
               <button onClick={() => setIsPricingModalOpen(false)} className="px-5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-full cursor-pointer transition-colors">Tutup</button>
             </div>
           </motion.div>

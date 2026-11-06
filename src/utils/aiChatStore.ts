@@ -1,6 +1,7 @@
 import { FormSchema } from '../types/form';
 import { generateFormWithAI } from './aiFormGenerator';
 import confetti from 'canvas-confetti';
+import { api } from './api';
 
 export interface ChatMessage {
   id: string;
@@ -121,6 +122,17 @@ function saveSessions(sessions: ChatSession[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
   } catch {}
+  for (const session of sessions) {
+    api
+      .saveChatSession({
+        id: session.id,
+        title: session.title,
+        timestamp: session.timestamp,
+        messages: session.messages as any,
+        generatedForm: session.generatedForm,
+      })
+      .catch(() => {});
+  }
 }
 
 const initialSessions = loadSavedSessions();
@@ -143,6 +155,12 @@ function emitChange() {
 export const aiChatStore = {
   getState(): AiChatState {
     return globalChatState;
+  },
+
+  hydrate(sessions: ChatSession[]) {
+    if (!sessions?.length) return;
+    globalChatState = { ...globalChatState, sessions };
+    emitChange();
   },
 
   subscribe(listener: () => void): () => void {
@@ -178,6 +196,7 @@ export const aiChatStore = {
   },
 
   deleteSession(sessionId: string) {
+    api.deleteChatSession(sessionId).catch(() => {});
     const updatedSessions = globalChatState.sessions.filter((s) => s.id !== sessionId);
     saveSessions(updatedSessions);
 
@@ -276,7 +295,7 @@ export const aiChatStore = {
       if (generated.theme) {
         generated.theme.canvasBg = '#F3F8FD';
         generated.theme.cardBg = '#ffffff';
-        generated.theme.cardBorderColor = '#fed7aa';
+        generated.theme.cardBorderColor = '#bfdbfe';
         generated.theme.primaryColor = '#223A5E';
       }
 

@@ -74,7 +74,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-4xl bg-[#F3F8FD] rounded-3xl shadow-2xl border-2 border-slate-300 overflow-hidden flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-4xl bg-[var(--system-bg-soft)] rounded-3xl shadow-2xl border-2 border-slate-300 overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Bar */}
@@ -93,7 +93,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                 Studio Generator Formulir Cepat
               </span>
               <span className="text-[10px] text-black font-bold font-mono">
-                Model Gemini 3.8 Flash
+                Model Gemini 3.5 Flash
               </span>
             </div>
           </div>
@@ -179,12 +179,12 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
             </div>
 
             <div className="pt-2 border-t-2 border-slate-200 text-[10px] text-slate-700 font-bold font-mono">
-              Model: Gemini 3.8 Flash
+              Model: Gemini 3.5 Flash
             </div>
           </aside>
 
           {/* AREA KANAN: MENYESUAIKAN DASHBOARD (#F3F8FD), BUKAN HITAM */}
-          <main className="md:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[#F3F8FD] relative">
+          <main className="md:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[var(--system-bg-soft)] relative">
             
             {!hasMessages ? (
               /* TAMPILAN AWAL: TENGAH DENGAN BATAS GARIS JELAS */
@@ -200,7 +200,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                   }}
                   className="w-full relative"
                 >
-                  <div className="relative shadow-sm rounded-2xl overflow-hidden border-2 border-slate-300 focus-within:border-[#223A5E] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
+                  <div className="relative shadow-sm rounded-2xl overflow-hidden border-2 border-slate-300 focus-within:border-[var(--system-primary)] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
                     <textarea
                       rows={3}
                       value={inputValue}
@@ -219,7 +219,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                       <button
                         type="submit"
                         disabled={!inputValue.trim() || isLoading}
-                        className="p-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-40 text-white rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border-2 border-[#8c5f10]"
+                        className="p-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border-2 border-[var(--system-primary)]"
                         title="Kirim ke AI"
                       >
                         {isLoading ? (
@@ -257,7 +257,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                     >
                       <div className={`max-w-md p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed space-y-2 ${
                         m.sender === 'user'
-                          ? 'bg-[#223A5E] text-white rounded-tr-none font-medium border-2 border-[#8c5f10]'
+                          ? 'bg-[var(--system-primary)] text-[var(--system-primary-contrast)] rounded-tr-none font-medium border-2 border-[var(--system-primary)]'
                           : 'bg-white border-2 border-slate-200 text-black rounded-tl-none font-medium'
                       }`}>
                         <p>{m.text}</p>
@@ -273,7 +273,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                             <button
                               type="button"
                               onClick={() => handleOpenFormInEditor(m.generatedForm!)}
-                              className="w-full py-2 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-2 border-[#8c5f10]"
+                              className="w-full py-2 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-2 border-[var(--system-primary)]"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                               <span>Buka & Edit di Editor Sekarang</span>
@@ -310,12 +310,12 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                     onChange={(e) => setInputValue(e.target.value)}
                     disabled={isLoading}
                     placeholder="Ketik instruksi tambahan untuk formulir..."
-                    className="flex-1 text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white text-black shadow-xs font-medium"
+                    className="flex-1 text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-[var(--system-primary)] focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white text-black shadow-xs font-medium"
                   />
                   <button
                     type="submit"
                     disabled={!inputValue.trim() || isLoading}
-                    className="px-4 py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border-2 border-[#8c5f10]"
+                    className="px-4 py-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border-2 border-[var(--system-primary)]"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

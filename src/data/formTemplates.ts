@@ -100,9 +100,9 @@ export const FORM_TEMPLATES: FormTemplateItem[] = [
           description: 'Pilih salah satu varian yang sesuai kebutuhan Anda.',
           required: true,
           options: [
-            { id: 'p1', text: 'Paket Basic (Rp 99.000) — E-Book + Starter Kit' },
-            { id: 'p2', text: 'Paket Pro (Rp 199.000) — Lengkap dengan Akses Komunitas' },
-            { id: 'p3', text: 'Paket VIP Exclusive (Rp 399.000) — Mentoring 1-on-1' },
+            { id: 'p1', text: 'Paket Basic (Rp 99.000) - E-Book + Starter Kit' },
+            { id: 'p2', text: 'Paket Pro (Rp 199.000) - Lengkap dengan Akses Komunitas' },
+            { id: 'p3', text: 'Paket VIP Exclusive (Rp 399.000) - Mentoring 1-on-1' },
           ],
         },
         {
@@ -431,6 +431,11 @@ export interface RecentFormItem {
   accentBg?: string;
   folderId?: string;
   folderName?: string;
+  status?: 'draft' | 'published' | 'closed';
+  accessRole?: 'owner' | 'editor' | 'viewer';
+  ownerName?: string;
+  ownerEmail?: string;
+  ownerAvatarUrl?: string;
   form: FormSchema;
 }
 
@@ -497,7 +502,7 @@ export const INITIAL_RECENT_FORMS: RecentFormItem[] = [
   },
   {
     id: 'rf_2',
-    title: 'Order Form — Merchandise Komunitas Designer',
+    title: 'Order Form - Merchandise Komunitas Designer',
     lastOpened: '26 Okt 2026',
     responseCount: 42,
     iconType: 'order',
@@ -527,7 +532,7 @@ export const INITIAL_RECENT_FORMS: RecentFormItem[] = [
   },
   {
     id: 'rf_3',
-    title: 'Blank Quiz — Evaluasi Pemrograman Frontend',
+    title: 'Blank Quiz - Evaluasi Pemrograman Frontend',
     lastOpened: '25 Okt 2026',
     responseCount: 15,
     iconType: 'quiz',
@@ -549,7 +554,7 @@ export const INITIAL_RECENT_FORMS: RecentFormItem[] = [
   },
   {
     id: 'rf_4',
-    title: 'Contact Information — Klien & Konsultasi UI/UX',
+    title: 'Contact Information - Klien & Konsultasi UI/UX',
     lastOpened: '20 Okt 2026',
     responseCount: 9,
     iconType: 'contact',
@@ -571,7 +576,7 @@ export const INITIAL_RECENT_FORMS: RecentFormItem[] = [
   },
   {
     id: 'rf_5',
-    title: 'RSVP Event — Tech Summit & Networking Night',
+    title: 'RSVP Event - Tech Summit & Networking Night',
     lastOpened: '18 Okt 2026',
     responseCount: 24,
     iconType: 'rsvp',
@@ -630,7 +635,7 @@ export function generateIsolatedSubmissions(formId: string, count: number): Form
         answers: {
           ord_1: name,
           ord_2: `0812${Math.floor(10000000 + Math.random() * 90000000)}`,
-          ord_3: i % 3 === 0 ? 'Paket VIP Exclusive (Rp 399.000) — Mentoring 1-on-1' : i % 2 === 0 ? 'Paket Pro (Rp 199.000) — Lengkap dengan Akses Komunitas' : 'Paket Basic (Rp 99.000) — E-Book + Starter Kit',
+          ord_3: i % 3 === 0 ? 'Paket VIP Exclusive (Rp 399.000) - Mentoring 1-on-1' : i % 2 === 0 ? 'Paket Pro (Rp 199.000) - Lengkap dengan Akses Komunitas' : 'Paket Basic (Rp 99.000) - E-Book + Starter Kit',
           ord_4: i % 2 === 0 ? 'JNE Express (Reguler 2-3 hari)' : 'SiCepat BEST (Kilat 1 hari)',
           ord_5: `Jl. Melati No. ${i + 10}, Jakarta Selatan, DKI Jakarta 12430`,
         },
