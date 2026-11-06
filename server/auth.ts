@@ -7,7 +7,7 @@ const SESSION_TTL_DAYS = 30;
 
 // Cookie `secure` hanya saat aplikasi disajikan lewat HTTPS (mis. di Vercel),
 // agar login tetap berfungsi di lokal (http://localhost).
-function useSecureCookies(): boolean {
+export function useSecureCookies(): boolean {
   const explicit = String(process.env.COOKIE_SECURE || '').toLowerCase();
   if (explicit === 'true') return true;
   if (explicit === 'false') return false;

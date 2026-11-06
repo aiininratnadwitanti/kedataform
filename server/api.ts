@@ -13,6 +13,7 @@ import {
   exchangeGoogleCode,
   upsertGoogleUser,
   appUrl,
+  useSecureCookies,
 } from './auth';
 import { sendInviteEmail, isMailConfigured } from './mailer';
 import {
@@ -307,7 +308,13 @@ router.get(
       return fail(res, 503, 'Google OAuth belum dikonfigurasi. Isi GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET di .env');
     }
     const state = crypto.randomBytes(16).toString('hex');
-    res.cookie('kdf_oauth_state', state, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000, path: '/' });
+    res.cookie('kdf_oauth_state', state, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: useSecureCookies(),
+      maxAge: 10 * 60 * 1000,
+      path: '/',
+    });
     res.redirect(googleAuthUrl(state));
   })
 );
@@ -324,7 +331,7 @@ router.get(
       const profile = await exchangeGoogleCode(code);
       const user = await upsertGoogleUser(profile);
       await createSession(user.id, req, res);
-      res.clearCookie('kdf_oauth_state', { path: '/' });
+      res.clearCookie('kdf_oauth_state', { path: '/', sameSite: 'lax', secure: useSecureCookies() });
       res.redirect('/?auth=success');
     } catch (err: any) {
       console.error('[auth] google callback failed', err?.message);
