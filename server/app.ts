@@ -16,14 +16,14 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
+// Health check (tidak menyentuh database, agar bisa dipakai cek "function hidup").
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
 // Pastikan database + skema siap sebelum memproses request (idempoten/memoized).
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   ensureReady().then(() => next()).catch(next);
-});
-
-// Health check
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
 // REST API v1 (envelope: { data, message, error })
