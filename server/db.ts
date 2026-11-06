@@ -17,8 +17,15 @@ function useSsl(): boolean {
 }
 
 // MySQL terkelola (mis. TiDB Cloud Serverless) mewajibkan koneksi TLS.
-function sslOptions(): { minVersion: 'TLSv1.2'; rejectUnauthorized: boolean } {
-  return { minVersion: 'TLSv1.2', rejectUnauthorized: true };
+// Opsional: DB_SSL_CA = isi PEM sertifikat CA (boleh pakai \n literal),
+// DB_SSL_REJECT_UNAUTHORIZED=false untuk menonaktifkan verifikasi (tidak disarankan).
+function sslOptions(): Record<string, unknown> {
+  const rejectUnauthorized =
+    String(process.env.DB_SSL_REJECT_UNAUTHORIZED || 'true').toLowerCase() !== 'false';
+  const opts: Record<string, unknown> = { minVersion: 'TLSv1.2', rejectUnauthorized };
+  const ca = process.env.DB_SSL_CA;
+  if (ca) opts.ca = ca.replace(/\\n/g, '\n');
+  return opts;
 }
 
 // Di serverless, batasi jumlah koneksi agar tidak menghabiskan kuota database.
