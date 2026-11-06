@@ -101,6 +101,14 @@ export const api = {
     return request('/auth/logout', { method: 'POST' });
   },
 
+  register(payload: { name: string; email: string; password: string }): Promise<{ user: ApiUser; responseCount: number }> {
+    return request('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+  },
+
+  loginWithPassword(payload: { email: string; password: string }): Promise<{ user: ApiUser; responseCount: number }> {
+    return request('/auth/login', { method: 'POST', body: JSON.stringify(payload) });
+  },
+
   billingConfig(): Promise<BillingConfig> {
     return request('/billing/config');
   },

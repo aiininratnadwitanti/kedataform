@@ -731,16 +731,21 @@ function MainApp() {
 
   // Called when user signs in - SELALU ARAHKAN KE DASHBOARD
   const handleUpdateUser = (updatedUser: UserAccount) => {
+    const wasAuthenticated = user.isAuthenticated;
     setUser(updatedUser);
     if (updatedUser.isAuthenticated) {
-      api
-        .updateMe({ name: updatedUser.name, avatarUrl: updatedUser.avatarUrl })
-        .catch((err) => console.error('Gagal memperbarui profil', err));
+      // Hanya simpan profil ke server kalau ini pembaruan profil pengguna yang sudah login.
+      // Saat login/daftar baru, jangan kirim updateMe (bisa menimpa avatar/nama).
+      if (wasAuthenticated) {
+        api
+          .updateMe({ name: updatedUser.name, avatarUrl: updatedUser.avatarUrl })
+          .catch((err) => console.error('Gagal memperbarui profil', err));
+      }
       setPendingTemplate(null);
       setIsLoginPage(false);
       setIsAuthModalOpen(false);
       setCurrentView('dashboard');
-      if (!user.isAuthenticated) {
+      if (!wasAuthenticated) {
         reloadFormsFromServer();
         reloadInvitations();
       }

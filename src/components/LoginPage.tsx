@@ -10,10 +10,13 @@ import {
   CheckCircle2, 
   ShieldCheck, 
   ArrowRight,
+  AlertCircle,
+  Loader2,
   User as UserIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserAccount } from '../types/form';
+import { api, toUserAccount } from '../utils/api';
 
 interface LoginPageProps {
   user: UserAccount;
@@ -30,12 +33,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot_password'>('login');
 
   // Form states
-  const [email, setEmail] = useState('rizkafaridadamayantii@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState('Rizka Farida Damayanti');
+  const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+
+  // Status pengiriman form
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Forgot password
   const [forgotEmail, setForgotEmail] = useState('');
@@ -43,7 +50,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   // Google sign in - alihkan ke OAuth 2.0 Google (server)
   const [isSimulatingGoogle, setIsSimulatingGoogle] = useState(false);
-  const [authNotice, setAuthNotice] = useState('');
 
   // Responsive check for desktop smooth sliding layout
   const [isDesktop, setIsDesktop] = useState(() => {
@@ -66,15 +72,58 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     window.location.href = '/api/v1/auth/google';
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Bersihkan pesan error saat berpindah mode (masuk / daftar)
+  useEffect(() => {
+    setErrorMessage('');
+  }, [mode]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
+
     if (mode === 'forgot_password') {
       if (forgotEmail.trim()) {
         setIsResetSent(true);
       }
       return;
     }
-    setAuthNotice('Saat ini pendaftaran & login hanya tersedia melalui Google. Klik tombol "Lanjutkan dengan Akun Google" di atas.');
+
+    const cleanEmail = email.trim();
+
+    if (mode === 'signup') {
+      if (name.trim().length < 2) {
+        setErrorMessage('Nama lengkap wajib diisi (minimal 2 karakter).');
+        return;
+      }
+      if (!cleanEmail) {
+        setErrorMessage('Alamat email wajib diisi.');
+        return;
+      }
+      if (password.length < 8) {
+        setErrorMessage('Kata sandi minimal 8 karakter.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMessage('Konfirmasi kata sandi belum sama.');
+        return;
+      }
+    } else if (!cleanEmail || !password) {
+      setErrorMessage('Email dan kata sandi wajib diisi.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const result =
+        mode === 'signup'
+          ? await api.register({ name: name.trim(), email: cleanEmail, password })
+          : await api.loginWithPassword({ email: cleanEmail, password });
+      onLogin(toUserAccount(result.user, result.responseCount ?? 0));
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Status apakah di mode signup (gambar ke kanan, form ke kiri)
@@ -274,9 +323,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               )}
 
               {/* Form Input Fields */}
-              {authNotice && (
-                <div className="p-3 rounded-xl bg-amber-50/90 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-100 text-[11px] leading-relaxed">
-                  {authNotice}
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-100 text-[11px] leading-relaxed flex items-start gap-2">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <span>{errorMessage}</span>
                 </div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -426,12 +476,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {/* Tombol Submit dengan Aksen Gold dan Teks Putih Tegas */}
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 rounded-xl bg-[var(--system-primary)] hover:opacity-90 active:scale-[0.99] text-[var(--system-primary-contrast)] text-xs font-bold tracking-wide transition-all shadow-md shadow-blue-950/20 border border-[var(--system-primary)] flex items-center justify-center gap-2 cursor-pointer mt-2"
+                  disabled={isSubmitting || isSimulatingGoogle}
+                  className="w-full py-3 px-4 rounded-xl bg-[var(--system-primary)] hover:opacity-90 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed text-[var(--system-primary-contrast)] text-xs font-bold tracking-wide transition-all shadow-md shadow-blue-950/20 border border-[var(--system-primary)] flex items-center justify-center gap-2 cursor-pointer mt-2"
                 >
-                  {mode === 'login' && <span className="font-bold">Masuk ke Studio Sekarang</span>}
-                  {mode === 'signup' && <span className="font-bold">Daftar Akun</span>}
+                  {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {mode === 'login' && <span className="font-bold">{isSubmitting ? 'Memproses...' : 'Masuk ke Studio Sekarang'}</span>}
+                  {mode === 'signup' && <span className="font-bold">{isSubmitting ? 'Membuat akun...' : 'Daftar Akun'}</span>}
                   {mode === 'forgot_password' && <span className="font-bold">Kirim Tautan Pemulihan</span>}
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  {!isSubmitting && <ArrowRight className="w-3.5 h-3.5" />}
                 </button>
               </form>
 

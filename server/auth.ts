@@ -107,6 +107,35 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 }
 
+const SCRYPT_KEYLEN = 64;
+
+/** Hash kata sandi memakai scrypt (bawaan Node, tanpa dependensi tambahan). */
+export function hashPassword(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString('hex');
+    crypto.scrypt(password, salt, SCRYPT_KEYLEN, (err, derived) => {
+      if (err) return reject(err);
+      resolve(`scrypt$${salt}$${derived.toString('hex')}`);
+    });
+  });
+}
+
+/** Verifikasi kata sandi terhadap hash tersimpan (timing-safe). */
+export async function verifyPassword(password: string, stored?: string | null): Promise<boolean> {
+  if (!stored) return false;
+  const [scheme, salt, hash] = stored.split('$');
+  if (scheme !== 'scrypt' || !salt || !hash) return false;
+  const expected = Buffer.from(hash, 'hex');
+  if (!expected.length) return false;
+  const derived = await new Promise<Buffer>((resolve, reject) => {
+    crypto.scrypt(password, salt, expected.length, (err, out) => {
+      if (err) return reject(err);
+      resolve(out);
+    });
+  });
+  return derived.length === expected.length && crypto.timingSafeEqual(derived, expected);
+}
+
 export function googleAuthUrl(state: string): string {
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID || '',

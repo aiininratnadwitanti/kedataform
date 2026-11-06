@@ -14,6 +14,9 @@ import {
   upsertGoogleUser,
   appUrl,
   useSecureCookies,
+  adminEmails,
+  hashPassword,
+  verifyPassword,
 } from './auth';
 import { sendInviteEmail, isMailConfigured } from './mailer';
 import {
@@ -337,6 +340,65 @@ router.get(
       console.error('[auth] google callback failed', err?.message);
       res.redirect(`/?auth=error`);
     }
+  })
+);
+
+router.post(
+  '/auth/register',
+  asyncH(async (req, res) => {
+    const { name, email, password } = req.body || {};
+    const cleanName = String(name || '').trim();
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const pass = String(password || '');
+
+    if (cleanName.length < 2) return fail(res, 400, 'Nama lengkap wajib diisi (minimal 2 karakter).');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) return fail(res, 400, 'Alamat email tidak valid.');
+    if (pass.length < 8) return fail(res, 400, 'Kata sandi minimal 8 karakter.');
+
+    const existing = await q<Row[]>(`SELECT id, password_hash FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1`, [cleanEmail]);
+    if (existing.length) {
+      return fail(res, 409, 'Email sudah terdaftar. Silakan masuk, atau gunakan email lain.');
+    }
+
+    const id = `u_${crypto.randomUUID()}`;
+    const passwordHash = await hashPassword(pass);
+    const isAdmin = adminEmails().includes(cleanEmail) ? 1 : 0;
+    await q(
+      `INSERT INTO users (id, google_id, name, email, password_hash, avatar_url, plan, max_free_responses, is_admin, created_at, updated_at)
+       VALUES (?, NULL, ?, ?, ?, '', 'free', 100, ?, NOW(), NOW())`,
+      [id, cleanName, cleanEmail, passwordHash, isAdmin]
+    );
+    const created = await q<Row[]>(`SELECT * FROM users WHERE id = ?`, [id]);
+    await createSession(id, req, res);
+    ok(res, { user: mapUser(created[0]), responseCount: 0 }, 'Akun berhasil dibuat');
+  })
+);
+
+router.post(
+  '/auth/login',
+  asyncH(async (req, res) => {
+    const { email, password } = req.body || {};
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const pass = String(password || '');
+
+    if (!cleanEmail || !pass) return fail(res, 400, 'Email dan kata sandi wajib diisi.');
+
+    const rows = await q<Row[]>(`SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1`, [cleanEmail]);
+    const user = rows[0];
+    if (!user) return fail(res, 401, 'Email atau kata sandi salah.');
+    if (!user.password_hash) {
+      return fail(res, 401, 'Akun ini terdaftar lewat Google. Silakan masuk dengan tombol "Lanjutkan dengan Akun Google".');
+    }
+    if (!(await verifyPassword(pass, user.password_hash))) {
+      return fail(res, 401, 'Email atau kata sandi salah.');
+    }
+
+    await createSession(user.id, req, res);
+    const counts = await q<{ c: number }[]>(
+      `SELECT COUNT(*) AS c FROM submissions s JOIN forms f ON f.id = s.form_id WHERE f.user_id = ?`,
+      [user.id]
+    );
+    ok(res, { user: mapUser(user), responseCount: Number(counts[0]?.c || 0) }, 'Berhasil masuk');
   })
 );
 
