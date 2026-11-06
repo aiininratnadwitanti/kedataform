@@ -5,6 +5,14 @@ import { q, Row } from './db';
 export const SESSION_COOKIE = 'kdf_session';
 const SESSION_TTL_DAYS = 30;
 
+// Cookie `secure` hanya saat aplikasi disajikan lewat HTTPS (mis. di Vercel),
+// agar login tetap berfungsi di lokal (http://localhost).
+function useSecureCookies(): boolean {
+  if (String(process.env.COOKIE_SECURE || '').toLowerCase() === 'true') return true;
+  if (String(process.env.COOKIE_SECURE || '').toLowerCase() === 'false') return false;
+  return (process.env.APP_URL || '').startsWith('https://');
+}
+
 export function adminEmails(): string[] {
   return (process.env.ADMIN_EMAILS || '')
     .split(',')
@@ -52,7 +60,7 @@ export async function createSession(userId: string, req: Request, res: Response)
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: false,
+    secure: useSecureCookies(),
     maxAge: SESSION_TTL_DAYS * 24 * 60 * 60 * 1000,
     path: '/',
   });
@@ -64,7 +72,7 @@ export async function destroySession(req: Request, res: Response): Promise<void>
   if (token) {
     await q(`DELETE FROM sessions WHERE token = ?`, [token]);
   }
-  res.clearCookie(SESSION_COOKIE, { path: '/' });
+  res.clearCookie(SESSION_COOKIE, { path: '/', sameSite: 'lax', secure: useSecureCookies() });
 }
 
 export async function currentUser(req: Request): Promise<Row | null> {

@@ -12,17 +12,36 @@ const baseConfig = {
   password: process.env.DB_PASSWORD ?? '',
 };
 
+function useSsl(): boolean {
+  return String(process.env.DB_SSL || '').toLowerCase() === 'true';
+}
+
+// MySQL terkelola (mis. TiDB Cloud Serverless) mewajibkan koneksi TLS.
+function sslOptions(): { minVersion: 'TLSv1.2'; rejectUnauthorized: boolean } {
+  return { minVersion: 'TLSv1.2', rejectUnauthorized: true };
+}
+
+// Di serverless, batasi jumlah koneksi agar tidak menghabiskan kuota database.
+const isServerless = Boolean(process.env.VERCEL);
+const connectionLimit = Number(process.env.DB_CONN_LIMIT) || (isServerless ? 3 : 10);
+
 export const pool = mysql.createPool({
   ...baseConfig,
   database: DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit,
   queueLimit: 0,
   charset: 'utf8mb4',
+  ...(useSsl() ? { ssl: sslOptions() } : {}),
 });
 
 export async function ensureDatabase(): Promise<void> {
-  const conn = await mysql.createConnection(baseConfig);
+  // Database terkelola biasanya sudah disediakan provider (tidak boleh CREATE DATABASE).
+  if (String(process.env.DB_SKIP_CREATE || '').toLowerCase() === 'true') return;
+  const conn = await mysql.createConnection({
+    ...baseConfig,
+    ...(useSsl() ? { ssl: sslOptions() } : {}),
+  });
   try {
     await conn.query(
       `CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
