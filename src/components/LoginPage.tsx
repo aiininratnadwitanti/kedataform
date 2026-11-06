@@ -6,6 +6,7 @@ import {
   Lock, 
   Eye,
   EyeOff,
+  CheckCircle2,
   ShieldCheck,
   ArrowRight,
   AlertCircle,
@@ -39,6 +40,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   // Status pengiriman form
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Google sign in - alihkan ke OAuth 2.0 Google (server)
   const [isSimulatingGoogle, setIsSimulatingGoogle] = useState(false);
@@ -64,14 +66,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     window.location.href = '/api/v1/auth/google';
   };
 
-  // Bersihkan pesan error saat berpindah mode (masuk / daftar)
-  useEffect(() => {
+  // Berpindah antara mode Masuk dan Daftar (sambil membersihkan pesan)
+  const switchMode = (next: 'login' | 'signup') => {
     setErrorMessage('');
-  }, [mode]);
+    setSuccessMessage('');
+    setMode(next);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+    setSuccessMessage('');
 
     const cleanEmail = email.trim();
 
@@ -99,11 +104,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     setIsSubmitting(true);
     try {
-      const result =
-        mode === 'signup'
-          ? await api.register({ name: name.trim(), email: cleanEmail, password })
-          : await api.loginWithPassword({ email: cleanEmail, password });
-      onLogin(toUserAccount(result.user, result.responseCount ?? 0));
+      if (mode === 'signup') {
+        await api.register({ name: name.trim(), email: cleanEmail, password });
+        // Daftar berhasil -> kembali ke form Masuk (tidak langsung masuk dashboard).
+        setName('');
+        setPassword('');
+        setConfirmPassword('');
+        setEmail(cleanEmail);
+        setMode('login');
+        setSuccessMessage('Akun berhasil dibuat. Silakan masuk dengan email dan kata sandi Anda.');
+      } else {
+        const result = await api.loginWithPassword({ email: cleanEmail, password });
+        onLogin(toUserAccount(result.user, result.responseCount ?? 0));
+      }
     } catch (err: any) {
       setErrorMessage(err?.message || 'Terjadi kesalahan. Silakan coba lagi.');
     } finally {
@@ -304,6 +317,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
 
               {/* Form Input Fields */}
+              {successMessage && (
+                <div className="p-3 rounded-xl bg-emerald-50/90 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-100 text-[11px] leading-relaxed flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
               {errorMessage && (
                 <div className="p-3 rounded-xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-100 text-[11px] leading-relaxed flex items-start gap-2">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
@@ -430,7 +449,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     Belum memiliki akun?{' '}
                     <button
                       type="button"
-                      onClick={() => setMode('signup')}
+                      onClick={() => switchMode('signup')}
                       className="text-[var(--system-primary)] hover:opacity-80 hover:underline font-bold cursor-pointer"
                     >
                       Daftar akun
@@ -441,7 +460,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     Sudah memiliki akun?{' '}
                     <button
                       type="button"
-                      onClick={() => setMode('login')}
+                      onClick={() => switchMode('login')}
                       className="text-[var(--system-primary)] hover:opacity-80 hover:underline font-bold cursor-pointer"
                     >
                       Masuk

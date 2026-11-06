@@ -369,8 +369,8 @@ router.post(
       [id, cleanName, cleanEmail, passwordHash, isAdmin]
     );
     const created = await q<Row[]>(`SELECT * FROM users WHERE id = ?`, [id]);
-    await createSession(id, req, res);
-    ok(res, { user: mapUser(created[0]), responseCount: 0 }, 'Akun berhasil dibuat');
+    // Sengaja TIDAK membuat sesi di sini: pengguna diarahkan untuk masuk dulu.
+    ok(res, { user: mapUser(created[0]), responseCount: 0 }, 'Akun berhasil dibuat. Silakan masuk.');
   })
 );
 
