@@ -75,8 +75,24 @@ MIDTRANS_CLIENT_KEY=<client-key>
 ## Catatan teknis
 
 - Semua `/api/*` diarahkan ke satu function lewat `rewrites` di `vercel.json`; SPA diarahkan ke `index.html`.
+- **Function API di-bundle dengan esbuild** (`npm run build:api` → `build/server.cjs`).
+  Vercel hanya men-transpile `api/index.ts` tanpa mem-bundle dependensinya, sehingga impor
+  langsung ke `server/**` gagal (`ERR_MODULE_NOT_FOUND`). `api/index.ts` kini memuat bundle itu.
 - `express.static()` tidak dipakai di Vercel (static disajikan dari `dist/` oleh Vercel).
 - **Batas body request Vercel = 4.5 MB** (Hobby). Upload gambar base64 yang lebih besar akan gagal
   dengan `413 FUNCTION_PAYLOAD_TOO_LARGE`. Untuk gambar besar, gunakan object storage (mis. Vercel Blob).
 - **Cold start**: function bisa "bangun" lebih lambat pada request pertama.
 - Jalankan lokal dengan `npm run dev` seperti biasa (perubahan ini tidak mengubah alur lokal).
+
+## Skema database
+
+Skema dibuat **otomatis** oleh aplikasi (`ensureSchema` di `server/schema.ts`) saat request pertama.
+Kalau provider MySQL-mu tidak mengizinkan pembuatan tabel otomatis, impor manual:
+
+```bash
+mysql -h <host> -P <port> -u <user> -p < docs/schema.sql
+```
+
+`docs/schema.sql` berisi struktur 11 tabel (users, sessions, forms, questions, submissions,
+folders, form_collaborators, system_settings, templates, payments, ai_chat_sessions).
+
