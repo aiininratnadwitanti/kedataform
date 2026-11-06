@@ -11,6 +11,7 @@ import {
   ArrowRight,
   AlertCircle,
   Loader2,
+  KeyRound,
   User as UserIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,6 +43,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  // Verifikasi email (OTP) saat daftar
+  const [otp, setOtp] = useState('');
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [otpSentTo, setOtpSentTo] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   // Google sign in - alihkan ke OAuth 2.0 Google (server)
   const [isSimulatingGoogle, setIsSimulatingGoogle] = useState(false);
 
@@ -66,11 +73,57 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     window.location.href = '/api/v1/auth/google';
   };
 
+  // Hitung mundur untuk "Kirim ulang kode"
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
   // Berpindah antara mode Masuk dan Daftar (sambil membersihkan pesan)
   const switchMode = (next: 'login' | 'signup') => {
     setErrorMessage('');
     setSuccessMessage('');
+    setOtp('');
+    setOtpSentTo('');
+    setResendCooldown(0);
     setMode(next);
+  };
+
+  // Kirim kode verifikasi (OTP) ke email saat pendaftaran
+  const handleSendOtp = async () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    const cleanEmail = email.trim();
+
+    if (name.trim().length < 2) {
+      setErrorMessage('Nama lengkap wajib diisi (minimal 2 karakter).');
+      return;
+    }
+    if (!cleanEmail) {
+      setErrorMessage('Alamat email wajib diisi.');
+      return;
+    }
+    if (password.length < 8) {
+      setErrorMessage('Kata sandi minimal 8 karakter.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrorMessage('Konfirmasi kata sandi belum sama.');
+      return;
+    }
+
+    setIsSendingOtp(true);
+    try {
+      await api.requestOtp({ email: cleanEmail, name: name.trim() });
+      setOtpSentTo(cleanEmail);
+      setResendCooldown(60);
+      setSuccessMessage(`Kode verifikasi dikirim ke ${cleanEmail}. Masukkan 6 digit kode di bawah.`);
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Gagal mengirim kode verifikasi.');
+    } finally {
+      setIsSendingOtp(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,6 +150,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         setErrorMessage('Konfirmasi kata sandi belum sama.');
         return;
       }
+      if (!/^\d{6}$/.test(otp.trim())) {
+        setErrorMessage('Masukkan 6 digit kode verifikasi yang dikirim ke email Anda.');
+        return;
+      }
     } else if (!cleanEmail || !password) {
       setErrorMessage('Email dan kata sandi wajib diisi.');
       return;
@@ -105,11 +162,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setIsSubmitting(true);
     try {
       if (mode === 'signup') {
-        await api.register({ name: name.trim(), email: cleanEmail, password });
+        await api.register({ name: name.trim(), email: cleanEmail, password, otp: otp.trim() });
         // Daftar berhasil -> kembali ke form Masuk (tidak langsung masuk dashboard).
         setName('');
         setPassword('');
         setConfirmPassword('');
+        setOtp('');
+        setOtpSentTo('');
+        setResendCooldown(0);
         setEmail(cleanEmail);
         setMode('login');
         setSuccessMessage('Akun berhasil dibuat. Silakan masuk dengan email dan kata sandi Anda.');
@@ -410,6 +470,43 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--system-border)] focus:border-[var(--system-primary)] focus:ring-2 focus:ring-[var(--system-primary)]/20 text-xs bg-[var(--system-surface)] text-[var(--system-text)] outline-none transition-all placeholder:text-[var(--system-text-muted)]"
                       />
                     </div>
+                  </div>
+                )}
+
+                {/* Verifikasi Email dengan OTP (Sign Up) */}
+                {mode === 'signup' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--system-text)] mb-1.5">
+                      Kode Verifikasi Email
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <KeyRound className="w-4 h-4 text-[var(--system-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="6 digit kode"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--system-border)] focus:border-[var(--system-primary)] focus:ring-2 focus:ring-[var(--system-primary)]/20 text-xs bg-[var(--system-surface)] text-[var(--system-text)] outline-none transition-all placeholder:text-[var(--system-text-muted)] tracking-[0.25em]"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={isSendingOtp || resendCooldown > 0}
+                        className="shrink-0 px-3 py-2.5 text-xs font-bold rounded-xl border border-[var(--system-primary)] text-[var(--system-primary)] hover:bg-[var(--system-primary)]/10 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
+                      >
+                        {isSendingOtp && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                        <span>{resendCooldown > 0 ? `Kirim ulang (${resendCooldown}s)` : 'Kirim kode'}</span>
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-[var(--system-text-muted)] mt-1.5">
+                      {otpSentTo
+                        ? `Kode dikirim ke ${otpSentTo}. Cek juga folder spam jika tidak masuk.`
+                        : 'Klik "Kirim kode" untuk menerima kode verifikasi di email Anda.'}
+                    </p>
                   </div>
                 )}
 

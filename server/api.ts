@@ -18,7 +18,7 @@ import {
   hashPassword,
   verifyPassword,
 } from './auth';
-import { sendInviteEmail, isMailConfigured } from './mailer';
+import { sendInviteEmail, sendOtpEmail, isMailConfigured } from './mailer';
 import {
   midtransConfigured,
   midtransClientConfig,
@@ -343,21 +343,86 @@ router.get(
   })
 );
 
+const OTP_TTL_MINUTES = 10;
+const OTP_MAX_ATTEMPTS = 5;
+const OTP_RESEND_COOLDOWN_SECONDS = 60;
+
+router.post(
+  '/auth/request-otp',
+  asyncH(async (req, res) => {
+    const { email, name } = req.body || {};
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanName = String(name || '').trim();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) return fail(res, 400, 'Alamat email tidak valid.');
+    if (!isMailConfigured()) {
+      return fail(res, 503, 'Pengiriman email belum dikonfigurasi di server, sehingga kode verifikasi tidak bisa dikirim.');
+    }
+
+    const existing = await q<Row[]>(`SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1`, [cleanEmail]);
+    if (existing.length) return fail(res, 409, 'Email sudah terdaftar. Silakan masuk, atau gunakan email lain.');
+
+    const recent = await q<Row[]>(
+      `SELECT created_at FROM email_otps
+       WHERE email = ? AND created_at > DATE_SUB(NOW(), INTERVAL ${OTP_RESEND_COOLDOWN_SECONDS} SECOND)
+       LIMIT 1`,
+      [cleanEmail]
+    );
+    if (recent.length) {
+      return fail(res, 429, `Kode baru saja dikirim. Tunggu ${OTP_RESEND_COOLDOWN_SECONDS} detik sebelum minta kode lagi.`);
+    }
+
+    const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+    const codeHash = await hashPassword(code);
+    await q(
+      `INSERT INTO email_otps (email, code_hash, attempts, expires_at, created_at)
+       VALUES (?, ?, 0, DATE_ADD(NOW(), INTERVAL ${OTP_TTL_MINUTES} MINUTE), NOW())
+       ON DUPLICATE KEY UPDATE code_hash = VALUES(code_hash), attempts = 0,
+         expires_at = VALUES(expires_at), created_at = NOW()`,
+      [cleanEmail, codeHash]
+    );
+
+    const sent = await sendOtpEmail({ to: cleanEmail, code, name: cleanName, expiresMinutes: OTP_TTL_MINUTES });
+    if (!sent.sent) {
+      return fail(res, 502, 'Gagal mengirim email verifikasi. Pastikan alamat email benar, lalu coba lagi.');
+    }
+    ok(res, { email: cleanEmail }, `Kode verifikasi dikirim ke ${cleanEmail}.`);
+  })
+);
+
 router.post(
   '/auth/register',
   asyncH(async (req, res) => {
-    const { name, email, password } = req.body || {};
+    const { name, email, password, otp } = req.body || {};
     const cleanName = String(name || '').trim();
     const cleanEmail = String(email || '').trim().toLowerCase();
     const pass = String(password || '');
+    const code = String(otp || '').trim();
 
     if (cleanName.length < 2) return fail(res, 400, 'Nama lengkap wajib diisi (minimal 2 karakter).');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) return fail(res, 400, 'Alamat email tidak valid.');
     if (pass.length < 8) return fail(res, 400, 'Kata sandi minimal 8 karakter.');
+    if (!/^\d{6}$/.test(code)) return fail(res, 400, 'Masukkan 6 digit kode verifikasi yang dikirim ke email Anda.');
 
-    const existing = await q<Row[]>(`SELECT id, password_hash FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1`, [cleanEmail]);
-    if (existing.length) {
-      return fail(res, 409, 'Email sudah terdaftar. Silakan masuk, atau gunakan email lain.');
+    const existing = await q<Row[]>(`SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1`, [cleanEmail]);
+    if (existing.length) return fail(res, 409, 'Email sudah terdaftar. Silakan masuk, atau gunakan email lain.');
+
+    const otpRows = await q<Row[]>(
+      `SELECT code_hash, attempts, (expires_at < NOW()) AS expired FROM email_otps WHERE email = ? LIMIT 1`,
+      [cleanEmail]
+    );
+    const otpRow = otpRows[0];
+    if (!otpRow) return fail(res, 400, 'Kode verifikasi tidak ditemukan. Klik "Kirim kode" terlebih dahulu.');
+    if (Number(otpRow.expired) === 1) {
+      await q(`DELETE FROM email_otps WHERE email = ?`, [cleanEmail]);
+      return fail(res, 400, 'Kode verifikasi sudah kedaluwarsa. Silakan minta kode baru.');
+    }
+    if (Number(otpRow.attempts) >= OTP_MAX_ATTEMPTS) {
+      return fail(res, 429, 'Terlalu banyak percobaan salah. Silakan minta kode baru.');
+    }
+    if (!(await verifyPassword(code, otpRow.code_hash))) {
+      await q(`UPDATE email_otps SET attempts = attempts + 1 WHERE email = ?`, [cleanEmail]);
+      return fail(res, 400, 'Kode verifikasi salah.');
     }
 
     const id = `u_${crypto.randomUUID()}`;
@@ -368,6 +433,7 @@ router.post(
        VALUES (?, NULL, ?, ?, ?, '', 'free', 100, ?, NOW(), NOW())`,
       [id, cleanName, cleanEmail, passwordHash, isAdmin]
     );
+    await q(`DELETE FROM email_otps WHERE email = ?`, [cleanEmail]);
     const created = await q<Row[]>(`SELECT * FROM users WHERE id = ?`, [id]);
     // Sengaja TIDAK membuat sesi di sini: pengguna diarahkan untuk masuk dulu.
     ok(res, { user: mapUser(created[0]), responseCount: 0 }, 'Akun berhasil dibuat. Silakan masuk.');

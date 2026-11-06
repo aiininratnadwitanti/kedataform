@@ -208,6 +208,15 @@ export async function ensureSchema(): Promise<void> {
     KEY idx_templates_category (category)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
 
+  await q(`CREATE TABLE IF NOT EXISTS email_otps (
+    email VARCHAR(255) NOT NULL PRIMARY KEY,
+    code_hash VARCHAR(255) NOT NULL,
+    attempts INT NOT NULL DEFAULT 0,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_email_otps_expires (expires_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+
   await seedTemplates();
 }
 

@@ -37,6 +37,58 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
+export interface OtpEmailParams {
+  to: string;
+  code: string;
+  name?: string;
+  expiresMinutes: number;
+}
+
+export async function sendOtpEmail(params: OtpEmailParams): Promise<{ sent: boolean; error?: string }> {
+  if (!isMailConfigured()) return { sent: false, error: 'not_configured' };
+
+  const { to, code, name, expiresMinutes } = params;
+  const subject = `Kode verifikasi KeDataForm: ${code}`;
+
+  const html = `<!doctype html>
+<html lang="id">
+  <body style="margin:0;padding:0;background:#F3F8FD;font-family:Arial,Helvetica,sans-serif;">
+    <div style="max-width:560px;margin:24px auto;background:#ffffff;border:1px solid #bfdbfe;border-radius:16px;overflow:hidden;">
+      <div style="background:#223A5E;padding:22px 26px;color:#ffffff;">
+        <div style="font-size:11px;letter-spacing:2px;font-weight:700;opacity:0.8;">KEDATAFORM</div>
+        <div style="font-size:20px;font-weight:800;margin-top:4px;">Verifikasi Pendaftaran</div>
+      </div>
+      <div style="padding:26px;color:#0f172a;font-size:14px;line-height:1.6;">
+        <p style="margin:0 0 12px;">Halo${name ? ` <strong>${escapeHtml(name)}</strong>` : ''},</p>
+        <p style="margin:0 0 16px;">Gunakan kode berikut untuk menyelesaikan pendaftaran akun KeDataForm Anda:</p>
+        <p style="margin:0 0 18px;">
+          <span style="display:inline-block;font-size:30px;font-weight:800;letter-spacing:8px;color:#223A5E;background:#F3F8FD;border:1px dashed #93c5fd;border-radius:12px;padding:14px 24px;">${escapeHtml(code)}</span>
+        </p>
+        <p style="margin:0 0 8px;">Kode ini berlaku selama <strong>${expiresMinutes} menit</strong>.</p>
+        <p style="font-size:12px;color:#64748b;margin:0;">Jika Anda tidak merasa mendaftar di KeDataForm, abaikan saja email ini.</p>
+      </div>
+    </div>
+  </body>
+</html>`;
+
+  const text = [
+    'Verifikasi Pendaftaran KeDataForm',
+    '',
+    `Kode verifikasi Anda: ${code}`,
+    `Berlaku ${expiresMinutes} menit.`,
+    '',
+    'Jika Anda tidak merasa mendaftar, abaikan email ini.',
+  ].join('\n');
+
+  try {
+    await getTransporter().sendMail({ from: mailFrom, to, subject, html, text });
+    return { sent: true };
+  } catch (error: any) {
+    console.error('[mailer] Gagal mengirim email OTP:', error?.message || error);
+    return { sent: false, error: error?.message || 'send_failed' };
+  }
+}
+
 export interface InviteEmailParams {
   to: string;
   formTitle: string;

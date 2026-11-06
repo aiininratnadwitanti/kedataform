@@ -101,8 +101,12 @@ export const api = {
     return request('/auth/logout', { method: 'POST' });
   },
 
-  register(payload: { name: string; email: string; password: string }): Promise<{ user: ApiUser; responseCount: number }> {
+  register(payload: { name: string; email: string; password: string; otp: string }): Promise<{ user: ApiUser; responseCount: number }> {
     return request('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+  },
+
+  requestOtp(payload: { email: string; name?: string }): Promise<{ email: string }> {
+    return request('/auth/request-otp', { method: 'POST', body: JSON.stringify(payload) });
   },
 
   loginWithPassword(payload: { email: string; password: string }): Promise<{ user: ApiUser; responseCount: number }> {
