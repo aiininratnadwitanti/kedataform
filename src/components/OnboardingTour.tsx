@@ -154,7 +154,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
       {/* Soft translucent backdrop */}
       <div 
         onClick={handleComplete}
-        className="fixed inset-0 bg-stone-900/30 backdrop-blur-2xs transition-opacity duration-200" 
+        className="fixed inset-0 bg-slate-900/30 backdrop-blur-2xs transition-opacity duration-200" 
       />
 
       {/* Subtle border highlight around target element */}
@@ -166,7 +166,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           width: rect.width + 12,
           height: rect.height + 12,
         }}
-        className="z-20 pointer-events-none rounded-xl border-2 border-amber-400/90 shadow-sm"
+        className="z-20 pointer-events-none rounded-xl border-2 border-blue-400/90 shadow-sm"
       />
 
       {/* Clean minimal cream card tooltip with text and button */}
@@ -177,14 +177,14 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           left: bubbleLeft,
           width: bubbleWidth,
         }}
-        className="z-30 bg-[#faf8f5] text-stone-900 rounded-2xl border border-amber-300/90 shadow-lg p-4 space-y-3 animate-in fade-in duration-150"
+        className="z-30 bg-[#F3F8FD] text-slate-900 rounded-2xl border border-blue-300/90 shadow-lg p-4 space-y-3 animate-in fade-in duration-150"
       >
         <div className="flex items-start justify-between gap-2">
           <div>
-            <span className="text-[10px] font-mono font-bold uppercase text-[#b48328] tracking-wider">
+            <span className="text-[10px] font-mono font-bold uppercase text-[#223A5E] tracking-wider">
               Panduan {step.stepNumber}
             </span>
-            <h4 className="text-sm font-bold text-stone-900 mt-0.5">
+            <h4 className="text-sm font-bold text-slate-900 mt-0.5">
               {step.title}
             </h4>
           </div>
@@ -192,14 +192,14 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           <button
             type="button"
             onClick={handleComplete}
-            className="p-1 text-stone-400 hover:text-stone-700 hover:bg-amber-100/60 rounded-lg transition-colors cursor-pointer"
+            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-blue-100/60 rounded-lg transition-colors cursor-pointer"
             title="Tutup"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <p className="text-xs text-stone-600 leading-relaxed">
+        <p className="text-xs text-slate-600 leading-relaxed">
           {step.description}
         </p>
 
@@ -208,7 +208,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
             <button
               type="button"
               onClick={handlePrev}
-              className="text-xs font-semibold text-stone-600 hover:text-stone-900 px-2 py-1 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer"
+              className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
             >
               Sebelumnya
             </button>
@@ -217,7 +217,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           <button
             type="button"
             onClick={handleNext}
-            className="px-4 py-1.5 bg-[#b48328] hover:bg-[#966816] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+            className="px-4 py-1.5 bg-[#223A5E] hover:bg-[#1a2d4a] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
           >
             {isLast ? 'Selesai' : 'Lanjut'}
           </button>

@@ -64,7 +64,7 @@ export function checkFormAvailability(schedule?: FormScheduleConfig): FormAvaila
         return {
           isOpen: false,
           badgeText: 'Segera',
-          badgeColor: 'bg-amber-100 text-amber-800 border-amber-200',
+          badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
           reasonText: schedule.notOpenYetMessage || `Formulir dibuka pada ${schedule.openDate} (${openTimeStr} WIB).`,
         };
       }

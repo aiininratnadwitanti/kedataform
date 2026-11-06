@@ -132,15 +132,15 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
 
   // Default theme
   const theme = {
-    primaryColor: isQuiz ? '#b48328' : '#ea580c',
-    canvasBg: '#faf8f5',
+    primaryColor: isQuiz ? '#223A5E' : '#ea580c',
+    canvasBg: '#F3F8FD',
     cardBg: '#ffffff',
     cardOpacity: 100,
-    textColor: '#1c1917',
+    textColor: '#0f172a',
     canvasPattern: 'dots' as const,
     headerBannerType: 'preset' as const,
     headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-    headerGradient: 'linear-gradient(135deg, #b48328 0%, #ea580c 100%)',
+    headerGradient: 'linear-gradient(135deg, #223A5E 0%, #ea580c 100%)',
     headerOverlayOpacity: 30,
     headerPosition: 'banner_top' as const,
     showLogo: false,
@@ -336,8 +336,8 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
         description: 'Uji kompetensi Bahasa Inggris: Tenses (Past & Perfect), Subject-Verb Agreement, Prepositions, Passive Voice, Conditional Sentences, serta Vocabulary & Antonyms.',
         theme: {
           ...theme,
-          primaryColor: '#b48328',
-          headerGradient: 'linear-gradient(135deg, #1e3a8a 0%, #b48328 100%)',
+          primaryColor: '#223A5E',
+          headerGradient: 'linear-gradient(135deg, #1e3a8a 0%, #223A5E 100%)',
         },
         quizConfig: {
           isQuizMode: true,
@@ -373,8 +373,8 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
         description: 'Uji kompetensi matematika Kurikulum Merdeka / K13 Kelas 6 SD: Operasi Pecahan, Volume Bangun Ruang, FPB & KPK, Perbandingan Skala Peta, dan Rata-rata Nilai.',
         theme: {
           ...theme,
-          primaryColor: '#b48328',
-          headerGradient: 'linear-gradient(135deg, #b48328 0%, #d97706 100%)',
+          primaryColor: '#223A5E',
+          headerGradient: 'linear-gradient(135deg, #223A5E 0%, #d97706 100%)',
         },
         quizConfig: {
           isQuizMode: true,
@@ -471,8 +471,8 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
         description: 'Evaluasi pemahaman konsep IPA dasar: Rantai Makanan, Fotosintesis, Tata Surya, dan Energi.',
         theme: {
           ...theme,
-          primaryColor: '#b48328',
-          headerGradient: 'linear-gradient(135deg, #b48328 0%, #15803d 100%)',
+          primaryColor: '#223A5E',
+          headerGradient: 'linear-gradient(135deg, #223A5E 0%, #15803d 100%)',
         },
         quizConfig: {
           isQuizMode: true,
@@ -554,8 +554,8 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
         description: 'Uji pemahaman kaidah Bahasa Indonesia: Ide Pokok Paragraf, Majas (Gaya Bahasa), Kata Baku EYD, dan Struktur Teks.',
         theme: {
           ...theme,
-          primaryColor: '#b48328',
-          headerGradient: 'linear-gradient(135deg, #991b1b 0%, #b48328 100%)',
+          primaryColor: '#223A5E',
+          headerGradient: 'linear-gradient(135deg, #991b1b 0%, #223A5E 100%)',
         },
         quizConfig: {
           isQuizMode: true,
@@ -652,8 +652,8 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
         description: 'Uji wawasan sejarah perjuangan bangsa, peristiwa penting kemerdekaan, dan nilai-nilai luhur Pancasila.',
         theme: {
           ...theme,
-          primaryColor: '#b48328',
-          headerGradient: 'linear-gradient(135deg, #78350f 0%, #b48328 100%)',
+          primaryColor: '#223A5E',
+          headerGradient: 'linear-gradient(135deg, #78350f 0%, #223A5E 100%)',
         },
         quizConfig: {
           isQuizMode: true,
@@ -1104,15 +1104,15 @@ export async function generateFormWithAI(params: AiGenerationPrompt): Promise<Fo
           title: cleanTitle,
           description: parsed.description || (isQuiz ? 'Silakan kerjakan butir soal berikut dengan teliti.' : 'Silakan isi data yang dibutuhkan di bawah ini.'),
           theme: {
-            primaryColor: isQuiz ? '#b48328' : '#ea580c',
-            canvasBg: '#faf8f5',
+            primaryColor: isQuiz ? '#223A5E' : '#ea580c',
+            canvasBg: '#F3F8FD',
             cardBg: '#ffffff',
             cardOpacity: 100,
-            textColor: '#1c1917',
+            textColor: '#0f172a',
             canvasPattern: 'dots',
             headerBannerType: 'preset',
             headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-            headerGradient: 'linear-gradient(135deg, #b48328 0%, #ea580c 100%)',
+            headerGradient: 'linear-gradient(135deg, #223A5E 0%, #ea580c 100%)',
             headerOverlayOpacity: 30,
             headerPosition: 'banner_top',
             showLogo: false,
@@ -1224,15 +1224,15 @@ Output ONLY raw JSON without markdown code fences.
             title: cleanTitle,
             description: parsed.description || 'Dibuat otomatis dengan asisten AI KeDataForm.',
             theme: {
-              primaryColor: isQuizRequested ? '#b48328' : '#ea580c',
-              canvasBg: '#faf8f5',
+              primaryColor: isQuizRequested ? '#223A5E' : '#ea580c',
+              canvasBg: '#F3F8FD',
               cardBg: '#ffffff',
               cardOpacity: 100,
-              textColor: '#1c1917',
+              textColor: '#0f172a',
               canvasPattern: 'dots',
               headerBannerType: 'preset',
               headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-              headerGradient: 'linear-gradient(135deg, #b48328 0%, #ea580c 100%)',
+              headerGradient: 'linear-gradient(135deg, #223A5E 0%, #ea580c 100%)',
               headerOverlayOpacity: 30,
               headerPosition: 'banner_top',
               showLogo: false,

@@ -2,17 +2,17 @@ import { FormSchema, FormSubmission, ThemeConfig } from '../types/form';
 
 export const defaultCanvaTheme: ThemeConfig = {
   // Warna & Latar: Putih Salju & Aksen Terracotta Serasi dengan Landing Page
-  primaryColor: '#b48328', // Terracotta Expedition matching landing page
-  canvasBg: '#faf8f5', // Snow white warm stone paper tone
+  primaryColor: '#223A5E', // Terracotta Expedition matching landing page
+  canvasBg: '#F3F8FD', // Snow white warm stone paper tone
   cardBg: '#ffffff', // Clean white
   cardOpacity: 100,
-  textColor: '#1c1917', // Obsidian Ink
+  textColor: '#0f172a', // Obsidian Ink
   canvasPattern: 'clean',
 
   // Header Cover
-  headerBannerType: 'preset',
-  headerCoverUrl: '/assets/aistudio/image_3ec5f637.png',
-  headerGradient: 'from-stone-900/40 via-stone-900/20 to-transparent',
+  headerBannerType: 'none',
+    headerCoverUrl: '',
+  headerGradient: 'from-slate-900/40 via-slate-900/20 to-transparent',
   headerOverlayOpacity: 10,
   headerPosition: 'banner_top',
 
@@ -58,12 +58,12 @@ export const CANVA_STYLE_TEMPLATES: {
     name: 'Modern Tech Studio',
     category: 'Startup & Bisnis',
     theme: {
-      primaryColor: '#b48328',
-      canvasBg: '#faf8f5',
+      primaryColor: '#223A5E',
+      canvasBg: '#F3F8FD',
       cardBg: '#ffffff',
       canvasPattern: 'dots',
-      headerBannerType: 'preset',
-      headerCoverUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+      headerBannerType: 'none',
+    headerCoverUrl: '',
       borderRadiusNum: 16,
       cardShadow: 'soft',
       fontFamily: 'sans',
@@ -77,14 +77,14 @@ export const CANVA_STYLE_TEMPLATES: {
     name: 'Warm Sunset Pastel',
     category: 'Estetika Pastel',
     theme: {
-      primaryColor: '#b48328',
+      primaryColor: '#223A5E',
       canvasBg: '#fffbf5',
       cardBg: '#ffffff',
-      textColor: '#1c1917',
+      textColor: '#0f172a',
       cardOpacity: 100,
       canvasPattern: 'clean',
-      headerBannerType: 'preset',
-      headerCoverUrl: '/assets/aistudio/image_3ec5f637.png',
+      headerBannerType: 'none',
+    headerCoverUrl: '',
       borderRadiusNum: 20,
       cardShadow: 'soft',
       fontFamily: 'serif',
@@ -103,10 +103,10 @@ export const CANVA_STYLE_TEMPLATES: {
       primaryColor: '#78350f',
       canvasBg: '#fbfaf8',
       cardBg: '#ffffff',
-      textColor: '#1c1917',
+      textColor: '#0f172a',
       canvasPattern: 'clean',
-      headerBannerType: 'preset',
-      headerCoverUrl: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80',
+      headerBannerType: 'none',
+    headerCoverUrl: '',
       borderRadiusNum: 4,
       cardShadow: 'none',
       cardBorderWidth: 1,
@@ -125,10 +125,10 @@ export const CANVA_STYLE_TEMPLATES: {
       primaryColor: '#f97316',
       canvasBg: '#fff7ed',
       cardBg: '#ffffff',
-      textColor: '#1c1917',
+      textColor: '#0f172a',
       canvasPattern: 'grid',
-      headerBannerType: 'preset',
-      headerCoverUrl: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80',
+      headerBannerType: 'none',
+    headerCoverUrl: '',
       borderRadiusNum: 24,
       cardShadow: 'floating',
       fontFamily: 'sans',

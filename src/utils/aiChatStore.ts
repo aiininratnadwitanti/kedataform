@@ -274,10 +274,10 @@ export const aiChatStore = {
       });
 
       if (generated.theme) {
-        generated.theme.canvasBg = '#faf8f5';
+        generated.theme.canvasBg = '#F3F8FD';
         generated.theme.cardBg = '#ffffff';
         generated.theme.cardBorderColor = '#fed7aa';
-        generated.theme.primaryColor = '#b48328';
+        generated.theme.primaryColor = '#223A5E';
       }
 
       const aiMsg: ChatMessage = {

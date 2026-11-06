@@ -197,19 +197,19 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 backdrop-blur-xs flex flex-col">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex flex-col">
       {/* Top Floating Control */}
-      <div className="sticky top-0 z-20 bg-white border-b border-amber-200/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
+      <div className="sticky top-0 z-20 bg-white border-b border-blue-200/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-stone-800">Pratinjau Hasil Desain Formulir</span>
-          <span className="text-amber-300">·</span>
-          <span className="text-xs text-stone-500 truncate max-w-sm">{form.title}</span>
+          <span className="text-xs font-semibold text-slate-800">Pratinjau Hasil Desain Formulir</span>
+          <span className="text-blue-300">·</span>
+          <span className="text-xs text-slate-500 max-w-sm break-words">{form.title}</span>
         </div>
 
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded-lg hover:bg-amber-100 text-stone-600 transition-colors cursor-pointer"
+          className="p-1 rounded-lg hover:bg-blue-100 text-slate-600 transition-colors cursor-pointer"
           title="Tutup pratinjau"
         >
           <X className="w-5 h-5" />
@@ -227,19 +227,27 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
         {/* Canvas pattern if active */}
         {theme.canvasPattern === 'dots' && (
           <div 
-            className="absolute inset-0 opacity-15 pointer-events-none"
+            className="absolute inset-0 opacity-40 pointer-events-none"
             style={{
-              backgroundImage: 'radial-gradient(#b48328 1px, transparent 1px)',
-              backgroundSize: '16px 16px'
+              backgroundImage: 'radial-gradient(#223A5E 1.5px, transparent 1.5px)',
+              backgroundSize: '18px 18px'
             }}
           />
         )}
         {theme.canvasPattern === 'grid' && (
           <div 
-            className="absolute inset-0 opacity-10 pointer-events-none"
+            className="absolute inset-0 opacity-25 pointer-events-none"
             style={{
-              backgroundImage: 'linear-gradient(#fed7aa 1px, transparent 1px), linear-gradient(90deg, #fed7aa 1px, transparent 1px)',
-              backgroundSize: '24px 24px'
+              backgroundImage: 'linear-gradient(#223A5E 1px, transparent 1px), linear-gradient(90deg, #223A5E 1px, transparent 1px)',
+              backgroundSize: '28px 28px'
+            }}
+          />
+        )}
+        {theme.canvasPattern === 'mesh' && (
+          <div 
+            className="absolute inset-0 opacity-30 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 20% 30%, #223A5E 0%, transparent 40%), radial-gradient(circle at 80% 70%, #223A5E 0%, transparent 40%)',
             }}
           />
         )}
@@ -259,32 +267,32 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
               {quizResult && form.quizConfig?.isQuizMode ? (
                 form.quizConfig.showScoreImmediately ? (
                   <>
-                    <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-white shadow-xs bg-[#b48328]">
+                    <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-white shadow-xs bg-[#223A5E]">
                       <Award className="w-7 h-7" />
                     </div>
 
                     <div>
-                      <h3 className="text-xl font-bold text-stone-900">Kuis Selesai!</h3>
-                      <p className="text-xs text-stone-600 mt-1">
+                      <h3 className="text-xl font-bold text-slate-900">Kuis Selesai!</h3>
+                      <p className="text-xs text-slate-600 mt-1">
                         Berikut hasil perolehan nilai untuk <strong>{form.title}</strong>:
                       </p>
                     </div>
 
                     {/* Score Card Display */}
-                    <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 my-3">
-                      <div className="text-3xl font-black text-[#b48328] tracking-tight font-mono">
-                        {quizResult.score} <span className="text-base font-normal text-stone-500">/ {quizResult.totalPossibleScore} Poin</span>
+                    <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 my-3">
+                      <div className="text-3xl font-black text-[#223A5E] tracking-tight font-mono">
+                        {quizResult.score} <span className="text-base font-normal text-slate-500">/ {quizResult.totalPossibleScore} Poin</span>
                       </div>
                       <div className="flex items-center justify-center gap-2 mt-2">
-                        <span className="text-xs font-bold text-stone-700 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                        <span className="text-xs font-bold text-slate-700 bg-blue-100 px-2.5 py-0.5 rounded-full">
                           Akurasi: {quizResult.percentage}%
                         </span>
                         <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                           quizResult.isPassed 
-                            ? 'bg-amber-100 text-amber-900 border border-amber-300' 
+                            ? 'bg-blue-100 text-blue-900 border border-blue-300' 
                             : 'bg-rose-50 text-rose-800 border border-rose-200'
                         }`}>
-                          {quizResult.isPassed ? <CheckCircle2 className="w-3.5 h-3.5 text-[#b48328]" /> : <XCircle className="w-3.5 h-3.5 text-rose-600" />}
+                          {quizResult.isPassed ? <CheckCircle2 className="w-3.5 h-3.5 text-[#223A5E]" /> : <XCircle className="w-3.5 h-3.5 text-rose-600" />}
                           {quizResult.isPassed 
                             ? `LULUS (KKM: ${form.quizConfig.passingScore ?? 70})` 
                             : `BELUM LULUS (KKM: ${form.quizConfig.passingScore ?? 70})`}
@@ -298,7 +306,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                         <button
                           type="button"
                           onClick={() => setShowReviewAnswers(!showReviewAnswers)}
-                          className="w-full py-2 px-3 text-xs font-semibold text-stone-700 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          className="w-full py-2 px-3 text-xs font-semibold text-slate-700 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
                           <span>{showReviewAnswers ? 'Sembunyikan Kunci & Pembahasan' : 'Lihat Kunci Jawaban & Pembahasan'}</span>
                           {showReviewAnswers ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -309,33 +317,33 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                             {quizResult.reviewList.map((item, i) => (
                               <div 
                                 key={i} 
-                                className="p-3.5 rounded-xl border border-amber-200 bg-[#fffdfa] text-xs space-y-1.5 transition-all shadow-2xs"
+                                className="p-3.5 rounded-xl border border-blue-200 bg-[#fffdfa] text-xs space-y-1.5 transition-all shadow-2xs"
                               >
                                 <div className="flex items-start justify-between gap-2">
-                                  <div className="font-semibold text-stone-900 leading-snug">
+                                  <div className="font-semibold text-slate-900 leading-snug">
                                     {item.question.title}
                                   </div>
-                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-amber-100 text-amber-900 font-mono">
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-blue-100 text-blue-900 font-mono">
                                     {item.isCorrect ? `+${item.pointsEarned} Poin` : `0 / ${item.maxPoints} Poin`}
                                   </span>
                                 </div>
-                                <div className="text-[11px] text-stone-600">
+                                <div className="text-[11px] text-slate-600">
                                   <span className="font-medium">Jawaban Anda: </span>
-                                  <span className={item.isCorrect ? 'text-stone-900 font-semibold' : 'text-stone-500 font-semibold'}>
+                                  <span className={item.isCorrect ? 'text-slate-900 font-semibold' : 'text-slate-500 font-semibold'}>
                                     {Array.isArray(item.userAnswer) ? item.userAnswer.join(', ') : (item.userAnswer || '(Tidak dijawab)')}
                                   </span>
                                 </div>
                                 {!item.isCorrect && item.correctAnswer && (
-                                  <div className="text-[11px] text-stone-800">
+                                  <div className="text-[11px] text-slate-800">
                                     <span className="font-medium">Kunci Jawaban Benar: </span>
-                                    <span className="font-semibold text-[#b48328]">
+                                    <span className="font-semibold text-[#223A5E]">
                                       {Array.isArray(item.correctAnswer) ? item.correctAnswer.join(', ') : item.correctAnswer}
                                     </span>
                                   </div>
                                 )}
                                 {item.explanation && (
-                                  <div className="text-[11px] text-stone-600 bg-white p-2.5 rounded-lg border border-amber-200/80 mt-1 leading-relaxed">
-                                    <span className="font-semibold text-stone-800">Pembahasan: </span>
+                                  <div className="text-[11px] text-slate-600 bg-white p-2.5 rounded-lg border border-blue-200/80 mt-1 leading-relaxed">
+                                    <span className="font-semibold text-slate-800">Pembahasan: </span>
                                     {item.explanation}
                                   </div>
                                 )}
@@ -355,8 +363,8 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                       <Check className="w-6 h-6 stroke-[3]" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-stone-900">Jawaban Kuis Berhasil Disimpan</h3>
-                      <p className="text-xs text-stone-600 mt-1 max-w-sm mx-auto">
+                      <h3 className="text-xl font-bold text-slate-900">Jawaban Kuis Berhasil Disimpan</h3>
+                      <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto">
                         Terima kasih telah mengikuti evaluasi <strong>{form.title}</strong>. Skor dan nilai akhir akan diumumkan langsung oleh evaluator.
                       </p>
                     </div>
@@ -372,8 +380,8 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-bold text-stone-900">Tanggapan Anda Telah Dicatat</h3>
-                    <p className="text-xs text-stone-600 mt-1 max-w-sm mx-auto">
+                    <h3 className="text-xl font-bold text-slate-900">Tanggapan Anda Telah Dicatat</h3>
+                    <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto">
                       Terima kasih telah mengisi formulir <strong>{form.title}</strong>.
                     </p>
                   </div>
@@ -384,9 +392,9 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="px-3.5 py-2 text-xs font-semibold text-stone-700 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#b48328]" />
+                  <RotateCcw className="w-3.5 h-3.5 text-[#223A5E]" />
                   <span>Kirim Jawaban Lain</span>
                 </button>
                 <button
@@ -402,7 +410,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Header Cover Banner jika aktif */}
-              {theme.headerBannerType === 'preset' && theme.headerCoverUrl && (
+               {theme.headerBannerType === 'preset' && theme.headerCoverUrl && theme.headerCoverUrl !== '/assets/aistudio/image_3ec5f637.png' && (
                 <div 
                   className="w-full overflow-hidden shadow-2xs relative"
                   style={{ 
@@ -422,11 +430,41 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   />
                 </div>
               )}
-              {theme.headerBannerType === 'gradient' && (
+                {theme.headerBannerType === 'preset' && (!theme.headerCoverUrl || theme.headerCoverUrl === '/assets/aistudio/image_3ec5f637.png') && (
+                 <div 
+                   className="w-full overflow-hidden shadow-2xs relative"
+                   style={{ 
+                     borderRadius: `${theme.borderRadiusNum}px`,
+                     height: `${theme.headerHeight || 140}px`,
+                   }}
+                 >
+                   <img
+                     src="/assets/landing/formulir.jpeg"
+                     alt="Cover"
+                     className="w-full h-full object-cover transition-transform"
+                   />
+                 </div>
+               )}
+               {theme.headerBannerType === 'gradient' && (
+                 <div 
+                   className={`h-24 sm:h-32 w-full bg-gradient-to-r ${theme.headerGradient} shadow-2xs`}
+                   style={{ borderRadius: `${theme.borderRadiusNum}px` }}
+                 />
+               )}
+              {theme.headerBannerType !== 'preset' && theme.headerBannerType !== 'gradient' && (
                 <div 
-                  className={`h-24 sm:h-32 w-full bg-gradient-to-r ${theme.headerGradient} shadow-2xs`}
-                  style={{ borderRadius: `${theme.borderRadiusNum}px` }}
-                />
+                  className="w-full overflow-hidden shadow-2xs relative"
+                  style={{ 
+                    borderRadius: `${theme.borderRadiusNum}px`,
+                    height: `${theme.headerHeight || 140}px`,
+                  }}
+                >
+                  <img
+                    src="/assets/landing/formulir.jpeg"
+                    alt="Cover"
+                    className="w-full h-full object-cover transition-transform"
+                  />
+                </div>
               )}
 
               {/* Title Card */}
@@ -447,7 +485,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                     <img
                       src={theme.logoUrl}
                       alt="Logo"
-                      className="w-10 h-10 rounded-lg object-cover border border-amber-200 shadow-2xs"
+                      className="w-10 h-10 rounded-lg object-cover border border-blue-200 shadow-2xs"
                     />
                   </div>
                 )}
@@ -488,7 +526,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                         {availability.badgeText}
                       </span>
                     </div>
-                    <p className="text-[11px] text-stone-600 mt-1 leading-relaxed">
+                    <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
                       {availability.reasonText || (availability.isOpen ? 'Formulir saat ini siap menerima tanggapan Anda.' : 'Formulir ini sedang ditutup.')}
                     </p>
                   </div>
@@ -498,22 +536,22 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
               {/* Banner Kuota Respon Maksimal 100 Tercapai (Akun Gratis) */}
               {isQuotaExceeded && (
                 <div 
-                  className="p-4 bg-amber-50 border-2 border-amber-300 shadow-sm flex items-start gap-3.5 text-left animate-in fade-in"
+                  className="p-4 bg-blue-50 border-2 border-blue-300 shadow-sm flex items-start gap-3.5 text-left animate-in fade-in"
                   style={{ borderRadius: `${theme.borderRadiusNum}px` }}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 text-amber-900">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 border border-blue-300 flex items-center justify-center shrink-0 text-blue-900">
                     <Lock className="w-5 h-5 stroke-[2.2]" />
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-xs text-amber-950 uppercase tracking-wide">
+                      <span className="font-extrabold text-xs text-blue-950 uppercase tracking-wide">
                         Batas Kuota 100 Data Tercapai (Paket Free)
                       </span>
-                      <span className="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-mono font-bold bg-blue-200/80 text-blue-900 px-2 py-0.5 rounded-full">
                         {responseCount} / 100 Respon
                       </span>
                     </div>
-                    <p className="text-xs text-amber-900/90 leading-relaxed">
+                    <p className="text-xs text-blue-900/90 leading-relaxed">
                       Formulir ini telah mencapai kapasitas maksimal 100 respon untuk paket gratis. Seluruh kolom isian formulir dinonaktifkan dan formulir tidak dapat menerima pengisian data baru sampai ditingkatkan ke paket Premium.
                     </p>
                     {onOpenUpgradeModal && (
@@ -521,7 +559,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                         <button
                           type="button"
                           onClick={onOpenUpgradeModal}
-                          className="px-3.5 py-1.5 rounded-xl bg-[#b48328] hover:bg-[#966816] text-white text-xs font-bold shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
+                          className="px-3.5 py-1.5 rounded-xl bg-[#223A5E] hover:bg-[#1a2d4a] text-white text-xs font-bold shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
                         >
                           <span>Tingkatkan ke Premium Sekarang</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -551,7 +589,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                     {q.type === 'image_block' ? (
                       <div className="space-y-2">
                         {q.imageUrl && (
-                          <div className="rounded-xl overflow-hidden border border-amber-200">
+                          <div className="rounded-xl overflow-hidden border border-blue-200">
                             <img src={q.imageUrl} alt={q.title} className="w-full h-56 object-cover" />
                           </div>
                         )}
@@ -568,7 +606,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                       /* Kasus 3: Regular Question */
                       <>
                         <div className="mb-3">
-                          <label className="text-sm font-semibold block text-stone-900">
+                          <label className="text-sm font-semibold block text-slate-900">
                             {q.title} {q.required && <span className="text-red-500">*</span>}
                           </label>
                           {q.description && (
@@ -577,7 +615,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
 
                           {/* Gambar opsional yang disematkan di dalam pertanyaan */}
                           {q.imageUrl && (
-                            <div className="mt-3 mb-2 rounded-xl overflow-hidden border border-amber-200 max-h-56">
+                            <div className="mt-3 mb-2 rounded-xl overflow-hidden border border-blue-200 max-h-56">
                               <img src={q.imageUrl} alt={q.title} className="w-full h-44 object-cover" />
                             </div>
                           )}
@@ -604,7 +642,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   disabled={!availability.isOpen || isQuotaExceeded}
                   className={`w-full py-3.5 text-xs font-bold text-white shadow-md transition-all flex items-center justify-center gap-2 ${
                     !availability.isOpen || isQuotaExceeded
-                      ? 'opacity-60 cursor-not-allowed bg-stone-500' 
+                      ? 'opacity-60 cursor-not-allowed bg-slate-500' 
                       : 'active:scale-98 cursor-pointer'
                   } ${
                     theme.buttonStyle === 'brutal' ? 'border-2 border-black shadow-[4px_4px_0px_#000]' : ''
@@ -659,7 +697,7 @@ function renderInputs(
           value={current || ''}
           onChange={(e) => handleAnswerChange(q.id, e.target.value)}
           placeholder="Tuliskan jawaban Anda di sini..."
-          className="w-full text-xs sm:text-sm border-b border-amber-300 focus:border-[#b48328] focus:outline-none py-2 bg-transparent text-stone-900 transition-colors"
+          className="w-full text-xs sm:text-sm border-b border-blue-300 focus:border-[#223A5E] focus:outline-none py-2 bg-transparent text-slate-900 transition-colors"
         />
       );
 
@@ -670,7 +708,7 @@ function renderInputs(
           value={current || ''}
           onChange={(e) => handleAnswerChange(q.id, e.target.value)}
           placeholder="Tuliskan penjelasan atau tanggapan lengkap Anda di sini..."
-          className="w-full text-xs sm:text-sm border-b border-amber-300 focus:border-[#b48328] focus:outline-none py-2 bg-transparent resize-y text-stone-900 transition-colors"
+          className="w-full text-xs sm:text-sm border-b border-blue-300 focus:border-[#223A5E] focus:outline-none py-2 bg-transparent resize-y text-slate-900 transition-colors"
         />
       );
 
@@ -694,16 +732,16 @@ function renderInputs(
                 }}
                 className={`flex items-center gap-3 p-3 rounded-xl border text-xs sm:text-sm cursor-pointer transition-all ${
                   isSelected 
-                    ? 'border-[#b48328] bg-amber-50/90 font-bold text-amber-950 shadow-2xs ring-1 ring-[#b48328]/40' 
-                    : 'border-amber-200/90 bg-white hover:bg-amber-50/50 text-stone-800 hover:border-amber-300'
+                    ? 'border-[#223A5E] bg-blue-50/90 font-bold text-blue-950 shadow-2xs ring-1 ring-[#223A5E]/40' 
+                    : 'border-blue-200/90 bg-white hover:bg-blue-50/50 text-slate-800 hover:border-blue-300'
                 }`}
               >
                 <div 
                   className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                    isSelected ? 'border-[#b48328] bg-white' : 'border-amber-300 bg-white'
+                    isSelected ? 'border-[#223A5E] bg-white' : 'border-blue-300 bg-white'
                   }`}
                 >
-                  {isSelected && <div className="w-2 h-2 rounded-full bg-[#b48328]" />}
+                  {isSelected && <div className="w-2 h-2 rounded-full bg-[#223A5E]" />}
                 </div>
                 <span className="leading-snug">{opt.text}</span>
               </div>
@@ -733,13 +771,13 @@ function renderInputs(
                 }}
                 className={`flex items-center gap-3 p-3 rounded-xl border text-xs sm:text-sm cursor-pointer transition-all ${
                   isChecked 
-                    ? 'border-[#b48328] bg-amber-50/90 font-bold text-amber-950 shadow-2xs ring-1 ring-[#b48328]/40' 
-                    : 'border-amber-200/90 bg-white hover:bg-amber-50/50 text-stone-800 hover:border-amber-300'
+                    ? 'border-[#223A5E] bg-blue-50/90 font-bold text-blue-950 shadow-2xs ring-1 ring-[#223A5E]/40' 
+                    : 'border-blue-200/90 bg-white hover:bg-blue-50/50 text-slate-800 hover:border-blue-300'
                 }`}
               >
                 <div 
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                    isChecked ? 'border-[#b48328] bg-[#b48328]' : 'border-amber-300 bg-white'
+                    isChecked ? 'border-[#223A5E] bg-[#223A5E]' : 'border-blue-300 bg-white'
                   }`}
                 >
                   {isChecked && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
@@ -756,7 +794,7 @@ function renderInputs(
         <select
           value={current || ''}
           onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-          className="w-full text-xs sm:text-sm bg-white border border-amber-300 rounded-xl p-2.5 text-stone-800 focus:outline-none focus:border-[#b48328] focus:ring-2 focus:ring-amber-100"
+          className="w-full text-xs sm:text-sm bg-white border border-blue-300 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100"
         >
           <option value="">-- Silakan pilih opsi --</option>
           {q.options?.map((opt) => (
@@ -779,7 +817,7 @@ function renderInputs(
                 type="button"
                 onClick={() => handleAnswerChange(q.id, val)}
                 className={`w-9 h-9 rounded-xl border text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
-                  isSelected ? 'text-white border-transparent shadow-xs' : 'bg-white border-amber-300 hover:border-amber-400 text-stone-800'
+                  isSelected ? 'text-white border-transparent shadow-xs' : 'bg-white border-blue-300 hover:border-blue-400 text-slate-800'
                 }`}
                 style={isSelected ? { backgroundColor: color } : {}}
               >
@@ -796,7 +834,7 @@ function renderInputs(
           type="date"
           value={current || ''}
           onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-          className="border border-amber-300 rounded-xl p-2.5 text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-[#b48328] focus:ring-2 focus:ring-amber-100 bg-white"
+          className="border border-blue-300 rounded-xl p-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 bg-white"
         />
       );
 

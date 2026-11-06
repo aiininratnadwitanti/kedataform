@@ -52,8 +52,8 @@ export interface SystemSettings {
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   themeMode: 'light',
-  systemStyle: 'warm_titanium',
-  primaryAccentColor: '#b48328', // Emas Arsip Klasik & Kuningan Dokumen Resmi
+  systemStyle: 'slate',
+  primaryAccentColor: '#223A5E', // Emas Arsip Klasik & Kuningan Dokumen Resmi
   borderRadius: 'modern',
   interfaceDensity: 'comfortable',
   systemFont: 'sans', // Default: Plus Jakarta Sans
@@ -136,39 +136,32 @@ export function getContrastTextColor(hex?: string): string {
   
   // Perceived brightness formula (YIQ standard ITU-R BT.601)
   const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-  // Threshold 120 memastikan warna emas (#b48328), amber, cyan, kuning memiliki teks hitam tegas
+  // Threshold 120 memastikan warna emas (#223A5E), amber, cyan, kuning memiliki teks hitam tegas
   return yiq >= 120 ? '#09090b' : '#ffffff';
 }
 
 // Preset palette colors for LIGHT MODE (Dark/Deep accents for high contrast on snow-white background)
 export const LIGHT_THEME_ACCENTS = [
-  { name: 'Emas Arsip Klasik', hex: '#b48328', desc: 'Warna emas & kuningan identik arsip resmi' },
-  { name: 'Deep Bronze Amber', hex: '#b45309', desc: 'Kuning keemasan gelap' },
-  { name: 'Kuningan Antik', hex: '#c28b18', desc: 'Emas kuningan dokumen arsip antik' },
+  { name: 'Emas Arsip Klasik', hex: '#223A5E', desc: 'Warna emas & kuningan identik arsip resmi' },
   { name: 'Alpine Forest Green', hex: '#15803d', desc: 'Hijau hutan tegas' },
-  { name: 'Obsidian Carbon', hex: '#1c1917', desc: 'Hitam arang klasik' },
+  { name: 'Obsidian Carbon', hex: '#0f172a', desc: 'Hitam arang klasik' },
   { name: 'Titanium Charcoal', hex: '#334155', desc: 'Abu-abu baja pekat' },
   { name: 'Royal Sapphire', hex: '#1d4ed8', desc: 'Biru royal tajam' },
   { name: 'Crimson Wine', hex: '#991b1b', desc: 'Merah marun berwibawa' },
   { name: 'Deep Plum Violet', hex: '#6b21a8', desc: 'Ungu plum gelap' },
   { name: 'Nordic Ocean Deep', hex: '#0f766e', desc: 'Teal laut dalam' },
   { name: 'Midnight Indigo', hex: '#3730a3', desc: 'Indigo pekat' },
-  { name: 'Dark Rust', hex: '#9a3412', desc: 'Tembaga gelap' },
   { name: 'Dark Slate Teal', hex: '#115e59', desc: 'Teal batu slate' },
 ];
 
 // Preset palette colors for DARK MODE (Light/Vibrant accents for high contrast on obsidian dark background)
 export const DARK_THEME_ACCENTS = [
-  { name: 'Coral Tangerine Light', hex: '#fb923c', desc: 'Oranye terang bercahaya' },
-  { name: 'Sunlit Amber Glow', hex: '#f59e0b', desc: 'Kuning emas bercahaya' },
   { name: 'Mint Emerald Light', hex: '#34d399', desc: 'Hijau mint terang' },
   { name: 'Sky Cyan Ice', hex: '#38bdf8', desc: 'Biru es kontras tinggi' },
   { name: 'Soft Lavender Lilac', hex: '#c084fc', desc: 'Ungu lavender lembut' },
   { name: 'Pastel Rose Blossom', hex: '#fb7185', desc: 'Merah muda pastel segar' },
-  { name: 'Golden Honey', hex: '#facc15', desc: 'Kuning cerah tajam' },
   { name: 'Spring Lime Neon', hex: '#a3e635', desc: 'Hijau limau elektrik' },
   { name: 'Pure Snow Titanium', hex: '#f8fafc', desc: 'Putih salju kontras tinggi' },
-  { name: 'Peach Cream Warm', hex: '#fdba74', desc: 'Persik lembut hangat' },
   { name: 'Electric Cyan Glow', hex: '#22d3ee', desc: 'Sian terang modern' },
   { name: 'Soft Moonlight White', hex: '#f1f5f9', desc: 'Putih perak terang' },
 ];
@@ -226,9 +219,9 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
     // When theme mode is switched: automatically adapt accent color to ensure high contrast!
     if (patch.themeMode && patch.themeMode !== current.themeMode) {
       if (patch.themeMode === 'dark' && isDarkColor(current.primaryAccentColor)) {
-        patch.primaryAccentColor = '#fb923c'; // Switch to vibrant coral light for dark mode
+        patch.primaryAccentColor = '#223A5E'; // Switch to blue for dark mode
       } else if (patch.themeMode === 'light' && isLightColor(current.primaryAccentColor)) {
-        patch.primaryAccentColor = '#b48328'; // Switch to Emas Arsip Klasik for light mode
+        patch.primaryAccentColor = '#223A5E'; // Switch to Emas Arsip Klasik for light mode
       }
     }
     setCurrent((prev) => ({ ...prev, ...patch }));
@@ -376,7 +369,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
       <div 
         className={`relative w-full max-w-4xl rounded-3xl shadow-2xl border overflow-hidden flex flex-col max-h-[90vh] ring-1 transition-colors ${
           isDark 
-            ? 'bg-[#18181b] text-stone-100 border-stone-800 ring-stone-700/50' 
+            ? 'bg-[#18181b] text-slate-100 border-slate-800 ring-slate-700/50' 
             : 'bg-white text-slate-900 border-slate-200 ring-slate-900/10'
         }`}
         style={{ fontFamily: getSystemFontFamily(current.systemFont) }}
@@ -385,12 +378,12 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
         {/* Top Header */}
         <div className={`px-5 py-4 sm:px-6 border-b flex items-center justify-between transition-colors ${
           isDark 
-            ? 'bg-[#222226] border-stone-800' 
+            ? 'bg-[#222226] border-slate-800' 
             : 'bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 border-slate-200/90'
         }`}>
           <div className="flex items-center gap-3">
             <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shadow-2xs ${
-              isDark ? 'bg-stone-800 border-stone-700 text-stone-200' : 'bg-white border-slate-200 text-slate-800'
+              isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
             }`}>
               <Settings className="w-4 h-4" />
             </div>
@@ -400,12 +393,12 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
               }`}>
                 <span>Pengaturan Sistem</span>
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold hidden sm:inline-block ${
-                  isDark ? 'bg-stone-800 text-stone-300' : 'bg-slate-200/80 text-slate-700'
+                  isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-200/80 text-slate-700'
                 }`}>
                   v2.4
                 </span>
               </h3>
-              <p className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-slate-500'}`}>
+              <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 Pilih menu di sub-sidebar untuk mengatur profil akun, font tulisan, warna aksen bebas, tema tampilan (Light/Dark), dan konfigurasi sistem.
               </p>
             </div>
@@ -415,7 +408,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
             type="button"
             onClick={onClose}
             className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-              isDark ? 'hover:bg-stone-800 text-stone-400 hover:text-white' : 'hover:bg-slate-200 text-slate-400 hover:text-slate-700'
+              isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-400 hover:text-slate-700'
             }`}
             title="Tutup dialog"
           >
@@ -430,7 +423,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
           {/* SUB-SIDEBAR KIRI (SUB-NAVIGASI PENGATURAN)                      */}
           {/* ============================================================== */}
           <aside className={`w-full sm:w-64 border-b sm:border-b-0 sm:border-r p-2.5 sm:p-3 space-y-1 shrink-0 overflow-x-auto sm:overflow-y-auto transition-colors ${
-            isDark ? 'bg-[#141416] border-stone-800' : 'bg-slate-50/70 border-slate-200/90'
+            isDark ? 'bg-[#141416] border-slate-800' : 'bg-slate-50/70 border-slate-200/90'
           }`}>
             <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 hidden sm:block">
               Sub-Menu Pengaturan
@@ -447,10 +440,10 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                     className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center justify-between gap-2.5 cursor-pointer shrink-0 sm:shrink ${
                       isActive
                         ? isDark
-                          ? 'bg-stone-800 text-white font-bold shadow-xs border border-stone-700'
+                          ? 'bg-slate-800 text-white font-bold shadow-xs border border-slate-700'
                           : 'bg-white text-slate-950 font-bold shadow-xs border border-slate-200/90'
                         : isDark
-                          ? 'text-stone-400 hover:text-stone-100 hover:bg-stone-800/40'
+                          ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/40'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                     }`}
                   >
@@ -458,7 +451,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                         isActive 
                           ? 'bg-slate-900 text-white shadow-2xs' 
-                          : isDark ? 'bg-stone-800 text-stone-300' : 'bg-slate-200/70 text-slate-600'
+                          : isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-200/70 text-slate-600'
                       }`}>
                         {item.icon}
                       </div>
@@ -507,7 +500,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
 
                 <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-amber-400 bg-stone-100 shadow-xs shrink-0">
+                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-400 bg-slate-100 shadow-xs shrink-0">
                       <img 
                         src={user?.avatarUrl || '/assets/aistudio/image_3ec5f637.png'} 
                         alt={user?.name || 'User'} 
@@ -517,7 +510,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                     <div>
                       <h5 className="text-sm font-bold text-slate-900">{user?.name || 'Pengguna'}</h5>
                       <p className="text-xs text-slate-500">{user?.email || 'Akun Aktif'}</p>
-                      <span className="inline-block mt-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-950 border border-amber-300">
+                      <span className="inline-block mt-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-950 border border-blue-300">
                         {user?.plan === 'pro' ? 'PRO KREATOR' : 'PAKET GRATIS (Maks 100/Form)'}
                       </span>
                     </div>
@@ -532,7 +525,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                       value={editProfileName}
                       onChange={(e) => setEditProfileName(e.target.value)}
                       placeholder="Masukkan nama lengkap Anda"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
                     />
                   </div>
 
@@ -540,7 +533,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                     <button
                       type="button"
                       onClick={handleSaveProfileInModal}
-                      className="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
                       <span>Simpan Perubahan</span>
@@ -723,14 +716,14 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
 
                 {/* Pilihan Warna Lingkaran Aksen */}
                 <div className={`p-5 rounded-2xl border space-y-4 shadow-2xs ${
-                  isDark ? 'bg-[#222226] border-stone-800' : 'bg-white border-slate-200'
+                  isDark ? 'bg-[#222226] border-slate-800' : 'bg-white border-slate-200'
                 }`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className={`text-xs font-bold uppercase tracking-wider block ${isDark ? 'text-stone-300' : 'text-slate-800'}`}>
+                      <span className={`text-xs font-bold uppercase tracking-wider block ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
                         {isDark ? 'Pilihan Warna Lingkaran Aksen (Mode Gelap):' : 'Pilihan Warna Lingkaran Aksen (Mode Terang):'}
                       </span>
-                      <p className="text-[11px] text-stone-400 mt-0.5">
+                      <p className="text-[11px] text-slate-400 mt-0.5">
                         Klik salah satu lingkaran warna di bawah untuk mengubah aksen seluruh sistem.
                       </p>
                     </div>
@@ -838,7 +831,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                       { 
                         id: 'light', 
                         label: 'Terang (Light Mode)', 
-                        icon: <Sun className="w-5 h-5 text-amber-500" />, 
+                        icon: <Sun className="w-5 h-5 text-blue-500" />, 
                         desc: 'Latar putih & abu-abu bersih, ideal untuk siang hari dan pencahayaan terang.' 
                       },
                       { 
@@ -1099,7 +1092,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                         onClick={() => handleUpdate({ language: 'id' })}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                           current.language === 'id'
-                            ? 'bg-white border-[#b48328] text-slate-900 font-bold shadow-xs ring-1 ring-[#b48328]'
+                            ? 'bg-white border-[#223A5E] text-slate-900 font-bold shadow-xs ring-1 ring-[#223A5E]'
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                       >
@@ -1113,7 +1106,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                           </div>
                         </div>
                         {current.language === 'id' && (
-                          <Check className="w-4 h-4 text-[#b48328]" />
+                          <Check className="w-4 h-4 text-[#223A5E]" />
                         )}
                       </button>
 
@@ -1122,7 +1115,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                         onClick={() => handleUpdate({ language: 'en' })}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                           current.language === 'en'
-                            ? 'bg-white border-[#b48328] text-slate-900 font-bold shadow-xs ring-1 ring-[#b48328]'
+                            ? 'bg-white border-[#223A5E] text-slate-900 font-bold shadow-xs ring-1 ring-[#223A5E]'
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                       >
@@ -1136,7 +1129,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                           </div>
                         </div>
                         {current.language === 'en' && (
-                          <Check className="w-4 h-4 text-[#b48328]" />
+                          <Check className="w-4 h-4 text-[#223A5E]" />
                         )}
                       </button>
                     </div>

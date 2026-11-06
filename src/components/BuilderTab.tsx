@@ -69,7 +69,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
   onShowToast,
 }) => {
   const [activeQuestionId, setActiveQuestionId] = useState<string>(form.questions[0]?.id || '');
-  const primaryAccent = form.theme?.primaryColor || '#b48328';
+  const primaryAccent = form.theme?.primaryColor || '#223A5E';
   const contrastText = getContrastTextColor(primaryAccent);
   const [insertAtIndex, setInsertAtIndex] = useState<number | null>(null);
   const [showBottomAddMenu, setShowBottomAddMenu] = useState(false);
@@ -366,19 +366,19 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
       }}
     >
       {/* Dynamic Theme Ribbon showing active customization status */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-amber-50/80 backdrop-blur-md border border-amber-200/80 shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-blue-50/80 backdrop-blur-md border border-blue-200/80 shadow-2xs">
         <div className="flex items-center gap-2.5">
           <div 
             className="w-4 h-4 rounded-full border border-white shadow-xs" 
-            style={{ backgroundColor: form.theme?.primaryColor || '#b48328' }} 
+            style={{ backgroundColor: form.theme?.primaryColor || '#223A5E' }} 
             title="Warna Aksen Aktif"
           />
-          <span className="text-xs font-semibold text-stone-800">
+          <span className="text-xs font-semibold text-slate-800">
             Tema Aktif: <strong className="font-bold">{form.theme?.fontFamily === 'serif' ? 'Serif Klasik' : form.theme?.fontFamily === 'mono' ? 'Monospace Coding' : 'Sans Modern'}</strong>
           </span>
           {isQuizMode && (
-            <span className="text-[10px] font-bold text-amber-900 bg-amber-200/70 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-              <Award className="w-3 h-3 text-[#b48328]" />
+            <span className="text-[10px] font-bold text-blue-900 bg-blue-200/70 border border-blue-300 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+              <Award className="w-3 h-3 text-[#223A5E]" />
               Mode Kuis Aktif
             </span>
           )}
@@ -387,7 +387,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
           <button
             type="button"
             onClick={() => onOpenThemeTab()}
-            className="text-xs font-bold text-[#b48328] hover:text-[#966816] hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-[#223A5E] hover:text-[#1a2d4a] hover:underline flex items-center gap-1 cursor-pointer"
           >
             <span>Ubah di Desain Studio</span>
             <span>→</span>
@@ -433,14 +433,14 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
               alt="Hero Cover"
               className="w-full h-full object-cover"
             />
-            <div className="absolute bottom-3 right-3 flex items-center gap-2 bg-stone-900/80 backdrop-blur-md p-1.5 rounded-xl border border-white/20 shadow-md">
+            <div className="absolute bottom-3 right-3 flex items-center gap-2 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-xl border border-white/20 shadow-md">
               <button
                 type="button"
                 onClick={() => onOpenThemeTab('header')}
-                className="h-7 px-3 bg-white hover:bg-amber-50 text-stone-900 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer border border-amber-200/80"
+                className="h-7 px-3 bg-white hover:bg-blue-50 text-slate-900 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer border border-blue-200/80"
                 title="Atur dan ganti gambar cover di panel Desain Studio"
               >
-                <ImageIcon className="w-3.5 h-3.5 text-[#b48328]" />
+                <ImageIcon className="w-3.5 h-3.5 text-[#223A5E]" />
                 <span>Ganti Cover</span>
               </button>
               <button
@@ -464,7 +464,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
             <button
               type="button"
               onClick={() => onOpenThemeTab('header')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#b48328] hover:text-white bg-amber-50/80 hover:bg-[#b48328] border border-amber-200/90 transition-all cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#223A5E] hover:text-white bg-blue-50/80 hover:bg-[#223A5E] border border-blue-200/90 transition-all cursor-pointer shadow-2xs"
               title="Atur gambar cover banner formulir di Desain Studio"
             >
               <ImageIcon className="w-3.5 h-3.5" />
@@ -476,12 +476,18 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
         {/* Hero Title & Description Card */}
         <div className="p-6 sm:p-8 space-y-3">
 
-          <input
-            type="text"
+          <textarea
             value={form.title}
             onChange={(e) => handleUpdateTitle(e.target.value)}
             placeholder="Judul Utama Formulir..."
-            className="w-full text-2xl sm:text-3xl font-extrabold text-stone-900 border-none focus:outline-none placeholder:text-stone-300 p-0"
+            rows={1}
+            className="w-full text-2xl sm:text-3xl font-extrabold text-slate-900 border-none focus:outline-none placeholder:text-slate-300 p-0 resize-none overflow-hidden"
+            style={{ minHeight: '2.5rem' }}
+            onInput={(e) => {
+              const t = e.currentTarget;
+              t.style.height = 'auto';
+              t.style.height = t.scrollHeight + 'px';
+            }}
           />
 
           <textarea
@@ -489,7 +495,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
             onChange={(e) => handleUpdateDescription(e.target.value)}
             placeholder="Tuliskan petunjuk atau deskripsi pengisian formulir di sini..."
             rows={2}
-            className="w-full text-sm sm:text-base text-stone-600 border-none focus:outline-none placeholder:text-stone-300 resize-none p-0 leading-relaxed"
+            className="w-full text-sm sm:text-base text-slate-600 border-none focus:outline-none placeholder:text-slate-300 resize-none p-0 leading-relaxed"
           />
         </div>
       </div>
@@ -498,22 +504,22 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
       {/* 2. PANEL SKOR & PENILAIAN (HANYA MUNCUL JIKA MODE KUIS AKTIF) */}
       {/* ============================================================== */}
       {isQuizMode && (
-        <div className="bg-[#fffdfa] rounded-2xl border border-amber-200/80 p-4 sm:p-5 shadow-xs space-y-4">
+        <div className="bg-[#fffdfa] rounded-2xl border border-blue-200/80 p-4 sm:p-5 shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-amber-100 text-amber-900 shadow-2xs">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-100 text-blue-900 shadow-2xs">
                 <GraduationCap className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm font-extrabold text-stone-900 tracking-tight">
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight">
                     Pengaturan Nilai & Skor Kuis
                   </span>
-                  <span className="text-[10px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-blue-900 bg-blue-100 border border-blue-300 px-2 py-0.5 rounded-full">
                     Kuis Aktif
                   </span>
                 </div>
-                <p className="text-[11px] text-stone-500">
+                <p className="text-[11px] text-slate-500">
                   Bobot poin per butir soal dan ambang batas kelulusan untuk evaluasi kuis otomatis.
                 </p>
               </div>
@@ -521,26 +527,26 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
           </div>
 
           {/* Panel Kustomisasi Nilai & Tampilan Skor ke Responden */}
-          <div className="pt-3 border-t border-amber-100 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="pt-3 border-t border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Widget 1: Akumulasi Total Poin */}
             <div className="p-3 rounded-xl bg-orange-50/70 border border-orange-200/80 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 block">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 block">
                   Total Nilai Maksimal
                 </span>
-                <span className="text-base font-extrabold text-stone-900 font-mono">
+                <span className="text-base font-extrabold text-slate-900 font-mono">
                   {totalPoints} Poin
                 </span>
               </div>
-              <span className="text-[11px] text-stone-700 bg-white px-2 py-1 rounded-md border border-orange-200 font-medium">
+              <span className="text-[11px] text-slate-700 bg-white px-2 py-1 rounded-md border border-orange-200 font-medium">
                 Akumulasi Otomatis
               </span>
             </div>
 
             {/* Widget 2: Ambang Nilai Kelulusan (KKM) */}
-            <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-800 block">
                   Batas Kelulusan (KKM)
                 </span>
                 <div className="flex items-center gap-1.5 mt-0.5">
@@ -550,12 +556,12 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                     max="100"
                     value={passingScore}
                     onChange={(e) => handleUpdatePassingScore(parseInt(e.target.value) || 0)}
-                    className="w-14 bg-white border border-amber-300 rounded-lg px-2 py-0.5 text-xs font-bold text-stone-900 font-mono focus:outline-none focus:border-[#b48328]"
+                    className="w-14 bg-white border border-blue-300 rounded-lg px-2 py-0.5 text-xs font-bold text-slate-900 font-mono focus:outline-none focus:border-[#223A5E]"
                   />
-                  <span className="text-xs text-stone-500 font-medium">/ 100</span>
+                  <span className="text-xs text-slate-500 font-medium">/ 100</span>
                 </div>
               </div>
-              <span className="text-[10px] text-stone-500 max-w-[100px] text-right leading-tight">
+              <span className="text-[10px] text-slate-500 max-w-[100px] text-right leading-tight">
                 Standar nilai kelulusan
               </span>
             </div>
@@ -563,14 +569,14 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
             {/* Widget 3: Tampilkan Nilai Setelah Selesai (Opsi Ditampilkan / Disembunyikan) */}
             <div className="p-3 rounded-xl bg-orange-50/70 border border-orange-200/80 flex flex-col justify-between gap-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 block">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 block">
                   Tampilkan Nilai ke Responden
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleShowScoreImmediately(!showScoreImmediately)}
                   className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    showScoreImmediately ? 'bg-[#b48328]' : 'bg-stone-300'
+                    showScoreImmediately ? 'bg-[#223A5E]' : 'bg-slate-300'
                   }`}
                   title="Pilih apakah skor langsung diperlihatkan setelah responden submit formulir"
                 >
@@ -581,16 +587,16 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                   />
                 </button>
               </div>
-              <div className="flex items-center gap-1 text-[11px] font-semibold text-stone-700">
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700">
                 {showScoreImmediately ? (
                   <>
-                    <Eye className="w-3.5 h-3.5 text-[#b48328]" />
-                    <span className="text-stone-800">Skor langsung ditampilkan</span>
+                    <Eye className="w-3.5 h-3.5 text-[#223A5E]" />
+                    <span className="text-slate-800">Skor langsung ditampilkan</span>
                   </>
                 ) : (
                   <>
-                    <EyeOff className="w-3.5 h-3.5 text-stone-400" />
-                    <span className="text-stone-500">Nilai disembunyikan (Diumumkan nanti)</span>
+                    <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="text-slate-500">Nilai disembunyikan (Diumumkan nanti)</span>
                   </>
                 )}
               </div>
@@ -615,12 +621,12 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
               {index > 0 && (
                 <div className="relative py-1 flex items-center justify-center group">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-dashed border-amber-200/90" />
+                    <div className="w-full border-t border-dashed border-blue-200/90" />
                   </div>
                   <button
                     type="button"
                     onClick={() => setInsertAtIndex(insertAtIndex === index - 1 ? null : index - 1)}
-                    className="relative z-10 px-3 py-1 bg-[#fffbf7] hover:bg-[#b48328] text-stone-700 hover:text-white border border-amber-300 hover:border-[#b48328] rounded-full text-[11px] font-semibold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                    className="relative z-10 px-3 py-1 bg-[#fffbf7] hover:bg-[#223A5E] text-slate-700 hover:text-white border border-blue-300 hover:border-[#223A5E] rounded-full text-[11px] font-semibold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
                     <span>Sisipkan Elemen di Sini</span>
@@ -630,15 +636,15 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
 
               {/* Menu Pemilih Elemen yang Disisipkan */}
               {insertAtIndex === index - 1 && (
-                <div className="p-4 bg-[#fff8f0] rounded-2xl border border-orange-200/90 space-y-3 animate-in fade-in shadow-sm">
+                <div className="p-4 bg-[#F3F8FD] rounded-2xl border border-orange-200/90 space-y-3 animate-in fade-in shadow-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-stone-800">
+                    <span className="text-xs font-bold text-slate-800">
                       Pilih Elemen yang Ingin Disisipkan:
                     </span>
                     <button
                       type="button"
                       onClick={() => setInsertAtIndex(null)}
-                      className="text-stone-400 hover:text-stone-700 cursor-pointer"
+                      className="text-slate-400 hover:text-slate-700 cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -650,10 +656,10 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                         key={item.type}
                         type="button"
                         onClick={() => handleInsertAtPosition(index - 1, item.type)}
-                        className="p-2.5 rounded-xl bg-white border border-orange-100 hover:border-[#b48328] hover:bg-orange-50/60 text-left transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+                        className="p-2.5 rounded-xl bg-white border border-orange-100 hover:border-[#223A5E] hover:bg-orange-50/60 text-left transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
                       >
-                        <div className="p-1 rounded bg-orange-50 text-[#b48328] shrink-0">{item.icon}</div>
-                        <span className="text-xs font-semibold text-stone-800 truncate">{item.label}</span>
+                        <div className="p-1 rounded bg-orange-50 text-[#223A5E] shrink-0">{item.icon}</div>
+                        <span className="text-xs font-semibold text-slate-800 truncate">{item.label}</span>
                       </button>
                     ))}
                   </div>
@@ -670,10 +676,10 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                   borderRadius: `${form.theme?.borderRadiusNum ?? 20}px`,
                   backgroundColor: form.theme?.cardBg || '#ffffff',
                   borderColor: isActive 
-                    ? (form.theme?.primaryColor || '#b48328') 
+                    ? (form.theme?.primaryColor || '#223A5E') 
                     : (form.theme?.cardBorderColor || '#fed7aa'),
                   boxShadow: isActive 
-                    ? `0 0 0 2px ${form.theme?.primaryColor || '#b48328'}25, 0 8px 24px -4px rgba(194, 65, 12, 0.08)` 
+                    ? `0 0 0 2px ${form.theme?.primaryColor || '#223A5E'}25, 0 8px 24px -4px rgba(194, 65, 12, 0.08)` 
                     : '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
                 }}
               >
@@ -685,10 +691,10 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                       {isQuizMode && !isSectionHeader && !isImageBlock && (
                         <div 
                           onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md shrink-0 shadow-2xs"
+                          className="flex items-center gap-1.5 bg-blue-50 border border-blue-300 px-2 py-0.5 rounded-md shrink-0 shadow-2xs"
                           title="Kustomisasi bobot nilai untuk soal ini"
                         >
-                          <span className="text-[10px] font-bold text-amber-900 uppercase tracking-tight">Nilai:</span>
+                          <span className="text-[10px] font-bold text-blue-900 uppercase tracking-tight">Nilai:</span>
                           <input
                             type="number"
                             min="0"
@@ -698,9 +704,9 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                               const val = Math.max(0, parseInt(e.target.value) || 0);
                               handleUpdateQuestion(question.id, { points: val });
                             }}
-                            className="w-10 bg-white border border-amber-300 rounded text-center text-xs font-mono font-bold text-stone-900 focus:outline-none focus:border-[#b48328] py-0.5"
+                            className="w-10 bg-white border border-blue-300 rounded text-center text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#223A5E] py-0.5"
                           />
-                          <span className="text-[10px] font-medium text-amber-800">pts</span>
+                          <span className="text-[10px] font-medium text-blue-800">pts</span>
                         </div>
                       )}
 
@@ -745,11 +751,11 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                               e.stopPropagation();
                               setOpenTypeDropdownId(isOpen ? null : question.id);
                             }}
-                            className="bg-white hover:bg-orange-50/80 active:bg-orange-100 border border-orange-200 hover:border-orange-300 text-stone-800 text-xs font-semibold rounded-xl px-3.5 py-2 flex items-center justify-between gap-2.5 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#b48328]/10 cursor-pointer"
+                            className="bg-white hover:bg-orange-50/80 active:bg-orange-100 border border-orange-200 hover:border-orange-300 text-slate-800 text-xs font-semibold rounded-xl px-3.5 py-2 flex items-center justify-between gap-2.5 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#223A5E]/10 cursor-pointer"
                             title="Ganti tipe pertanyaan"
                           >
-                            <span className="whitespace-nowrap font-medium text-stone-900">{currentItem.label}</span>
-                            <ChevronDown className={`w-3.5 h-3.5 text-stone-500 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+                            <span className="whitespace-nowrap font-medium text-slate-900">{currentItem.label}</span>
+                            <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
                           </button>
 
                           {isOpen && (
@@ -780,13 +786,13 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                       }}
                                       className={`w-full px-4 py-2 text-left text-xs flex items-center justify-between transition-colors cursor-pointer ${
                                         isSelected 
-                                          ? 'bg-orange-50 text-[#b48328] font-bold' 
-                                          : 'hover:bg-orange-50/60 text-stone-700 font-medium'
+                                          ? 'bg-orange-50 text-[#223A5E] font-bold' 
+                                          : 'hover:bg-orange-50/60 text-slate-700 font-medium'
                                       }`}
                                     >
                                       <span>{item.label}</span>
                                       {isSelected && (
-                                        <Check className="w-3.5 h-3.5 text-[#b48328] shrink-0" />
+                                        <Check className="w-3.5 h-3.5 text-[#223A5E] shrink-0" />
                                       )}
                                     </button>
                                   );
@@ -927,16 +933,16 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
 
                           return (
                             <div key={opt.id} className="flex items-center gap-2 group">
-                              <span className="w-3.5 h-3.5 rounded-full border-2 border-amber-300 bg-white shrink-0 block" />
+                              <span className="w-3.5 h-3.5 rounded-full border-2 border-blue-300 bg-white shrink-0 block" />
                               {isActive ? (
                                 <input
                                   type="text"
                                   value={opt.text}
                                   onChange={(e) => handleUpdateOptionText(question.id, opt.id, e.target.value)}
-                                  className="flex-1 text-xs sm:text-sm text-stone-800 border-b border-transparent focus:border-[#b48328] focus:outline-none py-1 hover:border-amber-200"
+                                  className="flex-1 text-xs sm:text-sm text-slate-800 border-b border-transparent focus:border-[#223A5E] focus:outline-none py-1 hover:border-blue-200"
                                 />
                               ) : (
-                                <span className="flex-1 text-xs sm:text-sm text-stone-700 py-1">{opt.text}</span>
+                                <span className="flex-1 text-xs sm:text-sm text-slate-700 py-1">{opt.text}</span>
                               )}
 
                               {/* Tombol Kunci Jawaban Benar */}
@@ -949,12 +955,12 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                   }}
                                   className={`px-2 py-0.5 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
                                     isCorrect
-                                      ? 'bg-amber-100 text-amber-900 border border-amber-400 shadow-2xs'
-                                      : 'bg-amber-50/60 hover:bg-amber-100/70 text-stone-600 border border-amber-200/80'
+                                      ? 'bg-blue-100 text-blue-900 border border-blue-400 shadow-2xs'
+                                      : 'bg-blue-50/60 hover:bg-blue-100/70 text-slate-600 border border-blue-200/80'
                                   }`}
                                   title="Tandai pilihan ini sebagai kunci jawaban yang benar"
                                 >
-                                  <Check className="w-3 h-3 stroke-[2.5] text-[#b48328]" />
+                                  <Check className="w-3 h-3 stroke-[2.5] text-[#223A5E]" />
                                   <span>{isCorrect ? 'Kunci Benar' : 'Jadikan Kunci'}</span>
                                 </button>
                               )}
@@ -966,7 +972,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                     e.stopPropagation();
                                     handleDeleteOption(question.id, opt.id);
                                   }}
-                                  className="text-stone-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                   title="Hapus pilihan"
                                 >
                                   <X className="w-3.5 h-3.5" />
@@ -980,7 +986,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                           <button
                             type="button"
                             onClick={() => handleAddOption(question.id)}
-                            className="text-xs text-[#b48328] hover:text-[#966816] font-semibold pt-1 flex items-center gap-1 cursor-pointer"
+                            className="text-xs text-[#223A5E] hover:text-[#1a2d4a] font-semibold pt-1 flex items-center gap-1 cursor-pointer"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>Tambah Opsi Pilihan</span>
@@ -999,16 +1005,16 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
 
                           return (
                             <div key={opt.id} className="flex items-center gap-2 group">
-                              <span className="w-3.5 h-3.5 rounded border-2 border-amber-300 bg-white shrink-0 block" />
+                              <span className="w-3.5 h-3.5 rounded border-2 border-blue-300 bg-white shrink-0 block" />
                               {isActive ? (
                                 <input
                                   type="text"
                                   value={opt.text}
                                   onChange={(e) => handleUpdateOptionText(question.id, opt.id, e.target.value)}
-                                  className="flex-1 text-xs sm:text-sm text-stone-800 border-b border-transparent focus:border-[#b48328] focus:outline-none py-1 hover:border-amber-200"
+                                  className="flex-1 text-xs sm:text-sm text-slate-800 border-b border-transparent focus:border-[#223A5E] focus:outline-none py-1 hover:border-blue-200"
                                 />
                               ) : (
-                                <span className="flex-1 text-xs sm:text-sm text-stone-700 py-1">{opt.text}</span>
+                                <span className="flex-1 text-xs sm:text-sm text-slate-700 py-1">{opt.text}</span>
                               )}
 
                               {/* Tombol Kunci Jawaban Benar */}
@@ -1021,12 +1027,12 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                   }}
                                   className={`px-2 py-0.5 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
                                     isCorrect
-                                      ? 'bg-amber-100 text-amber-900 border border-amber-400 shadow-2xs'
-                                      : 'bg-amber-50/60 hover:bg-amber-100/70 text-stone-600 border border-amber-200/80'
+                                      ? 'bg-blue-100 text-blue-900 border border-blue-400 shadow-2xs'
+                                      : 'bg-blue-50/60 hover:bg-blue-100/70 text-slate-600 border border-blue-200/80'
                                   }`}
                                   title="Tandai opsi centang ini sebagai kunci jawaban yang benar"
                                 >
-                                  <Check className="w-3 h-3 stroke-[2.5] text-[#b48328]" />
+                                  <Check className="w-3 h-3 stroke-[2.5] text-[#223A5E]" />
                                   <span>{isCorrect ? 'Kunci Benar' : 'Jadikan Kunci'}</span>
                                 </button>
                               )}
@@ -1184,7 +1190,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                       
                       {/* FITUR GESER URUTAN (MOVE UP / DOWN) */}
                       <div className="flex items-center gap-1.5 bg-orange-50/80 p-1 rounded-lg border border-orange-200/70">
-                        <span className="text-[11px] font-medium text-stone-500 px-1">Geser:</span>
+                        <span className="text-[11px] font-medium text-slate-500 px-1">Geser:</span>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -1192,7 +1198,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                             handleMove(index, 'up');
                           }}
                           disabled={index === 0}
-                          className="p-1 rounded hover:bg-white text-stone-700 disabled:opacity-30 disabled:hover:bg-transparent flex items-center gap-1 cursor-pointer"
+                          className="p-1 rounded hover:bg-white text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent flex items-center gap-1 cursor-pointer"
                           title="Geser ke atas"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
@@ -1205,7 +1211,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                             handleMove(index, 'down');
                           }}
                           disabled={index === form.questions.length - 1}
-                          className="p-1 rounded hover:bg-white text-stone-700 disabled:opacity-30 disabled:hover:bg-transparent flex items-center gap-1 cursor-pointer"
+                          className="p-1 rounded hover:bg-white text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent flex items-center gap-1 cursor-pointer"
                           title="Geser ke bawah"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
@@ -1217,10 +1223,10 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                       <button
                         type="button"
                         onClick={() => setEditingImageForId(editingImageForId === question.id ? null : question.id)}
-                        className="flex items-center gap-1 text-stone-800 hover:text-[#b48328] font-semibold bg-orange-50 hover:bg-orange-100/80 border border-orange-200/70 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                        className="flex items-center gap-1 text-slate-800 hover:text-[#223A5E] font-semibold bg-orange-50 hover:bg-orange-100/80 border border-orange-200/70 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
                         title="Sisipkan gambar ilustrasi ke label ini"
                       >
-                        <ImageIcon className="w-3.5 h-3.5 text-amber-700" />
+                        <ImageIcon className="w-3.5 h-3.5 text-blue-700" />
                         <span>{question.imageUrl ? 'Ganti Gambar' : '+ Gambar'}</span>
                       </button>
 
@@ -1232,7 +1238,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                             e.stopPropagation();
                             handleDuplicate(question.id);
                           }}
-                          className="hover:text-[#b48328] text-stone-600 flex items-center gap-1 cursor-pointer transition-colors"
+                          className="hover:text-[#223A5E] text-slate-600 flex items-center gap-1 cursor-pointer transition-colors"
                           title="Duplikat label ini"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -1245,7 +1251,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                             e.stopPropagation();
                             handleDelete(question.id);
                           }}
-                          className="hover:text-red-600 text-stone-600 flex items-center gap-1 cursor-pointer transition-colors"
+                          className="hover:text-red-600 text-slate-600 flex items-center gap-1 cursor-pointer transition-colors"
                           title="Hapus label ini"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1257,14 +1263,14 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                         {/* Wajib diisi switch */}
                         <label 
                           onClick={(e) => e.stopPropagation()} 
-                          className="flex items-center gap-1.5 cursor-pointer select-none font-medium text-stone-800"
+                          className="flex items-center gap-1.5 cursor-pointer select-none font-medium text-slate-800"
                         >
                           <span>Wajib</span>
                           <input
                             type="checkbox"
                             checked={question.required}
                             onChange={(e) => handleUpdateQuestion(question.id, { required: e.target.checked })}
-                            className="rounded border-orange-300 text-[#b48328] focus:ring-0"
+                            className="rounded border-orange-300 text-[#223A5E] focus:ring-0"
                           />
                         </label>
                       </div>
@@ -1283,12 +1289,12 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
       {/* 3. BUTTON TAMBAH LABEL / ELEMEN BARU DI BAGIAN BAWAH          */}
       {/* ============================================================== */}
       <div className="pt-2 space-y-3">
-        <div className="bg-[#fffdfa] rounded-2xl border border-amber-200/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-[#fffdfa] rounded-2xl border border-blue-200/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h4 className="text-sm font-bold text-stone-900">
+            <h4 className="text-sm font-bold text-slate-900">
               Tambahkan Pertanyaan atau Label Berikutnya
             </h4>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-slate-500">
               Gunakan tombol tambah untuk menyisipkan isian singkat, pilihan ganda, atau gambar baru.
             </p>
           </div>
@@ -1305,7 +1311,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                 }, 60);
               }
             }}
-            className="px-4 py-2.5 bg-[#b48328] hover:bg-[#ea580c] text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all shrink-0 cursor-pointer hover:scale-102 active:scale-98"
+            className="px-4 py-2.5 bg-[#223A5E] hover:bg-[#ea580c] text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all shrink-0 cursor-pointer hover:scale-102 active:scale-98"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Tambah Pertanyaan / Elemen</span>
@@ -1314,22 +1320,22 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
 
         {/* Menu Pilihan Tipe Tambah Bawah */}
         {showBottomAddMenu && (
-          <div ref={bottomMenuRef} className="p-4 bg-[#fff8f0] rounded-2xl border border-orange-200 shadow-md grid grid-cols-2 sm:grid-cols-3 gap-2.5 animate-in fade-in">
+          <div ref={bottomMenuRef} className="p-4 bg-[#F3F8FD] rounded-2xl border border-orange-200 shadow-md grid grid-cols-2 sm:grid-cols-3 gap-2.5 animate-in fade-in">
             {ELEMENT_CATALOG.map((item) => (
               <button
                 key={item.type}
                 type="button"
                 onClick={() => handleAddAtBottom(item.type)}
-                className="p-3 rounded-xl bg-white border border-orange-100 hover:border-[#b48328] hover:bg-orange-50/60 text-left transition-all flex items-start gap-2.5 group cursor-pointer shadow-2xs"
+                className="p-3 rounded-xl bg-white border border-orange-100 hover:border-[#223A5E] hover:bg-orange-50/60 text-left transition-all flex items-start gap-2.5 group cursor-pointer shadow-2xs"
               >
-                <div className="p-1.5 rounded-lg bg-orange-50 group-hover:bg-white border border-orange-200/80 text-[#b48328] shrink-0">
+                <div className="p-1.5 rounded-lg bg-orange-50 group-hover:bg-white border border-orange-200/80 text-[#223A5E] shrink-0">
                   {item.icon}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-stone-900 group-hover:text-[#b48328] transition-colors">
+                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#223A5E] transition-colors">
                     {item.label}
                   </div>
-                  <div className="text-[10px] text-stone-500 mt-0.5 line-clamp-1">
+                  <div className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">
                     {item.desc}
                   </div>
                 </div>

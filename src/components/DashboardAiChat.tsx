@@ -29,7 +29,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
   onOpenForm,
   onUpdateRecentForms,
   systemFontFamily,
-  primaryAccent = '#b48328',
+  primaryAccent = '#223A5E',
 }) => {
   const [chatState, setChatState] = useState<AiChatState>(() => aiChatStore.getState());
   const [inputValue, setInputValue] = useState('');
@@ -68,7 +68,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
           lastOpened: 'Baru saja',
           responseCount: 0,
           iconType: generated.quizConfig?.isQuizMode ? 'quiz' : 'blank',
-          accentColor: generated.theme?.primaryColor || '#b48328',
+          accentColor: generated.theme?.primaryColor || '#223A5E',
           accentBg: '#fef3c7',
           coverImage: generated.theme?.headerCoverUrl || '',
           form: generated,
@@ -85,7 +85,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
       lastOpened: 'Baru saja',
       responseCount: 0,
       iconType: form.quizConfig?.isQuizMode ? 'quiz' : 'blank',
-      accentColor: form.theme?.primaryColor || '#b48328',
+      accentColor: form.theme?.primaryColor || '#223A5E',
       accentBg: '#fef3c7',
       coverImage: form.theme?.headerCoverUrl || '',
       form,
@@ -113,17 +113,17 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
       {/* JUDUL DI ATAS FORM AI */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-amber-800 shadow-xs backdrop-blur-md">
-            <Bot className="w-4 h-4 stroke-[2.2] text-[#b48328]" />
+          <div className="w-8 h-8 rounded-xl bg-blue-400/20 border border-blue-400/50 flex items-center justify-center text-blue-800 shadow-xs backdrop-blur-md">
+            <Bot className="w-4 h-4 stroke-[2.2] text-[#223A5E]" />
           </div>
           <div>
             <h2 
-              className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-stone-800"
+              className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-slate-800"
               style={{ fontFamily: systemFontFamily }}
             >
               PERCAKAPAN ASISTEN AI FORMULIR
             </h2>
-            <p className="text-[11px] text-stone-500 font-normal">
+            <p className="text-[11px] text-slate-500 font-normal">
               Rancang formulir dan butir kuis secara otomatis melalui instruksi cepat
             </p>
           </div>
@@ -133,24 +133,24 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
       {/* CONTAINER FORM AI */}
       <div 
         id="dashboard-ai-chat-section" 
-        className="rounded-3xl border border-stone-200/90 bg-[#faf8f5] shadow-sm overflow-hidden"
+        className="rounded-3xl border border-slate-200/90 bg-[#F3F8FD] shadow-sm overflow-hidden"
       >
         {/* NAVBAR JUDUL FORMAI: GARIS TIPIS BATAS BAWAH SESUAI PERMINTAAN */}
-        <div className="px-6 py-3.5 bg-white/60 backdrop-blur-xs border-b border-stone-200 flex items-center justify-between gap-4 select-none">
+        <div className="px-6 py-3.5 bg-white/60 backdrop-blur-xs border-b border-slate-200 flex items-center justify-between gap-4 select-none">
           <div className="flex items-center gap-3">
             {/* Badge Transparan Gold Mengambang & Menonjol dengan Ikon Bot */}
-            <div className="relative -translate-y-0.5 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/25 via-amber-300/35 to-yellow-400/25 border border-amber-400/70 ring-1 ring-amber-300/40 backdrop-blur-md shadow-[0_4px_14px_-2px_rgba(217,119,6,0.28),inset_0_1px_1px_rgba(255,255,255,0.7)] hover:-translate-y-1 hover:shadow-[0_8px_20px_-3px_rgba(217,119,6,0.38)] transition-all duration-200 cursor-default">
-              <Bot className="w-4 h-4 text-[#b48328] stroke-[2.2]" />
-              <span className="font-semibold text-xs sm:text-sm tracking-wide text-amber-950 font-serif drop-shadow-xs">
+            <div className="relative -translate-y-0.5 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-400/25 via-blue-300/35 to-yellow-400/25 border border-blue-400/70 ring-1 ring-blue-300/40 backdrop-blur-md shadow-[0_4px_14px_-2px_rgba(217,119,6,0.28),inset_0_1px_1px_rgba(255,255,255,0.7)] hover:-translate-y-1 hover:shadow-[0_8px_20px_-3px_rgba(217,119,6,0.38)] transition-all duration-200 cursor-default">
+              <Bot className="w-4 h-4 text-[#223A5E] stroke-[2.2]" />
+              <span className="font-semibold text-xs sm:text-sm tracking-wide text-blue-950 font-serif drop-shadow-xs">
                 FormAI
               </span>
             </div>
             
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-stone-700">
+              <span className="text-xs font-medium text-slate-700">
                 Studio Generator Formulir Cepat
               </span>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-900 font-medium border border-amber-300/60 backdrop-blur-xs">
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-900 font-medium border border-blue-300/60 backdrop-blur-xs">
                 v3.8 Flash
               </span>
             </div>
@@ -165,10 +165,10 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
             <button
               type="button"
               onClick={() => aiChatStore.startNewChat()}
-              className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-stone-800 border border-stone-200 hover:border-amber-400 text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+              className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-blue-50 text-slate-800 border border-slate-200 hover:border-blue-400 text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
               title="Mulai obrolan formulir baru"
             >
-              <Plus className="w-3.5 h-3.5 stroke-[2] text-stone-700" />
+              <Plus className="w-3.5 h-3.5 stroke-[2] text-slate-700" />
               <span>Chat Baru</span>
             </button>
           </div>
@@ -185,10 +185,10 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
               {/* Header Sidebar: Teks Tidak Bold */}
               <div className="flex items-center justify-between pb-1">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-stone-100 border border-stone-200 text-stone-700 flex items-center justify-center shadow-2xs">
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-2xs">
                     <MessageSquare className="w-3.5 h-3.5 stroke-[2]" />
                   </div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-700">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700">
                     RIWAYAT CHAT
                   </h3>
                 </div>
@@ -197,7 +197,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                   <button
                     type="button"
                     onClick={() => aiChatStore.clearAllSessions()}
-                    className="p-1 rounded-lg text-stone-400 hover:text-red-600 hover:bg-stone-100 transition-colors cursor-pointer"
+                    className="p-1 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 transition-colors cursor-pointer"
                     title="Hapus semua riwayat chat"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -208,7 +208,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
               {/* List Riwayat Percakapan: Teks Tidak Bold */}
               <div className="space-y-0.5 max-h-[440px] overflow-y-auto pr-1">
                 {sessions.length === 0 ? (
-                  <div className="py-4 text-center text-xs text-stone-500 font-normal">
+                  <div className="py-4 text-center text-xs text-slate-500 font-normal">
                     Belum ada riwayat percakapan.
                   </div>
                 ) : (
@@ -220,8 +220,8 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                         onClick={() => aiChatStore.selectSession(session.id)}
                         className={`group flex items-center justify-between px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer ${
                           isActive
-                            ? 'bg-amber-100/90 text-stone-900 font-medium'
-                            : 'hover:bg-stone-100/80 text-stone-700 font-normal'
+                            ? 'bg-blue-100/90 text-slate-900 font-medium'
+                            : 'hover:bg-slate-100/80 text-slate-700 font-normal'
                         }`}
                         title={session.title}
                       >
@@ -235,7 +235,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                             e.stopPropagation();
                             aiChatStore.deleteSession(session.id);
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-0.5 text-stone-400 hover:text-red-600 rounded transition-opacity shrink-0 ml-1.5"
+                          className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-600 rounded transition-opacity shrink-0 ml-1.5"
                           title="Hapus"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -248,16 +248,16 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
             </div>
 
             {/* Footer Sidebar: Teks Tidak Bold */}
-            <div className="pt-3 border-t border-stone-200/60 text-[11px] text-stone-600 font-normal flex items-center justify-between">
+            <div className="pt-3 border-t border-slate-200/60 text-[11px] text-slate-600 font-normal flex items-center justify-between">
               <span>Model: Gemini 3.8 Flash</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-emerald-700" />
             </div>
           </aside>
 
           {/* ============================================================ */}
-          {/* AREA KANAN: LATAR MENYESUAIKAN DASHBOARD (#faf8f5), BUKAN HITAM */}
+          {/* AREA KANAN: LATAR MENYESUAIKAN DASHBOARD (#F3F8FD), BUKAN HITAM */}
           {/* ============================================================ */}
-          <main className="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[#faf8f5] relative">
+          <main className="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[#F3F8FD] relative">
             
             {!hasMessages ? (
               /* -------------------------------------------------------- */
@@ -266,7 +266,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
               <div className="flex-1 flex flex-col items-center justify-center max-w-xl mx-auto w-full text-center space-y-6 py-10 animate-in fade-in duration-200">
                 <div className="space-y-1">
                   <h2 
-                    className="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-900"
+                    className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900"
                     style={{ fontFamily: systemFontFamily }}
                   >
                     Buat Formulir Cepat Sekarang!
@@ -281,7 +281,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                   }}
                   className="w-full relative"
                 >
-                  <div className="relative shadow-sm rounded-2xl overflow-hidden border border-stone-300 focus-within:border-[#b48328] focus-within:ring-2 focus-within:ring-amber-200 transition-all bg-white">
+                  <div className="relative shadow-sm rounded-2xl overflow-hidden border border-slate-300 focus-within:border-[#223A5E] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
                     <textarea
                       rows={3}
                       value={inputValue}
@@ -293,14 +293,14 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                         }
                       }}
                       placeholder="Ketik topik formulir atau kuis yang ingin dibuat... (tekan Enter)"
-                      className="w-full text-xs sm:text-sm p-4 pr-14 focus:outline-none placeholder:text-stone-400 text-stone-800 bg-transparent resize-none leading-relaxed font-normal"
+                      className="w-full text-xs sm:text-sm p-4 pr-14 focus:outline-none placeholder:text-slate-400 text-slate-800 bg-transparent resize-none leading-relaxed font-normal"
                     />
 
                     <div className="absolute right-3 bottom-3">
                       <button
                         type="submit"
                         disabled={!inputValue.trim() || isLoading}
-                        className="p-2.5 bg-[#b48328] hover:bg-[#966816] disabled:opacity-40 text-white rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border border-[#8c5f10]"
+                        className="p-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-40 text-white rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border border-[#8c5f10]"
                         title="Kirim ke AI"
                       >
                         {isLoading ? (
@@ -320,14 +320,14 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
               <div className="flex-1 flex flex-col justify-between h-full space-y-4">
                 
                 {/* Header Minimalis Obrolan */}
-                <div className="flex items-center justify-between pb-3 border-b border-stone-200/60">
-                  <span className="text-xs font-semibold text-stone-800">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
+                  <span className="text-xs font-semibold text-slate-800">
                     Buat Formulir Cepat Sekarang!
                   </span>
                   <button
                     type="button"
                     onClick={() => aiChatStore.startNewChat()}
-                    className="text-xs text-[#b48328] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                    className="text-xs text-[#223A5E] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Obrolan Baru</span>
@@ -343,8 +343,8 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                     >
                       <div className={`max-w-xl space-y-2.5 ${
                         msg.sender === 'user'
-                          ? 'bg-[#b48328] text-white p-3.5 rounded-2xl rounded-tr-none shadow-xs text-xs sm:text-sm font-medium border-2 border-[#8c5f10]'
-                          : 'bg-white border-2 border-stone-200 text-black p-4 rounded-2xl rounded-tl-none shadow-xs text-xs sm:text-sm'
+                          ? 'bg-[#223A5E] text-white p-3.5 rounded-2xl rounded-tr-none shadow-xs text-xs sm:text-sm font-medium border-2 border-[#8c5f10]'
+                          : 'bg-white border-2 border-slate-200 text-black p-4 rounded-2xl rounded-tl-none shadow-xs text-xs sm:text-sm'
                       }`}>
                         <p className="leading-relaxed whitespace-pre-line">
                           {msg.text}
@@ -352,11 +352,11 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
 
                         {/* Kartu Formulir Hasil AI */}
                         {msg.generatedForm && (
-                          <div className="mt-2.5 p-3.5 rounded-xl border-2 border-amber-300 bg-amber-50/80 space-y-3">
+                          <div className="mt-2.5 p-3.5 rounded-xl border-2 border-blue-300 bg-blue-50/80 space-y-3">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 {msg.generatedForm.quizConfig?.isQuizMode ? (
-                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-amber-100 text-[#b45309] border border-amber-300 flex items-center gap-1">
+                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-blue-100 text-[#b45309] border border-blue-300 flex items-center gap-1">
                                     <GraduationCap className="w-3 h-3" />
                                     <span>Kuis Berpenilaian</span>
                                   </span>
@@ -366,7 +366,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                                     <span>Formulir Standar</span>
                                   </span>
                                 )}
-                                <span className="text-[10px] font-mono font-bold text-stone-600">
+                                <span className="text-[10px] font-mono font-bold text-slate-600">
                                   {msg.generatedForm.questions.length} Pertanyaan
                                 </span>
                               </div>
@@ -374,7 +374,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                               <h4 className="font-black text-sm text-black">
                                 {msg.generatedForm.title}
                               </h4>
-                              <p className="text-xs text-stone-700 line-clamp-2">
+                              <p className="text-xs text-slate-700 line-clamp-2">
                                 {msg.generatedForm.description}
                               </p>
                             </div>
@@ -383,9 +383,9 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleOpenInSystem(msg.generatedForm!)}
-                                className="w-full py-2.5 px-4 bg-[#b48328] hover:bg-[#966816] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-[#8c5f10]"
+                                className="w-full py-2.5 px-4 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-[#8c5f10]"
                               >
-                                <Bot className="w-3.5 h-3.5 text-amber-200" />
+                                <Bot className="w-3.5 h-3.5 text-blue-200" />
                                 <span>Buka & Edit Formulir</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
                               </button>
@@ -398,8 +398,8 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
 
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-white border-2 border-stone-200 p-3.5 rounded-2xl rounded-tl-none shadow-xs flex items-center gap-2.5 text-xs text-black font-semibold">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#b48328]" />
+                      <div className="bg-white border-2 border-slate-200 p-3.5 rounded-2xl rounded-tl-none shadow-xs flex items-center gap-2.5 text-xs text-black font-semibold">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#223A5E]" />
                         <span>AI sedang menyusun formulir...</span>
                       </div>
                     </div>
@@ -424,14 +424,14 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       onChange={(e) => setInputValue(e.target.value)}
                       disabled={isLoading}
                       placeholder="Ketik instruksi tambahan untuk formulir ini..."
-                      className="w-full text-xs sm:text-sm pl-4 pr-10 py-3 rounded-2xl border border-stone-300 focus:border-[#b48328] focus:ring-2 focus:ring-amber-100 focus:outline-none transition-all placeholder:text-stone-400 bg-white text-stone-800 shadow-xs font-normal"
+                      className="w-full text-xs sm:text-sm pl-4 pr-10 py-3 rounded-2xl border border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all placeholder:text-slate-400 bg-white text-slate-800 shadow-xs font-normal"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={!inputValue.trim() || isLoading}
-                    className="px-5 py-3 bg-[#b48328] hover:bg-[#966816] disabled:opacity-40 text-white font-medium text-xs rounded-2xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95 border border-[#8c5f10]"
+                    className="px-5 py-3 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-40 text-white font-medium text-xs rounded-2xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95 border border-[#8c5f10]"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

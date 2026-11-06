@@ -61,7 +61,8 @@ import {
   User,
   Users,
   Camera,
-  AlertCircle
+  AlertCircle,
+  Share2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { FormSchema, UserAccount, FormSubmission } from '../types/form';
@@ -94,6 +95,7 @@ import { CenterToastPopup } from './CenterToastPopup';
 interface DashboardViewProps {
   user: UserAccount;
   onOpenForm: (form: FormSchema) => void;
+  onOpenShare?: (form: FormSchema) => void;
   onOpenUpgradeModal: () => void;
   onSignOut: () => void;
   onOpenAuthModal?: () => void;
@@ -115,6 +117,7 @@ interface DashboardViewProps {
 export const DashboardView: React.FC<DashboardViewProps> = ({
   user,
   onOpenForm,
+  onOpenShare,
   onOpenUpgradeModal,
   onSignOut,
   formResponsesMap,
@@ -451,16 +454,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const systemFontFamily = getSystemFontFamily(currentSettings.systemFont);
   const activeAccentSwatches = isDark ? DARK_THEME_ACCENTS : LIGHT_THEME_ACCENTS;
-  const primaryAccent = currentSettings.primaryAccentColor || (isDark ? '#fbbf24' : '#b48328');
+  const primaryAccent = currentSettings.primaryAccentColor || (isDark ? '#223A5E' : '#223A5E');
   const contrastTextColor = getContrastTextColor(primaryAccent);
 
   const handleUpdateSetting = (patch: Partial<SystemSettings>) => {
     // When theme mode is switched: automatically adapt accent color to ensure contrast!
     if (patch.themeMode && patch.themeMode !== currentSettings.themeMode) {
       if (patch.themeMode === 'dark' && isDarkColor(currentSettings.primaryAccentColor)) {
-        patch.primaryAccentColor = '#fbbf24'; // Switch to warm gold for dark mode
+        patch.primaryAccentColor = '#223A5E'; // Switch to blue for dark mode
       } else if (patch.themeMode === 'light' && isLightColor(currentSettings.primaryAccentColor)) {
-        patch.primaryAccentColor = '#b48328'; // Switch to deep archival gold for light mode
+        patch.primaryAccentColor = '#223A5E'; // Switch to deep archival gold for light mode
       }
     }
     if (onUpdateSystemSettings) {
@@ -618,15 +621,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     newForm.id = newId;
     if (!newForm.theme) {
       newForm.theme = {
-        primaryColor: template.accentColor || '#b48328',
-        canvasBg: '#faf8f5',
+        primaryColor: template.accentColor || '#223A5E',
+        canvasBg: '#F3F8FD',
         cardBg: '#ffffff',
         cardOpacity: 100,
-        textColor: '#1c1917',
+        textColor: '#0f172a',
         canvasPattern: 'dots',
         headerBannerType: 'preset',
         headerCoverUrl: '/public/assets/aistudio/image_3ec5f637.png',
-        headerGradient: 'linear-gradient(135deg, #b48328 0%, #d97706 100%)',
+        headerGradient: 'linear-gradient(135deg, #223A5E 0%, #d97706 100%)',
         headerOverlayOpacity: 30,
         headerPosition: 'banner_top',
         showLogo: false,
@@ -650,11 +653,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         showBranding: true,
       };
     } else {
-      newForm.theme.canvasBg = '#faf8f5';
+      newForm.theme.canvasBg = '#F3F8FD';
       newForm.theme.cardBg = '#ffffff';
       newForm.theme.cardBorderColor = '#eedaa2';
       if (!newForm.theme.primaryColor || newForm.theme.primaryColor === '#18181b' || newForm.theme.primaryColor === '#27272a') {
-        newForm.theme.primaryColor = template.accentColor || '#b48328';
+        newForm.theme.primaryColor = template.accentColor || '#223A5E';
       }
     }
 
@@ -662,7 +665,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       onUpdateSystemSettings({
         ...currentSettings,
         themeMode: 'light',
-        primaryAccentColor: '#b48328',
+        primaryAccentColor: '#223A5E',
       });
     }
 
@@ -672,7 +675,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       lastOpened: 'Baru saja',
       responseCount: 0,
       iconType: template.iconType,
-      accentColor: template.accentColor || '#b48328',
+      accentColor: template.accentColor || '#223A5E',
       accentBg: '#fef3c7',
       coverImage: newForm.theme?.headerCoverUrl || '',
       form: newForm,
@@ -880,8 +883,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     <div 
       className={`min-h-screen transition-colors duration-200 antialiased flex flex-col ${
         isDark 
-          ? 'bg-[#121214] text-stone-100 selection:bg-stone-800 selection:text-white' 
-          : 'bg-[#faf8f5] text-[#1c1917] selection:bg-orange-100 selection:text-orange-950'
+          ? 'bg-[#121214] text-slate-100 selection:bg-slate-800 selection:text-white' 
+          : 'bg-[#F3F8FD] text-[#0f172a] selection:bg-orange-100 selection:text-orange-950'
       }`}
       style={{ fontFamily: systemFontFamily }}
     >
@@ -889,8 +892,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* 1. TOP HEADER: MINIMALIST EDITORIAL */}
       <header className={`sticky top-0 z-40 backdrop-blur-md border-b px-3 sm:px-6 py-3 transition-colors ${
         isDark 
-          ? 'bg-[#18181b]/95 border-stone-800 text-stone-100' 
-          : 'bg-white/95 border-stone-200 text-stone-900'
+          ? 'bg-[#18181b]/95 border-slate-800 text-slate-100' 
+          : 'bg-white/95 border-slate-200 text-slate-900'
       }`}>
         <div className="w-full flex items-center justify-between gap-4">
           
@@ -900,7 +903,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               type="button"
               onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
               className={`p-1.5 rounded-lg md:hidden cursor-pointer ${
-                isDark ? 'hover:bg-stone-800 text-stone-300' : 'hover:bg-stone-100 text-stone-600'
+                isDark ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-100 text-slate-600'
               }`}
               title="Menu Navigasi Sidebar"
             >
@@ -912,13 +915,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               onClick={() => navigateTo('dashboard')}
             >
               <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-transform group-hover:scale-105 ${
-                isDark ? 'border-stone-700 bg-stone-800 text-stone-200' : 'border-stone-300 bg-stone-100 text-stone-800'
+                isDark ? 'border-slate-700 bg-slate-800 text-slate-200' : 'border-slate-300 bg-slate-100 text-slate-800'
               }`}>
                 <PenTool className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
               </div>
               <div>
                 <span 
-                  className={`font-bold text-sm tracking-[0.2em] uppercase block leading-none ${isDark ? 'text-white' : 'text-stone-900'}`}
+                  className={`font-bold text-sm tracking-[0.2em] uppercase block leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}
                   style={{ fontFamily: systemFontFamily }}
                 >
                   KEDATAFORM
@@ -930,7 +933,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Minimalist Search Bar with Border & Live Results */}
           <div className="flex-1 max-w-lg mx-2 hidden sm:block relative">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
               <input
                 type="text"
                 placeholder={isEn ? "Search survey forms, field logs, or respondents..." : "Telusuri formulir survei, catatan lapangan, atau responden..."}
@@ -948,15 +951,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
                 className={`w-full text-xs rounded-full pl-9 pr-8 py-2 border focus:outline-none transition-all shadow-2xs ${
                   isDark 
-                    ? 'bg-[#222226] hover:bg-[#28282e] text-stone-100 placeholder:text-stone-500 border-stone-700 focus:border-stone-500' 
-                    : 'bg-[#fafaf9] hover:bg-white text-stone-800 placeholder:text-stone-400 border-stone-200 focus:border-[#b45309]'
+                    ? 'bg-[#222226] hover:bg-[#28282e] text-slate-100 placeholder:text-slate-500 border-slate-700 focus:border-slate-500' 
+                    : 'bg-[#F3F8FD] hover:bg-white text-slate-800 placeholder:text-slate-400 border-slate-200 focus:border-[#b45309]'
                 }`}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                   title="Hapus pencarian"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -973,15 +976,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 />
                 <div 
                   className={`absolute left-0 right-0 top-full mt-2 rounded-2xl border shadow-2xl z-50 p-3 space-y-2 max-h-80 overflow-y-auto animate-in fade-in ${
-                    isDark ? 'bg-[#1c1c20] border-stone-700 text-stone-100' : 'bg-white border-stone-200 text-stone-800'
+                    isDark ? 'bg-[#1c1c20] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-800'
                   }`}
                   style={{ fontFamily: systemFontFamily }}
                 >
                   <div className={`flex items-center justify-between px-3 py-2 border-b text-xs ${
-                    isDark ? 'border-stone-800' : 'border-stone-200'
+                    isDark ? 'border-slate-800' : 'border-slate-200'
                   }`}>
-                    <span className={`font-bold ${isDark ? 'text-stone-300' : 'text-stone-800'}`}>
-                      Hasil Pencarian: <span className="ml-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 font-black border border-amber-300 font-mono text-[11px]">{filteredForms.length} formulir</span>
+                    <span className={`font-bold ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
+                      Hasil Pencarian: <span className="ml-1 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-950 font-black border border-blue-300 font-mono text-[11px]">{filteredForms.length} formulir</span>
                     </span>
                     <button
                       type="button"
@@ -989,14 +992,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         setIsSearchFocused(false);
                         setActiveSidebarView('my_forms');
                       }}
-                      className="font-extrabold text-xs text-amber-800 hover:text-amber-950 hover:underline cursor-pointer"
+                      className="font-extrabold text-xs text-blue-800 hover:text-blue-950 hover:underline cursor-pointer"
                     >
                       Buka Semua →
                     </button>
                   </div>
 
                   {filteredForms.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-stone-400 font-medium">
+                    <div className="p-4 text-center text-xs text-slate-400 font-medium">
                       Tidak ada formulir yang cocok dengan "{searchQuery}".
                     </div>
                   ) : (
@@ -1010,27 +1013,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           }}
                           className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all hover:shadow-xs group ${
                             isDark 
-                              ? 'bg-stone-900/60 hover:bg-stone-800 border-stone-800 text-stone-200' 
-                              : 'bg-stone-50 hover:bg-amber-50/70 border-stone-200 text-stone-900'
+                              ? 'bg-slate-900/60 hover:bg-slate-800 border-slate-800 text-slate-200' 
+                              : 'bg-slate-50 hover:bg-blue-50/70 border-slate-200 text-slate-900'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <FileText className="w-4 h-4 shrink-0 text-amber-600" />
+                            <FileText className="w-4 h-4 shrink-0 text-blue-600" />
                             <div className="min-w-0">
-                              <span className="font-extrabold text-xs text-stone-900 truncate block group-hover:underline">
+                              <span className="font-extrabold text-xs text-slate-900 truncate block group-hover:underline">
                                 {item.title}
                               </span>
-                              <span className="text-[10px] text-stone-500 font-mono block">
+                              <span className="text-[10px] text-slate-500 font-mono block">
                                 {item.folderName} • Terakhir dibuka: {item.lastOpened}
                               </span>
                             </div>
                           </div>
                           <span className={`text-[11px] font-mono font-black px-3 py-1 rounded-full border shrink-0 flex items-center gap-1.5 shadow-2xs ${
                             isDark 
-                              ? 'bg-stone-800 text-stone-100 border-stone-600' 
-                              : 'bg-stone-100 text-stone-900 border-stone-300'
+                              ? 'bg-slate-800 text-slate-100 border-slate-600' 
+                              : 'bg-slate-100 text-slate-900 border-slate-300'
                           }`}>
-                            <Users className="w-3.5 h-3.5 text-stone-600" />
+                            <Users className="w-3.5 h-3.5 text-slate-600" />
                             <span>{formResponsesMap[item.id]?.length ?? item.responseCount ?? 0} Respon</span>
                           </span>
                         </div>
@@ -1052,8 +1055,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 onClick={() => setIsNotificationsOpen(prev => !prev)}
                 className={`p-2 rounded-full border relative transition-colors cursor-pointer ${
                   isDark
-                    ? 'border-stone-700 bg-[#222226] hover:bg-[#28282e] text-stone-200'
-                    : 'border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-700'
+                    ? 'border-slate-700 bg-[#222226] hover:bg-[#28282e] text-slate-200'
+                    : 'border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700'
                 }`}
                 title={isEn ? 'Notifications & Alerts' : 'Pusat Notifikasi & Respon'}
               >
@@ -1072,7 +1075,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   />
                   <div
                     className={`absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl z-50 p-3.5 space-y-3 animate-in fade-in ${
-                      isDark ? 'bg-[#1e1e22] border-stone-700 text-stone-200' : 'bg-white border-stone-200 text-stone-800'
+                      isDark ? 'bg-[#1e1e22] border-slate-700 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
                     }`}
                   >
                   <div className="flex items-center justify-between border-b pb-2.5">
@@ -1083,7 +1086,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
                       currentSettings.emailNotifications
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-stone-100 text-stone-500'
+                        : 'bg-slate-100 text-slate-500'
                     }`}>
                       {currentSettings.emailNotifications ? (isEn ? 'Live Alerts ON' : 'Notifikasi Aktif') : (isEn ? 'Muted' : 'Dinonaktifkan')}
                     </span>
@@ -1091,7 +1094,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                   <div className="space-y-2 max-h-56 overflow-y-auto scrollbar-thin">
                     {notifications.length === 0 ? (
-                      <p className="text-xs text-stone-400 py-4 text-center">{isEn ? 'No notifications yet' : 'Belum ada notifikasi'}</p>
+                      <p className="text-xs text-slate-400 py-4 text-center">{isEn ? 'No notifications yet' : 'Belum ada notifikasi'}</p>
                     ) : (
                       notifications.map((n) => (
                         <div
@@ -1099,8 +1102,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           onClick={() => handleOpenNotificationDetail(n)}
                           className={`p-2.5 rounded-xl border text-xs space-y-1 transition-all cursor-pointer hover:shadow-xs group ${
                             n.read
-                              ? isDark ? 'bg-stone-900/40 border-stone-800 text-stone-400 hover:bg-stone-800/60' : 'bg-stone-50 border-stone-100 text-stone-600 hover:bg-stone-100/70'
-                              : isDark ? 'bg-stone-800/80 border-stone-700 text-stone-200 hover:bg-stone-800' : 'bg-amber-50/60 border-amber-200 text-stone-800 hover:bg-amber-100/60'
+                              ? isDark ? 'bg-slate-900/40 border-slate-800 text-slate-400 hover:bg-slate-800/60' : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-slate-100/70'
+                              : isDark ? 'bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-800' : 'bg-blue-50/60 border-blue-200 text-slate-800 hover:bg-blue-100/60'
                           }`}
                           title="Klik untuk melihat detail notifikasi"
                         >
@@ -1111,9 +1114,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               )}
                               <span className="font-bold truncate group-hover:underline">{n.title}</span>
                             </div>
-                            <span className="text-[10px] text-stone-400 shrink-0 font-mono">{n.time}</span>
+                            <span className="text-[10px] text-slate-400 shrink-0 font-mono">{n.time}</span>
                           </div>
-                          <p className="text-[11px] leading-relaxed text-stone-500 line-clamp-2">{n.desc}</p>
+                          <p className="text-[11px] leading-relaxed text-slate-500 line-clamp-2">{n.desc}</p>
                           <div className="text-[10px] font-semibold flex items-center justify-end gap-1 pt-0.5" style={{ color: primaryAccent }}>
                             <span>Lihat Detail →</span>
                           </div>
@@ -1126,7 +1129,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
-                      className="text-stone-400 hover:text-stone-600 cursor-pointer font-medium"
+                      className="text-slate-400 hover:text-slate-600 cursor-pointer font-medium"
                     >
                       {isEn ? 'Mark all as read' : 'Tandai sudah dibaca'}
                     </button>
@@ -1159,8 +1162,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <aside
           className={`w-64 border-r flex flex-col justify-between shrink-0 select-none transition-all z-30 min-h-[calc(100vh-61px)] sticky top-[61px] self-start ${
             isDark 
-              ? 'bg-[#161619] border-stone-800 text-stone-300' 
-              : 'bg-[#fafaf9] border-stone-200 text-stone-700'
+              ? 'bg-[#161619] border-slate-800 text-slate-300' 
+              : 'bg-[#F3F8FD] border-slate-200 text-slate-700'
           } ${
             isMobileSidebarOpen
               ? isDark ? 'fixed inset-y-0 left-0 shadow-2xl p-5 bg-[#18181b]' : 'fixed inset-y-0 left-0 shadow-2xl p-5 bg-white'
@@ -1171,12 +1174,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             
             {/* Mobile Close Button */}
             {isMobileSidebarOpen && (
-              <div className={`flex items-center justify-between pb-3 border-b md:hidden ${isDark ? 'border-stone-800' : 'border-stone-200'}`}>
+              <div className={`flex items-center justify-between pb-3 border-b md:hidden ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                 <span className="font-bold text-sm tracking-wide" style={{ fontFamily: systemFontFamily }}>Navigasi Studio</span>
                 <button
                   type="button"
                   onClick={() => setIsMobileSidebarOpen(false)}
-                  className="p-1 rounded-md text-stone-400 hover:text-stone-300"
+                  className="p-1 rounded-md text-slate-400 hover:text-slate-300"
                 >
                   <X className="w-4 h-4 stroke-[2]" />
                 </button>
@@ -1203,7 +1206,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             {/* Nav Menu */}
             <div className="space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-stone-400 font-bold px-3 mb-2 block">
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400 font-bold px-3 mb-2 block">
                 {isEn ? 'Archive & Menu' : 'Arsip & Menu'}
               </span>
 
@@ -1220,8 +1223,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   activeSidebarView === 'dashboard' && !isViewingResponses
                     ? 'shadow-xs font-bold'
                     : isDark 
-                      ? 'text-stone-300 hover:bg-stone-800 hover:text-white' 
-                      : 'text-stone-700 hover:bg-stone-200/60'
+                      ? 'text-slate-300 hover:bg-slate-800 hover:text-white' 
+                      : 'text-slate-700 hover:bg-slate-200/60'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -1242,7 +1245,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                   activeSidebarView === 'my_forms' && !isViewingResponses
                     ? 'shadow-xs font-bold'
-                    : 'text-stone-700 hover:bg-stone-200/60'
+                    : 'text-slate-700 hover:bg-slate-200/60'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -1265,7 +1268,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
-                  className="w-full px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:bg-stone-200/60 flex items-center justify-between transition-colors cursor-pointer"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-200/60 flex items-center justify-between transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
                     <SlidersHorizontal className="w-4 h-4 stroke-[2]" />
@@ -1275,7 +1278,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </button>
 
                 {isSettingsMenuOpen && (
-                  <div className="pl-3 mt-1 space-y-1 border-l-2 border-stone-200 ml-3 py-1">
+                  <div className="pl-3 mt-1 space-y-1 border-l-2 border-slate-200 ml-3 py-1">
                     
                     {/* 1. Aturan Seluruh Sistem */}
                     <button
@@ -1289,7 +1292,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       className={`w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                         activeSidebarView === 'system_rules'
                           ? 'shadow-xs font-bold'
-                          : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1310,7 +1313,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       className={`w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                         activeSidebarView === 'plans'
                           ? 'shadow-xs font-bold'
-                          : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1341,8 +1344,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         activeSidebarView === 'profile' && !isViewingResponses
                           ? 'shadow-xs font-bold'
                           : isDark 
-                            ? 'text-stone-300 hover:bg-stone-800 hover:text-white' 
-                            : 'text-stone-700 hover:bg-stone-200/60'
+                            ? 'text-slate-300 hover:bg-slate-800 hover:text-white' 
+                            : 'text-slate-700 hover:bg-slate-200/60'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1360,13 +1363,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Sidebar Footer: Pinned Profile Card Sesuai Permintaan */}
-          <div className="pt-4 border-t border-amber-200/80 dark:border-stone-800 mt-auto">
+          <div className="pt-4 border-t border-blue-200/80 dark:border-slate-800 mt-auto">
             <div className={`p-3 rounded-2xl border transition-all ${
               activeSidebarView === 'profile'
-                ? 'ring-2 ring-amber-400 border-amber-400 bg-amber-50/60 dark:bg-amber-950/20'
+                ? 'ring-2 ring-blue-400 border-blue-400 bg-blue-50/60 dark:bg-blue-950/20'
                 : isDark 
-                  ? 'bg-[#1c1c20] border-stone-800 text-stone-200' 
-                  : 'bg-white border-amber-200/90 shadow-xs text-stone-800'
+                  ? 'bg-[#1c1c20] border-slate-800 text-slate-200' 
+                  : 'bg-white border-blue-200/90 shadow-xs text-slate-800'
             }`}>
               {/* Klik Profil Membuka Halaman Profil Langsung */}
               <div 
@@ -1377,7 +1380,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 {/* Avatar Profil dengan Badge yang Jelas */}
                 <div className="relative shrink-0">
                   <div 
-                    className="w-11 h-11 rounded-full overflow-hidden border-2 ring-2 ring-amber-100 shadow-2xs group-hover:scale-105 transition-transform"
+                    className="w-11 h-11 rounded-full overflow-hidden border-2 ring-2 ring-blue-100 shadow-2xs group-hover:scale-105 transition-transform"
                     style={{ borderColor: `${primaryAccent}80` }}
                   >
                     <img 
@@ -1388,7 +1391,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </div>
                   {/* Badge Ikon Edit Profil */}
                   <div 
-                    className="absolute -bottom-1 -right-1 bg-stone-900 text-white rounded-full p-1 border border-white shadow-xs group-hover:bg-amber-600 transition-colors"
+                    className="absolute -bottom-1 -right-1 bg-slate-900 text-white rounded-full p-1 border border-white shadow-xs group-hover:bg-blue-600 transition-colors"
                     title="Buka halaman profil"
                   >
                     <User className="w-2.5 h-2.5 stroke-[2.5]" />
@@ -1398,15 +1401,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 {/* Nama disampingnya & Free Maks 100/Form */}
                 <div className="min-w-0 flex-1">
                   <p 
-                    className={`text-xs font-bold truncate group-hover:text-amber-700 transition-colors ${isDark ? 'text-stone-100' : 'text-stone-900'}`}
+                    className={`text-xs font-bold truncate group-hover:text-blue-700 transition-colors ${isDark ? 'text-slate-100' : 'text-slate-900'}`}
                   >
                     {user.name}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
                       user.plan === 'pro' 
-                        ? 'bg-amber-100 text-amber-950 border border-amber-300' 
-                        : 'bg-stone-100 text-stone-700 border border-stone-200'
+                        ? 'bg-blue-100 text-blue-950 border border-blue-300' 
+                        : 'bg-slate-100 text-slate-700 border border-slate-200'
                     }`}>
                       {user.plan === 'pro' ? 'PRO' : 'FREE (Maks 100/Form)'}
                     </span>
@@ -1420,7 +1423,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     e.stopPropagation();
                     setIsProfileMenuOpen(!isProfileMenuOpen);
                   }}
-                  className={`p-1 rounded-lg transition-colors hover:bg-stone-100 dark:hover:bg-stone-800 ${isDark ? 'text-stone-400' : 'text-stone-600'}`}
+                  className={`p-1 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
                 >
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 stroke-[2.5] ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -1433,14 +1436,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     className="fixed inset-0 z-40 bg-transparent" 
                     onClick={() => setIsProfileMenuOpen(false)} 
                   />
-                  <div className="mt-2.5 pt-2.5 border-t border-stone-200 dark:border-stone-800 space-y-1.5 animate-in fade-in duration-150 relative z-50">
+                  <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-800 space-y-1.5 animate-in fade-in duration-150 relative z-50">
                     <button
                       type="button"
                       onClick={() => navigateTo('profile')}
                       className={`w-full px-3 py-2 rounded-xl text-left text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
                         activeSidebarView === 'profile'
-                          ? 'bg-stone-900 text-white'
-                          : isDark ? 'text-amber-300 bg-amber-950/40 hover:bg-amber-900/50 border border-amber-800/60' : 'text-amber-950 bg-amber-50 hover:bg-amber-100 border border-amber-300'
+                          ? 'bg-slate-900 text-white'
+                          : isDark ? 'text-blue-300 bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800/60' : 'text-blue-950 bg-blue-50 hover:bg-blue-100 border border-blue-300'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1459,7 +1462,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           navigateTo('plans');
                         }}
                         className={`w-full px-2.5 py-2 rounded-lg text-left text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
-                          isDark ? 'text-stone-200 hover:bg-stone-800' : 'text-stone-800 hover:bg-stone-100'
+                          isDark ? 'text-slate-200 hover:bg-slate-800' : 'text-slate-800 hover:bg-slate-100'
                         }`}
                       >
                         <Crown className="w-3.5 h-3.5 stroke-[2]" style={{ color: primaryAccent }} />
@@ -1495,7 +1498,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsViewingResponses(false)}
-                className="px-4 py-2 rounded-xl bg-white border border-stone-300 hover:border-stone-500 text-xs font-semibold text-stone-700 flex items-center gap-2 cursor-pointer shadow-xs transition-all"
+                className="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-slate-500 text-xs font-semibold text-slate-700 flex items-center gap-2 cursor-pointer shadow-xs transition-all"
               >
                 <ArrowLeft className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} />
                 <span>Kembali ke Halaman Sebelumnya</span>
@@ -1507,70 +1510,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {activeSidebarView === 'dashboard' && (
                 <div className="space-y-8">
                   
-                  {/* --- HERO BANNER: PANORAMIC EXPEDITION LANDSCAPE WITH TORN-PAPER EDGE (EXACT SAME AS LANDING PAGE) --- */}
-                  <div className="relative rounded-3xl overflow-hidden border border-stone-200 shadow-md">
-                    {/* Background Hero Image */}
-                    <div className="relative h-64 sm:h-72 w-full overflow-hidden">
-                      <img 
-                        src="/public/assets/aistudio/image_3ec5f637.png" 
-                        alt="Hero Mountain Expedition"
-                        className="w-full h-full object-cover object-center"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-stone-950/70 via-stone-950/40 to-stone-950/80 pointer-events-none" />
-
-                      {/* Content inside Hero Banner */}
-                      <div className="absolute inset-0 z-10 flex flex-col justify-center px-6 sm:px-10 text-white space-y-3">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] uppercase tracking-[0.25em] px-2.5 py-0.5 rounded-full bg-white/20 border border-white/30 text-white font-semibold backdrop-blur-sm">
-                            ARSIP FORMULIR & RESPON
-                          </span>
-                        </div>
-
-                        <h1 className="text-2xl sm:text-4xl font-serif font-extrabold tracking-[0.12em] uppercase text-white drop-shadow-md">
-                          PENGUMPULAN DATA & RESPON LAPANGAN
-                        </h1>
-
-                        <p className="font-['Caveat'] text-xl sm:text-2xl text-amber-200 tracking-wide drop-shadow-sm select-none">
-                          Koleksi momen & tanggapan berharga, bukan sekadar data mentah ↗
-                        </p>
-
-                        <div className="pt-2 flex flex-wrap items-center gap-3">
-                          <div className="px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-xs font-mono text-white flex items-center gap-2">
-                            <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse stroke-[2]" />
-                            <span>{totalResponsesAcrossForms} Respon Terkumpul</span>
-                          </div>
-                          <div className="px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-xs font-mono text-white flex items-center gap-2">
-                            <FileText className="w-3.5 h-3.5 text-amber-300 stroke-[2]" />
-                            <span>{recentForms.length} Formulir Aktif</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Torn Ragged Paper SVG Edge Transition to Canvas */}
-                      <div className="absolute bottom-0 inset-x-0 z-20 leading-none">
-                        <svg 
-                          viewBox="0 0 1200 40" 
-                          preserveAspectRatio="none" 
-                          className={`w-full h-6 sm:h-8 fill-current transition-colors ${
-                            isDark ? 'text-[#121214]' : 'text-[#ffffff]'
-                          }`}
-                        >
-                          <path d="M0,0 L35,18 L75,8 L120,25 L165,10 L210,22 L260,5 L310,20 L360,12 L410,28 L460,7 L515,24 L570,9 L620,21 L675,5 L730,23 L785,11 L840,26 L895,8 L950,20 L1005,7 L1060,23 L1115,12 L1160,21 L1200,3 L1200,40 L0,40 Z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
 
                   {/* --- QUICK START TEMPLATES ROW (RINGKAS & BERSIH) --- */}
                   <div className={`p-5 sm:p-6 rounded-2xl border shadow-xs space-y-4 transition-colors ${
-                    isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-[#ffffff] border-stone-200 text-stone-900'
+                    isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-[#ffffff] border-slate-200 text-slate-900'
                   }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <PenTool className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
                         <h2 
                           className={`text-xs font-extrabold tracking-[0.2em] uppercase ${
-                            isDark ? 'text-white' : 'text-stone-800'
+                            isDark ? 'text-white' : 'text-slate-800'
                           }`}
                           style={{ fontFamily: systemFontFamily }}
                         >
@@ -1588,9 +1538,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           inputEl?.focus();
                         }}
                         style={{ fontFamily: systemFontFamily }}
-                        className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs tracking-wider uppercase flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-stone-700"
+                        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs tracking-wider uppercase flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-slate-700"
                       >
-                        <Bot className="w-3.5 h-3.5 stroke-[2] text-amber-300" />
+                        <Bot className="w-3.5 h-3.5 stroke-[2] text-blue-300" />
                         <span>Buat dengan AI</span>
                       </button>
                     </div>
@@ -1602,17 +1552,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           id={item.id === 'blank' ? 'tour-blank-form' : undefined}
                           onClick={() => handleCreateFromTemplate(item)}
                           className={`group cursor-pointer text-left space-y-1.5 p-2 rounded-xl border border-transparent transition-all ${
-                            isDark ? 'hover:border-stone-700 hover:bg-[#222226]' : 'hover:border-stone-300 hover:bg-[#fafaf9]'
+                            isDark ? 'hover:border-slate-700 hover:bg-[#222226]' : 'hover:border-slate-300 hover:bg-[#F3F8FD]'
                           }`}
                         >
                           <div className={`h-24 rounded-lg border transition-all flex flex-col items-center justify-center p-3 relative ${
                             isDark 
-                              ? 'bg-[#222226] border-stone-700 group-hover:border-amber-400 group-hover:shadow-xs' 
-                              : 'bg-white border-stone-200 group-hover:border-[#b45309] group-hover:shadow-xs'
+                              ? 'bg-[#222226] border-slate-700 group-hover:border-blue-400 group-hover:shadow-xs' 
+                              : 'bg-white border-slate-200 group-hover:border-[#b45309] group-hover:shadow-xs'
                           }`}>
                             {item.id === 'blank' ? (
                               <div className={`w-8 h-8 rounded-full border flex items-center justify-center group-hover:scale-105 transition-transform ${
-                                isDark ? 'border-stone-600 bg-stone-800 text-stone-200' : 'border-stone-300 bg-stone-50 text-stone-700'
+                                isDark ? 'border-slate-600 bg-slate-800 text-slate-200' : 'border-slate-300 bg-slate-50 text-slate-700'
                               }`}>
                                 <Plus className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} />
                               </div>
@@ -1620,26 +1570,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               <div className="w-full h-full flex flex-col justify-between">
                                 <div className="flex items-center justify-between">
                                   <div className={`w-6 h-6 rounded flex items-center justify-center ${
-                                    isDark ? 'bg-stone-800 text-stone-300' : 'bg-stone-100'
+                                    isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100'
                                   }`}>
                                     {renderTemplateIcon(item.iconType)}
                                   </div>
                                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryAccent }} />
                                 </div>
                                 <div className="space-y-1">
-                                  <div className={`h-1.5 w-3/4 rounded ${isDark ? 'bg-stone-700' : 'bg-stone-200'}`} />
-                                  <div className={`h-1 w-1/2 rounded ${isDark ? 'bg-stone-800' : 'bg-stone-100'}`} />
+                                  <div className={`h-1.5 w-3/4 rounded ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                                  <div className={`h-1 w-1/2 rounded ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`} />
                                 </div>
                               </div>
                             )}
                           </div>
                           <div>
-                            <span className={`text-xs font-bold truncate block group-hover:text-amber-400 transition-colors ${
-                              isDark ? 'text-stone-200' : 'text-stone-800'
+                            <span className={`text-xs font-bold truncate block group-hover:text-blue-400 transition-colors ${
+                              isDark ? 'text-slate-200' : 'text-slate-800'
                             }`}>
                               {item.name}
                             </span>
-                            <span className="text-[10px] text-stone-400 block truncate">
+                            <span className="text-[10px] text-slate-400 block truncate">
                               {item.category}
                             </span>
                           </div>
@@ -1667,23 +1617,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   
                   {/* Header Form Saya */}
                   <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border shadow-xs transition-colors ${
-                    isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                    isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                   }`}>
                     <div>
                       <div className="flex items-center gap-2.5">
                         <h1 
-                          className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-stone-900'}`}
+                          className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}
                           style={{ fontFamily: systemFontFamily }}
                         >
                           Arsip Seluruh Formulir
                         </h1>
                         <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-                          isDark ? 'text-stone-300 bg-stone-800 border-stone-700' : 'text-stone-700 bg-stone-100 border-stone-200'
+                          isDark ? 'text-slate-300 bg-slate-800 border-slate-700' : 'text-slate-700 bg-slate-100 border-slate-200'
                         }`}>
                           {recentForms.length} Dokumen
                         </span>
                       </div>
-                      <p className={`text-xs mt-1 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                      <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                         Kelola seluruh instrumen survei, atur jadwal buka & deadline, serta unduh data responden. Gambar sampul otomatis mengikuti desain masing-masing form.
                       </p>
                     </div>
@@ -1703,8 +1653,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         style={{ fontFamily: systemFontFamily }}
                         className={`px-4 py-2 rounded-xl text-xs tracking-wider uppercase border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs font-bold ${
                           isDark 
-                            ? 'bg-stone-800 hover:bg-stone-700 text-stone-200 border-stone-700' 
-                            : 'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300'
+                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700' 
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
                         }`}
                       >
                         <Bot className="w-3.5 h-3.5 inline text-[#b45309] stroke-[2]" />
@@ -1732,8 +1682,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               isCatSelected
                                 ? 'font-bold shadow-xs'
                                 : isDark
-                                  ? 'bg-[#18181b] text-stone-300 hover:bg-stone-800 border border-stone-800'
-                                  : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
+                                  ? 'bg-[#18181b] text-slate-300 hover:bg-slate-800 border border-slate-800'
+                                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                             }`}
                           >
                             {cat}
@@ -1743,15 +1693,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </div>
 
                     <div className={`flex items-center gap-1 p-1 rounded-xl border shadow-2xs self-end sm:self-auto ${
-                      isDark ? 'bg-[#18181b] border-stone-800' : 'bg-white border-stone-200'
+                      isDark ? 'bg-[#18181b] border-slate-800' : 'bg-white border-slate-200'
                     }`}>
                       <button
                         type="button"
                         onClick={() => setViewMode('grid')}
                         className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                           viewMode === 'grid' 
-                            ? isDark ? 'bg-stone-800 text-white font-bold' : 'bg-stone-100 text-stone-900 font-bold' 
-                            : 'text-stone-400 hover:text-stone-200'
+                            ? isDark ? 'bg-slate-800 text-white font-bold' : 'bg-slate-100 text-slate-900 font-bold' 
+                            : 'text-slate-400 hover:text-slate-200'
                         }`}
                         title="Tampilan Grid"
                       >
@@ -1762,8 +1712,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         onClick={() => setViewMode('list')}
                         className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                           viewMode === 'list' 
-                            ? isDark ? 'bg-stone-800 text-white font-bold' : 'bg-stone-100 text-stone-900 font-bold' 
-                            : 'text-stone-400 hover:text-stone-200'
+                            ? isDark ? 'bg-slate-800 text-white font-bold' : 'bg-slate-100 text-slate-900 font-bold' 
+                            : 'text-slate-400 hover:text-slate-200'
                         }`}
                         title="Tampilan List"
                       >
@@ -1775,43 +1725,44 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {/* Grid / List Mode */}
                   {filteredForms.length === 0 ? (
                     <div className={`p-12 text-center rounded-2xl border shadow-xs space-y-3 ${
-                      isDark ? 'bg-[#18181b] border-stone-800 text-stone-300' : 'bg-white border-stone-200 text-stone-600'
+                      isDark ? 'bg-[#18181b] border-slate-800 text-slate-300' : 'bg-white border-slate-200 text-slate-600'
                     }`}>
-                      <FileText className="w-8 h-8 text-stone-400 mx-auto stroke-[1.5]" />
-                      <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-stone-900'}`}>Tidak ada formulir yang sesuai</h3>
-                      <p className="text-xs text-stone-400">Coba ubah kata kunci pencarian atau pilih kategori lain.</p>
+                      <FileText className="w-8 h-8 text-slate-400 mx-auto stroke-[1.5]" />
+                      <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Tidak ada formulir yang sesuai</h3>
+                      <p className="text-xs text-slate-400">Coba ubah kata kunci pencarian atau pilih kategori lain.</p>
                     </div>
                   ) : viewMode === 'grid' ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {filteredForms.map((item) => {
                         const isolatedCount = formResponsesMap[item.id]?.length ?? item.responseCount;
                         const availability = checkFormAvailability(item.form.schedule);
                         
                         // Sampul seragam: gunakan gambar kustom atau sampul standar estetis agar seluruh kartu seragam
-                        const formCover = item.form.theme?.headerCoverUrl || item.coverImage || '/assets/aistudio/image_3ec5f637.png';
+                        const rawCover = item.form.theme?.headerCoverUrl || '';
+const formCover = (rawCover && rawCover !== '/assets/aistudio/image_3ec5f637.png') ? rawCover : '/assets/landing/formulir.jpeg';
 
                         return (
                           <div
                             key={item.id}
                             onClick={() => onOpenForm(item.form)}
                             className={`rounded-2xl border hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between shadow-xs relative ${
-                              activeMenuFormId === item.id ? 'overflow-visible z-30 ring-1 ring-amber-400/50' : 'overflow-hidden'
+                              activeMenuFormId === item.id ? 'overflow-visible z-30 ring-1 ring-blue-400/50' : 'overflow-hidden'
                             } ${
                               isDark 
-                                ? 'bg-[#18181b] border-stone-800 hover:border-stone-600' 
-                                : 'bg-white border-stone-200 hover:border-stone-400'
+                                ? 'bg-[#18181b] border-slate-800 hover:border-slate-600' 
+                                : 'bg-white border-slate-200 hover:border-slate-400'
                             }`}
                           >
                             {/* Card Header: Cover Image Seragam (Tinggi h-36 Rapi & Konsisten) */}
                             <div className={`h-36 w-full overflow-hidden border-b relative ${
-                              isDark ? 'bg-stone-900 border-stone-800' : 'bg-stone-100 border-stone-200'
+                              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
                             }`}>
                               <img 
                                 src={formCover} 
                                 alt={item.title} 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 via-transparent to-transparent pointer-events-none" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
                               
                               <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
                                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -1839,8 +1790,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               <div className="flex items-start justify-between gap-2.5">
                                 <div className="min-w-0 flex-1">
                                   <h3 
-                                    className={`font-bold text-base group-hover:text-amber-400 transition-colors line-clamp-2 ${
-                                      isDark ? 'text-white' : 'text-stone-900'
+                                    className={`font-bold text-base group-hover:text-blue-400 transition-colors line-clamp-2 ${
+                                      isDark ? 'text-white' : 'text-slate-900'
                                     }`}
                                     style={{ fontFamily: systemFontFamily }}
                                   >
@@ -1861,8 +1812,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                       activeMenuFormId === item.id
                                         ? 'shadow-xs'
                                         : isDark 
-                                          ? 'bg-stone-800 hover:bg-stone-700 text-stone-300 border-stone-700' 
-                                          : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
+                                          ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' 
+                                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
                                     }`}
                                     title={isEn ? 'Form actions' : 'Opsi Formulir'}
                                   >
@@ -1874,15 +1825,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                       onClick={(e) => e.stopPropagation()}
                                       className={`absolute right-0 top-full mt-1.5 w-56 rounded-xl shadow-2xl border py-1.5 z-50 max-h-60 overflow-y-auto scrollbar-thin animate-in fade-in ${
                                         isDark 
-                                          ? 'bg-[#222226] border-stone-700 text-stone-200 shadow-black/80' 
-                                          : 'bg-white border-stone-200 text-stone-800 shadow-stone-300/80'
+                                          ? 'bg-[#222226] border-slate-700 text-slate-200 shadow-black/80' 
+                                          : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/80'
                                       }`}
                                     >
                                       <button
                                         type="button"
                                         onClick={() => handleOpenResponsesFromMenu(item.id)}
                                         className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                          isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                         }`}
                                       >
                                         <BarChart2 className="w-3.5 h-3.5 stroke-[2]" style={{ color: primaryAccent }} />
@@ -1892,21 +1843,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                         type="button"
                                         onClick={() => setSelectedFormForSchedule(item.form)}
                                         className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                          isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                         }`}
                                       >
-                                        <CalendarClock className="w-3.5 h-3.5 stroke-[2] text-stone-400" />
+                                        <CalendarClock className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
                                         <span>{isEn ? 'Schedule & Availability' : 'Atur Jadwal Buka'}</span>
                                       </button>
                                       <button
                                         type="button"
                                         onClick={(e) => handleToggleQuizModeFromMenu(item, e)}
                                         className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between cursor-pointer ${
-                                          isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                         }`}
                                       >
                                         <div className="flex items-center gap-2">
-                                          <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-amber-500' : 'text-stone-400'}`} />
+                                          <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-blue-500' : 'text-slate-400'}`} />
                                           <span>{isEn ? 'Quiz & Scoring' : 'Mode Kuis & Skor'}</span>
                                         </div>
                                         <span 
@@ -1924,13 +1875,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                         type="button"
                                         onClick={(e) => handleDuplicateForm(item, e)}
                                         className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                          isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                         }`}
                                       >
-                                        <Copy className="w-3.5 h-3.5 stroke-[2] text-stone-400" />
+                                        <Copy className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
                                         <span>{isEn ? 'Duplicate Form' : 'Duplikat Formulir'}</span>
                                       </button>
-                                      <div className={`my-1 border-t ${isDark ? 'border-stone-700' : 'border-stone-100'}`} />
+                                      <div className={`my-1 border-t ${isDark ? 'border-slate-700' : 'border-slate-100'}`} />
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveMenuFormId(null);
+                                          if (onOpenShare) onOpenShare(item.form);
+                                        }}
+                                        className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
+                                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
+                                        }`}
+                                      >
+                                        <Share2 className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
+                                        <span>{isEn ? 'Share Form' : 'Bagikan Formulir'}</span>
+                                      </button>
+                                      <div className={`my-1 border-t ${isDark ? 'border-slate-700' : 'border-slate-100'}`} />
                                       <button
                                         type="button"
                                         onClick={(e) => handleDeleteForm(item.id, e)}
@@ -1946,31 +1912,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 </div>
                               </div>
 
-                              <div className={`space-y-1 pt-1 border-t text-[11px] font-mono ${
-                                isDark ? 'border-stone-800' : 'border-stone-100'
-                              }`}>
-                                <div className={`flex items-center justify-between ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
-                                  <span>{isEn ? 'RESPONSE QUOTA:' : 'KUOTA RESPON:'}</span>
-                                  <span className={`font-bold ${isolatedCount >= 100 && user.plan === 'free' ? 'text-red-600 font-extrabold' : isDark ? 'text-white' : 'text-stone-900'}`}>
-                                    {isolatedCount}/100 {isolatedCount >= 100 && user.plan === 'free' ? (isEn ? '(LOCKED)' : '(TERKUNCI)') : ''}
-                                  </span>
-                                </div>
-                                <div className={`w-full h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-stone-800' : 'bg-stone-100'}`}>
-                                  <div 
-                                    className="h-full rounded-full transition-all" 
-                                    style={{ 
-                                      width: `${Math.min(100, isolatedCount)}%`,
-                                      backgroundColor: primaryAccent 
-                                    }}
-                                  />
-                                </div>
-                              </div>
                             </div>
 
                             <div className={`px-5 py-3 border-t flex items-center justify-between text-xs ${
-                              isDark ? 'bg-[#161619] border-stone-800' : 'bg-[#fafaf9] border-stone-150'
+                              isDark ? 'bg-[#161619] border-slate-800' : 'bg-[#F3F8FD] border-slate-150'
                             }`}>
-                              <span className="text-[11px] font-mono text-stone-400">{item.lastOpened}</span>
+                              <span className="text-[11px] font-mono text-slate-400">{item.lastOpened}</span>
                               <span 
                                 className="font-bold tracking-wider flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
                                 style={{ color: primaryAccent, fontFamily: systemFontFamily }}
@@ -1986,7 +1933,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   ) : (
                     /* LIST VIEW */
                     <div className={`rounded-2xl border divide-y overflow-hidden shadow-xs ${
-                      isDark ? 'bg-[#18181b] border-stone-800 divide-stone-800' : 'bg-white border-stone-200 divide-stone-100'
+                      isDark ? 'bg-[#18181b] border-slate-800 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'
                     }`}>
                       {filteredForms.map((item) => {
                         const isolatedCount = formResponsesMap[item.id]?.length ?? item.responseCount;
@@ -1997,19 +1944,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             key={item.id}
                             onClick={() => onOpenForm(item.form)}
                             className={`p-4 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${
-                              isDark ? 'hover:bg-[#202025]' : 'hover:bg-[#fafaf9]'
+                              isDark ? 'hover:bg-[#202025]' : 'hover:bg-[#F3F8FD]'
                             }`}
                           >
                             <div className="flex items-center gap-3.5 min-w-0">
                               <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 font-bold ${
-                                isDark ? 'bg-stone-800 border-stone-700 text-stone-200' : 'bg-stone-100 border-stone-200 text-stone-700'
+                                isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-700'
                               }`}>
                                 <FileText className="w-5 h-5 stroke-[1.8]" style={{ color: primaryAccent }} />
                               </div>
                               <div className="min-w-0">
                                 <h3 
-                                  className={`font-bold text-sm truncate group-hover:text-amber-400 ${
-                                    isDark ? 'text-white' : 'text-stone-900'
+                                   className={`font-bold text-sm line-clamp-2 group-hover:text-blue-400 ${
+                                    isDark ? 'text-white' : 'text-slate-900'
                                   }`}
                                   style={{ fontFamily: systemFontFamily }}
                                 >
@@ -2038,7 +1985,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               <span className={`font-mono font-bold px-2 py-0.5 rounded text-[11px] ${
                                 isolatedCount >= 100 && user.plan === 'free'
                                   ? 'text-red-700 bg-red-100 border border-red-300'
-                                  : isDark ? 'text-stone-300 bg-stone-800' : 'text-stone-700 bg-stone-100'
+                                  : isDark ? 'text-slate-300 bg-slate-800' : 'text-slate-700 bg-slate-100'
                               }`}>
                                 {isolatedCount}/100 Respon {isolatedCount >= 100 && user.plan === 'free' ? '(Terkunci)' : ''}
                               </span>
@@ -2058,8 +2005,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   }}
                                   className={`p-1.5 rounded-lg border transition-colors ${
                                     isDark 
-                                      ? 'bg-stone-800 hover:bg-stone-700 text-stone-300 border-stone-700' 
-                                      : 'bg-white hover:bg-stone-100 text-stone-600 border-stone-200'
+                                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' 
+                                      : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-200'
                                   }`}
                                   title="Opsi Formulir"
                                 >
@@ -2071,15 +2018,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     onClick={(e) => e.stopPropagation()}
                                     className={`absolute right-0 top-full mt-1.5 w-56 rounded-xl shadow-2xl border py-1.5 z-50 max-h-60 overflow-y-auto scrollbar-thin animate-in fade-in ${
                                       isDark 
-                                        ? 'bg-[#222226] border-stone-700 text-stone-200 shadow-black/80' 
-                                        : 'bg-white border-stone-200 text-stone-800 shadow-stone-300/80'
+                                        ? 'bg-[#222226] border-slate-700 text-slate-200 shadow-black/80' 
+                                        : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/80'
                                     }`}
                                   >
                                     <button
                                       type="button"
                                       onClick={() => handleOpenResponsesFromMenu(item.id)}
                                       className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                        isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                        isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                       }`}
                                     >
                                       <BarChart2 className="w-3.5 h-3.5 stroke-[2]" style={{ color: primaryAccent }} />
@@ -2089,21 +2036,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                       type="button"
                                       onClick={() => setSelectedFormForSchedule(item.form)}
                                       className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                        isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                        isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                       }`}
                                     >
-                                      <CalendarClock className="w-3.5 h-3.5 stroke-[2] text-stone-400" />
+                                      <CalendarClock className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
                                       <span>{isEn ? 'Schedule & Availability' : 'Atur Jadwal Buka'}</span>
                                     </button>
                                     <button
                                       type="button"
                                       onClick={(e) => handleToggleQuizModeFromMenu(item, e)}
                                       className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between cursor-pointer ${
-                                        isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                        isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                       }`}
                                     >
                                       <div className="flex items-center gap-2">
-                                        <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-amber-500' : 'text-stone-400'}`} />
+                                        <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-blue-500' : 'text-slate-400'}`} />
                                         <span>{isEn ? 'Quiz & Scoring' : 'Mode Kuis & Skor'}</span>
                                       </div>
                                       <span 
@@ -2121,13 +2068,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                       type="button"
                                       onClick={(e) => handleDuplicateForm(item, e)}
                                       className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
-                                        isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50'
+                                        isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
                                       }`}
                                     >
-                                      <Copy className="w-3.5 h-3.5 stroke-[2] text-stone-400" />
+                                      <Copy className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
                                       <span>{isEn ? 'Duplicate Form' : 'Duplikat Formulir'}</span>
                                     </button>
-                                    <div className={`my-1 border-t ${isDark ? 'border-stone-700' : 'border-stone-100'}`} />
+                                    <div className={`my-1 border-t ${isDark ? 'border-slate-700' : 'border-slate-100'}`} />
                                     <button
                                       type="button"
                                       onClick={(e) => handleDeleteForm(item.id, e)}
@@ -2156,12 +2103,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div className="space-y-6">
                   
                   <div className={`p-6 rounded-2xl border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
-                    isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                    isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                   }`}>
                     <div>
                       <div className="flex items-center gap-2.5 flex-wrap">
                         <h1 
-                          className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-stone-900'}`}
+                          className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}
                           style={{ fontFamily: systemFontFamily }}
                         >
                           {isEn ? 'System-Wide Rules & Studio Customization' : 'Aturan Seluruh Sistem & Kustomisasi Studio'}
@@ -2169,14 +2116,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border ${
                           currentSettings.autoSaveForms !== false 
                             ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                            : 'bg-stone-500/10 text-stone-400 border-stone-500/20'
+                            : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
                         }`}>
                           {currentSettings.autoSaveForms !== false 
                             ? (isEn ? '✓ Auto-Save Active & Synced' : '✓ Aktif & Otomatis Tersimpan') 
                             : (isEn ? 'Auto-Save Paused' : 'Auto-Save Dijeda')}
                         </span>
                       </div>
-                      <p className="text-xs text-stone-500 mt-1">
+                      <p className="text-xs text-slate-500 mt-1">
                         {isEn 
                           ? 'Customize studio themes, view modes, typography, and circular accent color palettes.'
                           : 'Kustomisasi tema, mode tampilan, font editorial, dan palet lingkaran warna aksen studio.'}
@@ -2209,7 +2156,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <button
                         type="button"
                         onClick={handleResetSettingsToDefault}
-                        className="px-3.5 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 rounded-xl border border-stone-200 flex items-center gap-1.5 cursor-pointer transition-colors"
+                        className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 rounded-xl border border-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
                         title={isEn ? "Reset all system settings to defaults" : "Kembalikan semua setelan ke awal pabrik"}
                       >
                         <RotateCcw className="w-3.5 h-3.5 stroke-[2]" />
@@ -2220,14 +2167,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                   {/* Two-column sub-layout */}
                   <div className={`rounded-2xl border shadow-xs overflow-hidden flex flex-col lg:flex-row min-h-[560px] transition-colors ${
-                    isDark ? 'bg-[#18181b] border-stone-800' : 'bg-white border-stone-200'
+                    isDark ? 'bg-[#18181b] border-slate-800' : 'bg-white border-slate-200'
                   }`}>
                     
                     {/* In-page sub-sidebar */}
                     <div className={`w-full lg:w-64 border-b lg:border-b-0 lg:border-r p-3 sm:p-4 space-y-1 shrink-0 transition-colors ${
-                      isDark ? 'border-stone-800 bg-[#161619]' : 'border-stone-200 bg-[#fafaf9]'
+                      isDark ? 'border-slate-800 bg-[#161619]' : 'border-slate-200 bg-[#F3F8FD]'
                     }`}>
-                      <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold hidden lg:block">
+                      <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold hidden lg:block">
                         Sub-Menu Pengaturan
                       </div>
 
@@ -2268,17 +2215,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center justify-between gap-2.5 cursor-pointer shrink-0 lg:shrink ${
                                 isActive
                                   ? isDark
-                                    ? 'bg-[#252529] font-bold shadow-xs border border-stone-700 text-white'
-                                    : 'bg-white font-bold shadow-xs border border-stone-300 text-stone-900'
+                                    ? 'bg-[#252529] font-bold shadow-xs border border-slate-700 text-white'
+                                    : 'bg-white font-bold shadow-xs border border-slate-300 text-slate-900'
                                   : isDark
-                                    ? 'text-stone-400 hover:text-stone-200 hover:bg-stone-800/60'
-                                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
+                                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                               }`}
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <div 
                                   className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                    isActive ? 'text-white' : isDark ? 'bg-stone-800 text-stone-300' : 'bg-stone-200 text-stone-700'
+                                    isActive ? 'text-white' : isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'
                                   }`}
                                   style={isActive ? { backgroundColor: primaryAccent, color: contrastTextColor } : {}}
                                 >
@@ -2288,7 +2235,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   <div className="text-xs font-semibold truncate leading-tight">
                                     {sub.label}
                                   </div>
-                                  <div className="text-[10px] text-stone-400 truncate hidden lg:block">
+                                  <div className="text-[10px] text-slate-400 truncate hidden lg:block">
                                     {sub.desc}
                                   </div>
                                 </div>
@@ -2296,7 +2243,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                               {sub.badge && (
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold shrink-0 hidden lg:inline-block ${
-                                  isDark ? 'bg-stone-800 text-stone-300' : 'bg-stone-200 text-stone-700'
+                                  isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'
                                 }`}>
                                   {sub.badge}
                                 </span>
@@ -2314,19 +2261,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {settingsSubTab === 'appearance' && (
                         <div className="space-y-6 animate-in fade-in duration-150">
                           <div className={`border-b pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                            isDark ? 'border-stone-800' : 'border-stone-200'
+                            isDark ? 'border-slate-800' : 'border-slate-200'
                           }`}>
                             <div>
                               <h3 
                                 className={`text-base font-bold flex items-center gap-2 ${
-                                  isDark ? 'text-white' : 'text-stone-900'
+                                  isDark ? 'text-white' : 'text-slate-900'
                                 }`}
                                 style={{ fontFamily: systemFontFamily }}
                               >
                                 <Palette className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
                                 <span>Tema, Font & Palet Pensil Warna Studio</span>
                               </h3>
-                              <p className={`text-xs mt-0.5 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                 Kustomisasi seluruh estetika studio dan formulir. Bersih, presisi, tanpa efek berlebih.
                               </p>
                             </div>
@@ -2351,15 +2298,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             
                             {/* Card 1: Mode & Nuansa Tema */}
                             <div className={`p-4 rounded-2xl border space-y-3.5 ${
-                              isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-[#fafaf9] border-stone-200 text-stone-800'
+                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
                             }`}>
                               <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider font-bold">
                                 <Contrast className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
-                                <span className={isDark ? 'text-stone-200' : 'text-stone-700'}>Mode & Nuansa Tema</span>
+                                <span className={isDark ? 'text-slate-200' : 'text-slate-700'}>Mode & Nuansa Tema</span>
                               </div>
 
                               <div className="space-y-1.5">
-                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>
+                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                                   Mode Tema Sistem
                                 </label>
                                 <div className="relative">
@@ -2368,20 +2315,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     onChange={(e) => handleUpdateSetting({ themeMode: e.target.value as any })}
                                     className={`w-full appearance-none rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none transition-all cursor-pointer pr-9 ${
                                       isDark 
-                                        ? 'bg-[#161619] border border-stone-700 text-stone-100 hover:border-stone-600 focus:ring-1 focus:ring-stone-600' 
-                                        : 'bg-white border border-stone-300 hover:border-stone-400 text-stone-900 focus:ring-1 focus:ring-stone-400'
+                                        ? 'bg-[#161619] border border-slate-700 text-slate-100 hover:border-slate-600 focus:ring-1 focus:ring-slate-600' 
+                                        : 'bg-white border border-slate-300 hover:border-slate-400 text-slate-900 focus:ring-1 focus:ring-slate-400'
                                     }`}
                                   >
                                     <option value="light">Terang (Snow-White Light Mode - Rekomendasi)</option>
                                     <option value="dark">Gelap (Studio Dark Mode)</option>
                                     <option value="auto">Otomatis (Ikuti Sistem OS)</option>
                                   </select>
-                                  <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
                                 </div>
                               </div>
 
                               <div className="space-y-1.5">
-                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>
+                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                                   Gaya Nuansa UI
                                 </label>
                                 <div className="relative">
@@ -2390,8 +2337,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     onChange={(e) => handleUpdateSetting({ systemStyle: e.target.value as any })}
                                     className={`w-full appearance-none rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none transition-all cursor-pointer pr-9 ${
                                       isDark 
-                                        ? 'bg-[#161619] border border-stone-700 text-stone-100 hover:border-stone-600 focus:ring-1 focus:ring-stone-600' 
-                                        : 'bg-white border border-stone-300 hover:border-stone-400 text-stone-900 focus:ring-1 focus:ring-stone-400'
+                                        ? 'bg-[#161619] border border-slate-700 text-slate-100 hover:border-slate-600 focus:ring-1 focus:ring-slate-600' 
+                                        : 'bg-white border border-slate-300 hover:border-slate-400 text-slate-900 focus:ring-1 focus:ring-slate-400'
                                     }`}
                                   >
                                     <option value="warm_titanium">Warm Titanium (Putih Salju & Kertas Hangat - Default Landing)</option>
@@ -2402,22 +2349,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     <option value="nordic_frost">Nordic Frost (Nuansa Dingin Bersih)</option>
                                     <option value="oled">Midnight OLED (Kontras Hitam Pekat)</option>
                                   </select>
-                                  <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
                                 </div>
                               </div>
                             </div>
 
                             {/* Card 2: Tipografi Font */}
                             <div className={`p-4 rounded-2xl border space-y-3.5 ${
-                              isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-[#fafaf9] border-stone-200 text-stone-800'
+                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
                             }`}>
                               <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider font-bold">
                                 <Type className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
-                                <span className={isDark ? 'text-stone-200' : 'text-stone-700'}>Tipografi & Font Sistem</span>
+                                <span className={isDark ? 'text-slate-200' : 'text-slate-700'}>Tipografi & Font Sistem</span>
                               </div>
 
                               <div className="space-y-1.5">
-                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>
+                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                                   Jenis Font Sistem
                                 </label>
                                 <div className="relative">
@@ -2426,8 +2373,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     onChange={(e) => handleUpdateSetting({ systemFont: e.target.value as any })}
                                     className={`w-full appearance-none rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none transition-all cursor-pointer pr-9 ${
                                       isDark 
-                                        ? 'bg-[#161619] border border-stone-700 text-stone-100 hover:border-stone-600 focus:ring-1 focus:ring-stone-600' 
-                                        : 'bg-white border border-stone-300 hover:border-stone-400 text-stone-900 focus:ring-1 focus:ring-stone-400'
+                                        ? 'bg-[#161619] border border-slate-700 text-slate-100 hover:border-slate-600 focus:ring-1 focus:ring-slate-600' 
+                                        : 'bg-white border border-slate-300 hover:border-slate-400 text-slate-900 focus:ring-1 focus:ring-slate-400'
                                     }`}
                                   >
                                     <optgroup label="Modern Sans-Serif (Default Rekomendasi)">
@@ -2448,12 +2395,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                       <option value="caveat">Caveat (Tulisan Tangan Santai)</option>
                                     </optgroup>
                                   </select>
-                                  <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
                                 </div>
                               </div>
 
                               <div className="space-y-1.5">
-                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>
+                                <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                                   Skala Ukuran Teks (Font Size)
                                 </label>
                                 <div className="relative">
@@ -2462,15 +2409,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     onChange={(e) => handleUpdateSetting({ fontSizeScale: e.target.value as any })}
                                     className={`w-full appearance-none rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none transition-all cursor-pointer pr-9 ${
                                       isDark 
-                                        ? 'bg-[#161619] border border-stone-700 text-stone-100 hover:border-stone-600 focus:ring-1 focus:ring-stone-600' 
-                                        : 'bg-white border border-stone-300 hover:border-stone-400 text-stone-900 focus:ring-1 focus:ring-stone-400'
+                                        ? 'bg-[#161619] border border-slate-700 text-slate-100 hover:border-slate-600 focus:ring-1 focus:ring-slate-600' 
+                                        : 'bg-white border border-slate-300 hover:border-slate-400 text-slate-900 focus:ring-1 focus:ring-slate-400'
                                     }`}
                                   >
                                     <option value="compact">Kompak (90% - Informasi Padat)</option>
                                     <option value="standard">Standar (100% - Default Seimbang)</option>
                                     <option value="comfortable">Lapang (110% - Nyaman & Besar)</option>
                                   </select>
-                                  <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
                                 </div>
                               </div>
                             </div>
@@ -2479,13 +2426,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                           {/* SECTION: WARNA AKSEN LINGKARAN */}
                           <div className={`p-5 rounded-2xl border space-y-4 ${
-                            isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-[#fafaf9] border-stone-200 text-stone-800'
+                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
                           }`}>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <Palette className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
                                 <label className={`text-xs font-mono uppercase tracking-wider font-bold block ${
-                                  isDark ? 'text-white' : 'text-stone-900'
+                                  isDark ? 'text-white' : 'text-slate-900'
                                 }`}>
                                   Warna Aksen Studio
                                 </label>
@@ -2505,13 +2452,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             {/* Label filter kontras */}
                             <div className="flex items-center justify-between">
                               <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                                isDark ? 'text-amber-300' : 'text-stone-700'
+                                isDark ? 'text-blue-300' : 'text-slate-700'
                               }`}>
                                 {isDark 
                                   ? 'Pilihan Warna Lingkaran Aksen (Mode Gelap):' 
                                   : 'Pilihan Warna Lingkaran Aksen (Mode Terang):'}
                               </span>
-                              <span className="text-[10px] font-mono text-stone-400">
+                              <span className="text-[10px] font-mono text-slate-400">
                                 Otomatis harmoni dengan tema
                               </span>
                             </div>
@@ -2551,9 +2498,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           {/* Border Radius & Animations */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className={`p-4 rounded-2xl border space-y-1.5 ${
-                              isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-[#fafaf9] border-stone-200 text-stone-800'
+                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
                             }`}>
-                              <label className={`text-[11px] font-semibold block ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>
+                              <label className={`text-[11px] font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                                 Kelengkungan Sudut (Border Radius)
                               </label>
                               <div className="relative">
@@ -2562,26 +2509,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   onChange={(e) => handleUpdateSetting({ borderRadius: e.target.value as any })}
                                   className={`w-full appearance-none rounded-xl px-3.5 py-2 text-xs font-medium cursor-pointer pr-9 focus:outline-none ${
                                     isDark 
-                                      ? 'bg-[#161619] border border-stone-700 text-stone-100' 
-                                      : 'bg-white border border-stone-300 text-stone-900'
+                                      ? 'bg-[#161619] border border-slate-700 text-slate-100' 
+                                      : 'bg-white border border-slate-300 text-slate-900'
                                   }`}
                                 >
                                   <option value="modern">Modern Rounded (12px / 24px - Default)</option>
                                   <option value="sharp">Tajam / Sharp (6px / 8px)</option>
                                   <option value="rounded">Ekstra Membulat (16px / 32px)</option>
                                 </select>
-                                <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
+                                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
                               </div>
                             </div>
 
                             <div className={`p-4 rounded-2xl border flex items-center justify-between ${
-                              isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-[#fafaf9] border-stone-200 text-stone-900'
+                              isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-900'
                             }`}>
                               <div>
-                                <label className={`text-xs font-semibold block ${isDark ? 'text-stone-200' : 'text-stone-900'}`}>
+                                <label className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
                                   Animasi Transisi Halus
                                 </label>
-                                <p className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                                <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                   Efek perpindahan micro-interaction antar tampilan
                                 </p>
                               </div>
@@ -2593,7 +2540,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   className="sr-only peer"
                                 />
                                 <div 
-                                  className="w-10 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"
+                                  className="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"
                                   style={{ backgroundColor: currentSettings.enableAnimations ? primaryAccent : undefined }}
                                 />
                               </label>
@@ -2606,26 +2553,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {/* SUB-TAB 2: WORKSPACE */}
                       {settingsSubTab === 'workspace' && (
                         <div className="space-y-4 animate-in fade-in duration-150">
-                          <div className={`border-b pb-3 ${isDark ? 'border-stone-800' : 'border-stone-200'}`}>
+                          <div className={`border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                             <h3 
                               className={`text-base font-bold flex items-center gap-2 ${
-                                isDark ? 'text-white' : 'text-stone-900'
+                                isDark ? 'text-white' : 'text-slate-900'
                               }`}
                               style={{ fontFamily: systemFontFamily }}
                             >
                               <Building2 className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
                               <span>Workspace & Identitas Lembaga</span>
                             </h3>
-                            <p className={`text-xs mt-0.5 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                            <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                               Kelola nama workspace, email kontak resmi, zona waktu, dan format tanggal.
                             </p>
                           </div>
 
                           <div className={`p-5 rounded-2xl border space-y-4 ${
-                            isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-[#fafaf9] border-stone-200 text-stone-800'
+                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[#F3F8FD] border-slate-200 text-slate-800'
                           }`}>
                             <div>
-                              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-stone-300' : 'text-stone-800'}`}>
+                              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
                                 Nama Workspace / Instansi
                               </label>
                               <input
@@ -2634,14 +2581,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 onChange={(e) => handleUpdateSetting({ workspaceName: e.target.value })}
                                 className={`w-full text-xs rounded-xl p-2.5 focus:outline-none focus:ring-1 ${
                                   isDark 
-                                    ? 'bg-[#161619] border border-stone-700 text-stone-100 focus:ring-stone-600' 
-                                    : 'bg-white border border-stone-300 text-stone-800 focus:ring-stone-400'
+                                    ? 'bg-[#161619] border border-slate-700 text-slate-100 focus:ring-slate-600' 
+                                    : 'bg-white border border-slate-300 text-slate-800 focus:ring-slate-400'
                                 }`}
                               />
                             </div>
 
                             <div>
-                              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-stone-300' : 'text-stone-800'}`}>
+                              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
                                 Email Kontak Administrator
                               </label>
                               <input
@@ -2650,15 +2597,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 onChange={(e) => handleUpdateSetting({ adminEmail: e.target.value })}
                                 className={`w-full text-xs rounded-xl p-2.5 focus:outline-none focus:ring-1 ${
                                   isDark 
-                                    ? 'bg-[#161619] border border-stone-700 text-stone-100 focus:ring-stone-600' 
-                                    : 'bg-white border border-stone-300 text-stone-800 focus:ring-stone-400'
+                                    ? 'bg-[#161619] border border-slate-700 text-slate-100 focus:ring-slate-600' 
+                                    : 'bg-white border border-slate-300 text-slate-800 focus:ring-slate-400'
                                 }`}
                               />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
-                                <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-stone-300' : 'text-stone-800'}`}>
+                                <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
                                   Zona Waktu Default
                                 </label>
                                 <select
@@ -2666,8 +2613,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   onChange={(e) => handleUpdateSetting({ timezone: e.target.value })}
                                   className={`w-full text-xs rounded-xl p-2.5 cursor-pointer focus:outline-none ${
                                     isDark 
-                                      ? 'bg-[#161619] border border-stone-700 text-stone-100' 
-                                      : 'bg-white border border-stone-300 text-stone-800'
+                                      ? 'bg-[#161619] border border-slate-700 text-slate-100' 
+                                      : 'bg-white border border-slate-300 text-slate-800'
                                   }`}
                                 >
                                   <option value="WIB (GMT+7)">WIB (GMT+7) - Jakarta, Bandung</option>
@@ -2678,7 +2625,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               </div>
 
                               <div>
-                                <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-stone-300' : 'text-stone-800'}`}>
+                                <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
                                   {isEn ? 'Date Display Format' : 'Format Tampilan Tanggal'}
                                 </label>
                                 <select
@@ -2686,8 +2633,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   onChange={(e) => handleUpdateSetting({ dateFormat: e.target.value })}
                                   className={`w-full text-xs rounded-xl p-2.5 cursor-pointer focus:outline-none ${
                                     isDark 
-                                      ? 'bg-[#161619] border border-stone-700 text-stone-100' 
-                                      : 'bg-white border border-stone-300 text-stone-800'
+                                      ? 'bg-[#161619] border border-slate-700 text-slate-100' 
+                                      : 'bg-white border border-slate-300 text-slate-800'
                                   }`}
                                 >
                                   <option value="DD/MM/YYYY">DD/MM/YYYY (Contoh: 03/11/2026)</option>
@@ -2698,8 +2645,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             </div>
 
                             {/* BAHASA SISTEM / SYSTEM LANGUAGE SELECTOR */}
-                            <div className={`pt-3 border-t space-y-2 ${isDark ? 'border-stone-800' : 'border-stone-200'}`}>
-                              <label className={`text-xs font-semibold block ${isDark ? 'text-stone-300' : 'text-stone-800'}`}>
+                            <div className={`pt-3 border-t space-y-2 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+                              <label className={`text-xs font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
                                 {isEn ? 'System Language' : 'Bahasa Sistem'}
                               </label>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2714,11 +2661,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                     currentSettings.language === 'id'
                                       ? isDark
-                                        ? 'bg-stone-800 text-white font-bold ring-1'
-                                        : 'bg-white text-stone-900 font-bold shadow-xs ring-1'
+                                        ? 'bg-slate-800 text-white font-bold ring-1'
+                                        : 'bg-white text-slate-900 font-bold shadow-xs ring-1'
                                       : isDark
-                                        ? 'bg-[#161619] border-stone-700 text-stone-400 hover:text-stone-200'
-                                        : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
+                                        ? 'bg-[#161619] border-slate-700 text-slate-400 hover:text-slate-200'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                   }`}
                                 >
                                   <div className="flex items-center gap-2.5">
@@ -2727,7 +2674,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     </span>
                                     <div>
                                       <div className="text-xs font-semibold">Bahasa Indonesia</div>
-                                      <div className="text-[10px] text-stone-400">Bahasa resmi & utama</div>
+                                      <div className="text-[10px] text-slate-400">Bahasa resmi & utama</div>
                                     </div>
                                   </div>
                                   {currentSettings.language === 'id' && (
@@ -2746,11 +2693,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                     currentSettings.language === 'en'
                                       ? isDark
-                                        ? 'bg-stone-800 text-white font-bold ring-1'
-                                        : 'bg-white text-stone-900 font-bold shadow-xs ring-1'
+                                        ? 'bg-slate-800 text-white font-bold ring-1'
+                                        : 'bg-white text-slate-900 font-bold shadow-xs ring-1'
                                       : isDark
-                                        ? 'bg-[#161619] border-stone-700 text-stone-400 hover:text-stone-200'
-                                        : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
+                                        ? 'bg-[#161619] border-slate-700 text-slate-400 hover:text-slate-200'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                   }`}
                                 >
                                   <div className="flex items-center gap-2.5">
@@ -2759,7 +2706,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     </span>
                                     <div>
                                       <div className="text-xs font-semibold">English (US)</div>
-                                      <div className="text-[10px] text-stone-400">Global & International</div>
+                                      <div className="text-[10px] text-slate-400">Global & International</div>
                                     </div>
                                   </div>
                                   {currentSettings.language === 'en' && (
@@ -2775,17 +2722,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {/* SUB-TAB 3: NOTIFICATIONS */}
                       {settingsSubTab === 'notifications' && (
                         <div className="space-y-4 animate-in fade-in duration-150">
-                          <div className={`border-b pb-3 ${isDark ? 'border-stone-800' : 'border-stone-200'}`}>
+                          <div className={`border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                             <h3 
                               className={`text-base font-bold flex items-center gap-2 ${
-                                isDark ? 'text-white' : 'text-stone-900'
+                                isDark ? 'text-white' : 'text-slate-900'
                               }`}
                               style={{ fontFamily: systemFontFamily }}
                             >
                               <Bell className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
                               <span>{isEn ? 'Notifications & Quota Management' : 'Notifikasi & Pengelolaan Kuota'}</span>
                             </h3>
-                            <p className={`text-xs mt-0.5 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                            <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                               {isEn 
                                 ? 'Configure incoming response alerts, autosave safeguards, and form deletion confirmations.'
                                 : 'Atur pengiriman notifikasi respon masuk dan perlindungan otomatis draf formulir.'}
@@ -2793,14 +2740,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           </div>
 
                           <div className={`p-5 rounded-2xl border space-y-4 shadow-2xs ${
-                            isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                           }`}>
                             <div className="flex items-center justify-between">
                               <div>
-                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-stone-900'}`}>
+                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                   {isEn ? 'Incoming Response Notifications' : 'Notifikasi Respon Masuk'}
                                 </div>
-                                <div className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                                <div className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                   {isEn 
                                     ? 'Instant alert banner and notification center entry when respondents submit answers.'
                                     : 'Kirim email pemberitahuan instan saat responden submit jawaban baru.'}
@@ -2816,13 +2763,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             </div>
 
                             <div className={`flex items-center justify-between pt-3 border-t ${
-                              isDark ? 'border-stone-800' : 'border-stone-150'
+                              isDark ? 'border-slate-800' : 'border-slate-150'
                             }`}>
                               <div>
-                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-stone-900'}`}>
+                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                   {isEn ? 'Auto-Save Form Drafts' : 'Auto-Save Otomatis Draf'}
                                 </div>
-                                <div className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                                <div className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                   {isEn 
                                     ? 'Real-time background sync of forms and studio rules directly to browser storage.'
                                     : 'Simpan perubahan draf formulir secara otomatis saat mendesain pertanyaan.'}
@@ -2838,13 +2785,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             </div>
 
                             <div className={`flex items-center justify-between pt-3 border-t ${
-                              isDark ? 'border-stone-800' : 'border-stone-150'
+                              isDark ? 'border-slate-800' : 'border-slate-150'
                             }`}>
                               <div>
-                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-stone-900'}`}>
+                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                   {isEn ? 'Form Deletion Confirmation Dialog' : 'Peringatan Konfirmasi Hapus Formulir'}
                                 </div>
-                                <div className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                                <div className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                   {isEn 
                                     ? 'Prevent accidental form deletion with an explicit confirmation popup.'
                                     : 'Mencegah penghapusan formulir tanpa sengaja dengan dialog konfirmasi.'}
@@ -2861,13 +2808,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                             {/* LIVE VERIFICATION BUTTON: PROVE NOTIFICATIONS ARE WORKING */}
                             <div className={`pt-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                              isDark ? 'border-stone-800' : 'border-stone-150'
+                              isDark ? 'border-slate-800' : 'border-slate-150'
                             }`}>
                               <div>
-                                <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-stone-900'}`}>
+                                <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                   {isEn ? 'Test Notification Trigger' : 'Uji Fungsi Notifikasi Berjalan'}
                                 </div>
-                                <div className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                                <div className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                   {isEn 
                                     ? 'Click to test and verify incoming alerts reflect on the Bell notification center.'
                                     : 'Klik untuk menguji dan membuktikan bahwa respon baru langsung memicu lonceng notifikasi.'}
@@ -2878,8 +2825,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 onClick={handleTestNotification}
                                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs shrink-0 flex items-center gap-1.5 self-start sm:self-auto border ${
                                   isDark 
-                                    ? 'bg-stone-800 hover:bg-stone-700 text-stone-200 border-stone-700' 
-                                    : 'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300'
+                                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700' 
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
                                 }`}
                               >
                                 <Bell className="w-3.5 h-3.5" style={{ color: primaryAccent }} />
@@ -2893,28 +2840,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {/* SUB-TAB 4: SECURITY */}
                       {settingsSubTab === 'security' && (
                         <div className="space-y-4 animate-in fade-in duration-150">
-                          <div className={`border-b pb-3 ${isDark ? 'border-stone-800' : 'border-stone-200'}`}>
+                          <div className={`border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                             <h3 
                               className={`text-base font-bold flex items-center gap-2 ${
-                                isDark ? 'text-white' : 'text-stone-900'
+                                isDark ? 'text-white' : 'text-slate-900'
                               }`}
                               style={{ fontFamily: systemFontFamily }}
                             >
                               <ShieldCheck className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
                               <span>Keamanan Data & Reset Pengaturan</span>
                             </h3>
-                            <p className={`text-xs mt-0.5 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                            <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                               Perlindungan bot spam dan opsi pemulihan setelan awal sistem.
                             </p>
                           </div>
 
                           <div className={`p-5 rounded-2xl border space-y-4 shadow-2xs ${
-                            isDark ? 'bg-[#1f1f23] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                           }`}>
                             <div className="flex items-center justify-between">
                               <div>
-                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-stone-900'}`}>Proteksi Pengiriman Bot & Spam</div>
-                                <div className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>Gunakan honeypot anti-spam cerdas pada formulir publik tanpa captcha yang mengganggu responden.</div>
+                                <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Proteksi Pengiriman Bot & Spam</div>
+                                <div className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Gunakan honeypot anti-spam cerdas pada formulir publik tanpa captcha yang mengganggu responden.</div>
                               </div>
                               <input
                                 type="checkbox"
@@ -2926,23 +2873,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             </div>
 
                             <div className={`p-3 rounded-xl border text-[11px] space-y-1 ${
-                              isDark ? 'bg-[#161619] border-stone-700' : 'bg-stone-50 border-stone-200'
+                              isDark ? 'bg-[#161619] border-slate-700' : 'bg-slate-50 border-slate-200'
                             }`}>
-                              <div className={`flex items-center gap-1.5 font-semibold ${isDark ? 'text-stone-200' : 'text-stone-800'}`}>
+                              <div className={`flex items-center gap-1.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                                 <ShieldCheck className="w-3.5 h-3.5 stroke-[2] text-emerald-400" />
                                 <span>Enkripsi Database & TLS Aktif</span>
                               </div>
-                              <p className={isDark ? 'text-stone-400' : 'text-stone-500'}>
+                              <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>
                                 Seluruh respon formulir disimpan terisolasi per form ID dan terlindungi secara aman.
                               </p>
                             </div>
 
                             <div className={`pt-3 border-t flex items-center justify-between ${
-                              isDark ? 'border-stone-800' : 'border-stone-150'
+                              isDark ? 'border-slate-800' : 'border-slate-150'
                             }`}>
                               <div>
                                 <div className="text-xs font-semibold text-rose-500">Reset Semua Pengaturan Sistem</div>
-                                <div className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-400'}`}>Kembalikan tema, font, dan warna ke setelan default pabrik.</div>
+                                <div className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-400'}`}>Kembalikan tema, font, dan warna ke setelan default pabrik.</div>
                               </div>
                               <button
                                 type="button"
@@ -2970,23 +2917,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {activeSidebarView === 'plans' && (
                 <div className="space-y-6">
                   <div className={`p-6 rounded-2xl border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
-                    isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                    isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                   }`}>
                     <div>
                       <div className="flex items-center gap-2">
                         <h1 
-                          className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-stone-900'}`}
+                          className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}
                           style={{ fontFamily: systemFontFamily }}
                         >
                           Plans & Kuota Akun
                         </h1>
                         <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-                          isDark ? 'bg-stone-800 text-amber-300 border-stone-700' : 'bg-stone-100 text-stone-800 border-stone-200'
+                          isDark ? 'bg-slate-800 text-blue-300 border-slate-700' : 'bg-slate-100 text-slate-800 border-slate-200'
                         }`}>
                           {user.plan === 'pro' ? 'Paket Pro Aktif' : 'Paket Starter Gratis'}
                         </span>
                       </div>
-                      <p className={`text-xs mt-1 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                      <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                         Tingkatkan paket untuk tanggapan tanpa batas, hapus watermark KeDataForm, dan ekspor instan ke Google Sheets.
                       </p>
                     </div>
@@ -3009,33 +2956,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     {/* Starter */}
                     <div className={`p-6 rounded-2xl border shadow-xs space-y-4 transition-colors ${
-                      isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                      isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                     }`}>
                       <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold block">Starter Field</span>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold block">Starter Field</span>
                         <div 
-                          className={`text-3xl font-bold mt-1 ${isDark ? 'text-white' : 'text-stone-900'}`}
+                          className={`text-3xl font-bold mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}
                           style={{ fontFamily: systemFontFamily }}
                         >
                           Rp 0
                         </div>
-                        <p className={`text-xs mt-1 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>Mulai gratis untuk pengujian lapangan</p>
+                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Mulai gratis untuk pengujian lapangan</p>
                       </div>
-                      <ul className={`space-y-2.5 text-xs ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>
+                      <ul className={`space-y-2.5 text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} /> 100 respon per formulir</li>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} /> Akses 10 jenis pertanyaan</li>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} /> Aturan jadwal buka hari & jam</li>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} /> Ekspor file spreadsheet CSV</li>
                       </ul>
                       <div className={`p-2.5 text-center text-xs font-semibold rounded-xl ${
-                        isDark ? 'bg-stone-800 text-stone-300' : 'bg-stone-100 text-stone-700'
+                        isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-700'
                       }`}>
                         Paket Saat Ini
                       </div>
                     </div>
 
                     {/* Pro */}
-                    <div className="bg-[#1c1917] text-white p-6 rounded-2xl border border-stone-700 shadow-xl space-y-4 relative">
+                    <div className="bg-[#0f172a] text-white p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4 relative">
                       <div 
                         className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full font-bold shadow-xs"
                         style={{ backgroundColor: primaryAccent, color: contrastTextColor }}
@@ -3043,26 +2990,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         UNGGULAN
                       </div>
                       <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold block">Pro Expedition</span>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold block">Pro Expedition</span>
                         <div 
                           className="text-3xl font-bold text-white mt-1"
                           style={{ fontFamily: systemFontFamily }}
                         >
-                          Rp 79.000 <span className="text-xs font-normal text-stone-400">/ bln</span>
+                          Rp 79.000 <span className="text-xs font-normal text-slate-400">/ bln</span>
                         </div>
-                        <p className="text-xs text-stone-400 mt-1">Untuk respon data tak terbatas</p>
+                        <p className="text-xs text-slate-400 mt-1">Untuk respon data tak terbatas</p>
                       </div>
-                      <ul className="space-y-2.5 text-xs text-stone-300">
-                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-amber-400" /> Tanggapan Tanpa Batas (Unlimited)</li>
-                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-amber-400" /> Ekspor CSV, Excel & Google Sheets</li>
-                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-amber-400" /> Hapus watermark KeDataForm</li>
-                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-amber-400" /> Dukungan prioritas 24/7</li>
+                      <ul className="space-y-2.5 text-xs text-slate-300">
+                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Tanggapan Tanpa Batas (Unlimited)</li>
+                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Ekspor CSV, Excel & Google Sheets</li>
+                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Hapus watermark KeDataForm</li>
+                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Dukungan prioritas 24/7</li>
                       </ul>
                       <button
                         type="button"
                         onClick={onOpenUpgradeModal}
                         style={{ fontFamily: systemFontFamily }}
-                        className="w-full py-2.5 bg-white hover:bg-stone-100 text-stone-900 font-bold tracking-wider uppercase text-xs rounded-xl shadow-md transition-colors cursor-pointer"
+                        className="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold tracking-wider uppercase text-xs rounded-xl shadow-md transition-colors cursor-pointer"
                       >
                         Tingkatkan ke Pro
                       </button>
@@ -3070,19 +3017,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                     {/* Enterprise */}
                     <div className={`p-6 rounded-2xl border shadow-xs space-y-4 transition-colors ${
-                      isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                      isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                     }`}>
                       <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold block">Enterprise Archival</span>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold block">Enterprise Archival</span>
                         <div 
-                          className={`text-3xl font-bold mt-1 ${isDark ? 'text-white' : 'text-stone-900'}`}
+                          className={`text-3xl font-bold mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}
                           style={{ fontFamily: systemFontFamily }}
                         >
                           Kustom
                         </div>
-                        <p className={`text-xs mt-1 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>Untuk lembaga riset & instansi</p>
+                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Untuk lembaga riset & instansi</p>
                       </div>
-                      <ul className={`space-y-2.5 text-xs ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>
+                      <ul className={`space-y-2.5 text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} /> Semua fitur Pro</li>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} /> Multi-user tim & role akses</li>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5]" style={{ color: primaryAccent }} /> Integrasi webhook kustom</li>
@@ -3115,20 +3062,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {activeSidebarView === 'profile' && (
                 <div className="space-y-6 w-full py-2">
                   {/* Header Halaman Profil (Tanpa Panah Keluar) */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-stone-200 dark:border-stone-800">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-amber-700 dark:text-amber-400">
+                        <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-blue-700 dark:text-blue-400">
                           AKUN & IDENTITAS
                         </span>
                       </div>
                       <h1 
-                        className={`text-xl sm:text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}
+                        className={`text-xl sm:text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}
                         style={{ fontFamily: systemFontFamily }}
                       >
                         Profil Pengguna
                       </h1>
-                      <p className={`text-xs ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                      <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                         Kelola foto profil, informasi akun, dan paket langganan Anda
                       </p>
                     </div>
@@ -3139,17 +3086,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     /* SESI CROP FOTO PROFIL LINGKARAN LANGSUNG SETELAH PILIH FOTO */
                     /* ======================================================== */
                     <div className={`p-6 sm:p-8 rounded-3xl border shadow-sm space-y-6 animate-in fade-in duration-200 w-full ${
-                      isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                      isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                     }`}>
                       <div className="text-center space-y-1.5 max-w-lg mx-auto">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 text-amber-900 dark:text-amber-200 text-xs font-bold">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950/60 border border-blue-300 text-blue-900 dark:text-blue-200 text-xs font-bold">
                           <Crop className="w-3.5 h-3.5" />
                           <span>Sesuaikan & Crop Foto Profil</span>
                         </div>
                         <h2 className="text-lg font-black">
                           Atur Area Foto Sesuai Lingkaran Profil
                         </h2>
-                        <p className="text-xs text-stone-500">
+                        <p className="text-xs text-slate-500">
                           Geser foto langsung dengan kursor mouse untuk mengatur posisi, dan gunakan scroll mouse atau tombol untuk memperbesar/memperkecil.
                         </p>
                       </div>
@@ -3157,7 +3104,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {/* Viewport Lingkaran Crop yang Otomatis Sesuai Lingkaran Profil */}
                       <div className="flex flex-col items-center justify-center space-y-4 py-2">
                         <div 
-                          className="w-64 h-64 sm:w-72 sm:h-72 rounded-full overflow-hidden border-4 border-amber-500 ring-8 ring-amber-100 dark:ring-amber-950/50 shadow-2xl bg-stone-900 relative cursor-grab active:cursor-grabbing select-none flex items-center justify-center mx-auto"
+                          className="w-64 h-64 sm:w-72 sm:h-72 rounded-full overflow-hidden border-4 border-blue-500 ring-8 ring-blue-100 dark:ring-blue-950/50 shadow-2xl bg-slate-900 relative cursor-grab active:cursor-grabbing select-none flex items-center justify-center mx-auto"
                           onMouseDown={handleCropMouseDown}
                           onMouseMove={handleCropMouseMove}
                           onMouseUp={handleCropMouseUp}
@@ -3198,15 +3145,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                         {/* Kontrol Cepat Zoom & Posisi */}
                         <div className="flex flex-col items-center gap-2.5 text-center">
-                          <p className="text-xs font-semibold text-stone-600 dark:text-stone-300 flex items-center gap-1.5">
-                            <Move className="w-3.5 h-3.5 text-amber-600" />
+                          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                            <Move className="w-3.5 h-3.5 text-blue-600" />
                             <span>Klik dan geser mouse untuk memindahkan foto</span>
                           </p>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => setCursorZoom(prev => Math.max(0.6, prev - 0.15))}
-                              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 flex items-center gap-1 cursor-pointer transition-colors"
+                              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center gap-1 cursor-pointer transition-colors"
                               title="Perkecil foto"
                             >
                               <ZoomOut className="w-3.5 h-3.5" />
@@ -3218,7 +3165,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 setCursorPan({ x: 0, y: 0 });
                                 setCursorZoom(1);
                               }}
-                              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 cursor-pointer transition-colors"
+                              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
                               title="Reset ke posisi semula"
                             >
                               Reset Posisi
@@ -3226,7 +3173,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             <button
                               type="button"
                               onClick={() => setCursorZoom(prev => Math.min(3.5, prev + 0.15))}
-                              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 flex items-center gap-1 cursor-pointer transition-colors"
+                              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center gap-1 cursor-pointer transition-colors"
                               title="Perbesar foto"
                             >
                               <ZoomIn className="w-3.5 h-3.5" />
@@ -3237,18 +3184,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       </div>
 
                       {/* Tombol Aksi Crop */}
-                      <div className="pt-4 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between gap-3 max-w-lg mx-auto">
+                      <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 max-w-lg mx-auto">
                         <button
                           type="button"
                           onClick={() => setProfilePageMode('view')}
-                          className="px-5 py-2.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:text-black hover:bg-stone-100 dark:hover:bg-stone-800 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl transition-colors cursor-pointer"
+                          className="px-5 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-black hover:bg-slate-100 dark:hover:bg-slate-800 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors cursor-pointer"
                         >
                           Batal
                         </button>
                         <button
                           type="button"
                           onClick={handleApplyCursorCrop}
-                          className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 bg-stone-950 hover:bg-stone-800 text-white border border-stone-800"
+                          className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 bg-slate-950 hover:bg-slate-800 text-white border border-slate-800"
                         >
                           <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
                           <span>Selesai & Terapkan Foto Ini</span>
@@ -3263,11 +3210,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
                         {/* Kiri: Card Foto Profil dengan HANYA 1 TOMBOL "Ubah Foto" */}
                         <div className={`lg:col-span-4 p-6 sm:p-8 rounded-3xl border shadow-xs flex flex-col items-center justify-center text-center space-y-4 ${
-                          isDark ? 'bg-[#18181b] border-stone-800' : 'bg-white border-stone-200'
+                          isDark ? 'bg-[#18181b] border-slate-800' : 'bg-white border-slate-200'
                         }`}>
                           <div className="relative group">
                             <div 
-                              className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 ring-4 ring-amber-200/80 dark:ring-amber-950/60 shadow-lg"
+                              className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 ring-4 ring-blue-200/80 dark:ring-blue-950/60 shadow-lg"
                               style={{ borderColor: primaryAccent }}
                             >
                               <img 
@@ -3286,10 +3233,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           </div>
 
                           <div className="space-y-1">
-                            <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-stone-900'}`}>
+                            <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                               Foto Profil
                             </h3>
-                            <p className="text-[11px] text-stone-500 max-w-[220px]">
+                            <p className="text-[11px] text-slate-500 max-w-[220px]">
                               Pilih foto dari komputer/HP untuk langsung menyesuaikan crop lingkaran
                             </p>
                           </div>
@@ -3298,21 +3245,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           <button
                             type="button"
                             onClick={() => editAvatarFileInputRef.current?.click()}
-                            className="px-5 py-2.5 text-xs font-black text-white bg-stone-950 hover:bg-stone-800 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-xs border border-stone-800"
+                            className="px-5 py-2.5 text-xs font-black text-white bg-slate-950 hover:bg-slate-800 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-xs border border-slate-800"
                             title="Pilih foto baru dan langsung atur crop lingkaran"
                           >
-                            <Camera className="w-4 h-4 stroke-[2.2] text-amber-300" />
+                            <Camera className="w-4 h-4 stroke-[2.2] text-blue-300" />
                             <span>Ubah Foto</span>
                           </button>
                         </div>
 
                         {/* Kanan: Form Biodata & Akun */}
                         <div className={`lg:col-span-8 p-6 sm:p-8 rounded-3xl border shadow-xs space-y-5 ${
-                          isDark ? 'bg-[#18181b] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+                          isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                         }`}>
                           <div className="space-y-4">
                             <div>
-                              <label className="text-xs font-bold block mb-1.5 text-stone-800 dark:text-stone-200">
+                              <label className="text-xs font-bold block mb-1.5 text-slate-800 dark:text-slate-200">
                                 Nama Lengkap
                               </label>
                               <input
@@ -3323,14 +3270,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 placeholder="Masukkan nama lengkap Anda"
                                 className={`w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-xs font-semibold transition-colors ${
                                   isDark 
-                                    ? 'bg-stone-900 border-stone-700 text-white focus:border-amber-400' 
-                                    : 'bg-white border-stone-300 text-stone-900 focus:border-amber-500'
+                                    ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-400' 
+                                    : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
                                 }`}
                               />
                             </div>
 
                             <div>
-                              <label className="text-xs font-bold block mb-1.5 text-stone-800 dark:text-stone-200">
+                              <label className="text-xs font-bold block mb-1.5 text-slate-800 dark:text-slate-200">
                                 Email Akun
                               </label>
                               <input
@@ -3339,11 +3286,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 disabled
                                 className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium cursor-not-allowed ${
                                   isDark 
-                                    ? 'bg-stone-900/60 border-stone-800 text-stone-500' 
-                                    : 'bg-stone-100 border-stone-200 text-stone-600'
+                                    ? 'bg-slate-900/60 border-slate-800 text-slate-500' 
+                                    : 'bg-slate-100 border-slate-200 text-slate-600'
                                 }`}
                               />
-                              <span className="text-[10px] text-stone-400 mt-1 block">
+                              <span className="text-[10px] text-slate-400 mt-1 block">
                                 Email terhubung sebagai identitas utama akun Anda
                               </span>
                             </div>
@@ -3351,17 +3298,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             {/* Status Paket & Kuota */}
                             <div className={`p-4 rounded-2xl border flex items-center justify-between ${
                               isDark 
-                                ? 'bg-amber-950/20 border-amber-900/50' 
-                                : 'bg-amber-50/70 border-amber-200'
+                                ? 'bg-blue-950/20 border-blue-900/50' 
+                                : 'bg-blue-50/70 border-blue-200'
                             }`}>
                               <div>
-                                <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold block">
+                                <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">
                                   Status Paket
                                 </span>
-                                <span className="text-xs font-black text-amber-950 dark:text-amber-200">
+                                <span className="text-xs font-black text-blue-950 dark:text-blue-200">
                                   {user.plan === 'pro' ? 'Paket Pro Aktif' : 'Paket Free (Starter)'}
                                 </span>
-                                <p className="text-[11px] text-stone-600 dark:text-stone-400">
+                                <p className="text-[11px] text-slate-600 dark:text-slate-400">
                                   {user.plan === 'pro' ? 'Tanggapan & formulir tanpa batas' : 'Maksimal 100 respon per formulir'}
                                 </p>
                               </div>
@@ -3369,7 +3316,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => navigateTo('plans')}
-                                  className="px-3.5 py-1.5 text-[11px] font-black rounded-xl shadow-xs transition-all cursor-pointer bg-stone-900 text-white hover:bg-stone-800 border border-stone-800"
+                                  className="px-3.5 py-1.5 text-[11px] font-black rounded-xl shadow-xs transition-all cursor-pointer bg-slate-900 text-white hover:bg-slate-800 border border-slate-800"
                                 >
                                   Upgrade
                                 </button>
@@ -3378,10 +3325,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           </div>
 
                           {/* Tombol Simpan Perubahan */}
-                          <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end">
+                          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end">
                             <button
                               type="submit"
-                              className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 bg-stone-950 hover:bg-stone-800 text-white border border-stone-800"
+                              className="px-6 py-2.5 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 bg-slate-950 hover:bg-slate-800 text-white border border-slate-800"
                             >
                               <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
                               <span>Simpan Perubahan</span>
@@ -3428,12 +3375,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
           <div 
             className={`w-full max-w-md rounded-3xl border shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-150 ${
-              isDark ? 'bg-[#1c1c20] border-stone-700 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+              isDark ? 'bg-[#1c1c20] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
             }`}
             style={{ fontFamily: systemFontFamily }}
           >
             {/* Header Modal */}
-            <div className="flex items-start justify-between gap-3 border-b pb-4 border-stone-200 dark:border-stone-800">
+            <div className="flex items-start justify-between gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div 
                   className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-xs"
@@ -3442,10 +3389,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <Bell className="w-5 h-5 stroke-[2]" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider font-bold text-stone-600 dark:text-stone-400">
+                  <div className="text-[10px] font-mono uppercase tracking-wider font-bold text-slate-600 dark:text-slate-400">
                     {selectedNotification.type === 'response' ? 'Notifikasi Respon' : 'Pemberitahuan Sistem'}
                   </div>
-                  <h3 className="font-black text-lg text-stone-900 dark:text-white leading-tight">
+                  <h3 className="font-black text-lg text-slate-900 dark:text-white leading-tight">
                     {selectedNotification.title}
                   </h3>
                 </div>
@@ -3453,7 +3400,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedNotification(null)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -3461,17 +3408,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             {/* Body Detail */}
             <div className="space-y-3 text-xs leading-relaxed">
-              <div className="flex items-center justify-between text-xs text-stone-600 dark:text-stone-300 font-mono pb-1 font-semibold">
-                <span>Waktu: <strong className="text-stone-900 dark:text-white">{selectedNotification.time}</strong></span>
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 font-mono pb-1 font-semibold">
+                <span>Waktu: <strong className="text-slate-900 dark:text-white">{selectedNotification.time}</strong></span>
                 <span className="flex items-center gap-1 text-emerald-600 font-bold">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Sudah Dibaca
                 </span>
               </div>
 
-              <div className={`p-4 rounded-2xl border-2 shadow-2xs ${isDark ? 'bg-stone-900 border-stone-700' : 'bg-stone-50 border-stone-300'}`}>
+              <div className={`p-4 rounded-2xl border-2 shadow-2xs ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
                 <p 
                   className="font-semibold text-sm leading-relaxed"
-                  style={{ color: isDark ? '#f5f5f4' : '#18181b' }}
+                  style={{ color: isDark ? '#f1f5f9' : '#18181b' }}
                 >
                   {selectedNotification.details || selectedNotification.desc}
                 </p>
@@ -3480,13 +3427,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {/* Jika ada form terkait */}
               {selectedNotification.formTitle && (
                 <div className={`p-3.5 rounded-2xl border-2 flex items-center justify-between gap-3 ${
-                  isDark ? 'bg-stone-900 border-stone-700' : 'bg-amber-50 border-amber-300'
+                  isDark ? 'bg-slate-900 border-slate-700' : 'bg-blue-50 border-blue-300'
                 }`}>
                   <div className="flex items-center gap-2.5 min-w-0">
                     <FileText className="w-4 h-4 shrink-0" style={{ color: primaryAccent }} />
                     <div className="min-w-0">
-                      <span className="text-[10px] text-stone-600 dark:text-stone-400 block font-mono font-bold">Formulir Terkait:</span>
-                      <span className="font-extrabold truncate text-xs block text-stone-900 dark:text-white">{selectedNotification.formTitle}</span>
+                      <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-mono font-bold">Formulir Terkait:</span>
+                      <span className="font-extrabold truncate text-xs block text-slate-900 dark:text-white">{selectedNotification.formTitle}</span>
                     </div>
                   </div>
                   <button
@@ -3509,7 +3456,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             {/* Footer Modal Actions */}
-            <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => {
@@ -3527,7 +3474,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedNotification(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 Tutup
               </button>
@@ -3541,7 +3488,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
           <div 
             className={`w-full max-w-md rounded-3xl border shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-150 ${
-              isDark ? 'bg-[#1c1c20] border-stone-700 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+              isDark ? 'bg-[#1c1c20] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
             }`}
             style={{ fontFamily: systemFontFamily }}
           >
@@ -3551,10 +3498,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <Trash2 className="w-6 h-6 stroke-[2.5]" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-black text-stone-900 dark:text-white leading-tight">
+                <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
                   Konfirmasi Hapus Formulir
                 </h3>
-                <p className="text-xs text-stone-700 dark:text-stone-300 mt-1 leading-relaxed font-semibold">
+                <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed font-semibold">
                   Tindakan ini permanen dan tidak dapat dibatalkan. Seluruh pertanyaan serta tanggapan responden akan dihapus.
                 </p>
               </div>
@@ -3562,7 +3509,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             {/* Form Info Box */}
             <div className={`p-4 rounded-2xl border-2 space-y-2.5 shadow-2xs ${
-              isDark ? 'bg-stone-900 border-stone-700' : 'bg-stone-100/90 border-stone-300'
+              isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-100/90 border-slate-300'
             }`}>
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-rose-600 shrink-0" />
@@ -3573,9 +3520,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {formPendingDelete.title}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs font-mono font-bold pt-1.5 border-t border-stone-200 dark:border-stone-800" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>
+              <div className="flex items-center justify-between text-xs font-mono font-bold pt-1.5 border-t border-slate-200 dark:border-slate-800" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>
                 <span>Terakhir dibuka: <strong style={{ color: isDark ? '#ffffff' : '#0f172a' }}>{formPendingDelete.lastOpened}</strong></span>
-                <span className="font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 shadow-2xs" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>
+                <span className="font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-2xs" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>
                   {formResponsesMap[formPendingDelete.id]?.length ?? formPendingDelete.responseCount ?? 0} Responden
                 </span>
               </div>
@@ -3583,20 +3530,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             {/* Alert jika form tersisa hanya 1 */}
             {recentForms.length <= 1 ? (
-              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-medium">
+              <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 text-xs font-medium">
                 ⚠️ Tidak dapat menghapus karena harus menyisakan minimal satu formulir dalam studio.
               </div>
             ) : null}
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-stone-200 dark:border-stone-800">
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => {
                   setIsDeleteModalOpen(false);
                   setFormPendingDelete(null);
                 }}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer text-stone-700 dark:text-stone-300"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-slate-700 dark:text-slate-300"
               >
                 Batal
               </button>
@@ -3617,7 +3564,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     setIsDeleteModalOpen(false);
                     setFormPendingDelete(null);
                   }}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
                 >
                   Mengerti
                 </button>
@@ -3632,10 +3579,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveSidebarView('dashboard')}
-          className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold border border-amber-600 transition-all cursor-pointer animate-in slide-in-from-bottom-4 hover:scale-102"
+          className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-xl bg-blue-500 hover:bg-blue-400 text-slate-950 text-xs font-bold border border-blue-600 transition-all cursor-pointer animate-in slide-in-from-bottom-4 hover:scale-102"
           title="Klik untuk kembali ke Obrolan AI"
         >
-          <Loader2 className="w-4 h-4 animate-spin text-stone-950 shrink-0" />
+          <Loader2 className="w-4 h-4 animate-spin text-slate-950 shrink-0" />
           <span>AI sedang merancang formulir di latar belakang... (Klik untuk lihat)</span>
         </button>
       )}

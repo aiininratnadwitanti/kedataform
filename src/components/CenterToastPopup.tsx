@@ -30,7 +30,7 @@ export const CenterToastPopup: React.FC<CenterToastPopupProps> = ({
   return (
     <div 
       className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-200 animate-in fade-in ${
-        darkMode ? 'bg-black/60 backdrop-blur-xs' : 'bg-stone-900/25 backdrop-blur-[2px]'
+        darkMode ? 'bg-black/60 backdrop-blur-xs' : 'bg-slate-900/25 backdrop-blur-[2px]'
       }`}
       onClick={onClose}
     >
@@ -38,8 +38,8 @@ export const CenterToastPopup: React.FC<CenterToastPopupProps> = ({
         onClick={(e) => e.stopPropagation()}
         className={`relative rounded-3xl p-6 sm:p-7 max-w-sm w-full mx-auto flex flex-col items-center text-center animate-in zoom-in-95 duration-200 select-none transition-colors ${
           darkMode
-            ? 'bg-[#18181b] text-white border border-stone-700/80 shadow-2xl shadow-black/70 ring-1 ring-white/10'
-            : 'bg-white text-stone-900 border border-stone-200/90 shadow-2xl shadow-stone-900/15 ring-1 ring-black/5'
+            ? 'bg-[#18181b] text-white border border-slate-700/80 shadow-2xl shadow-black/70 ring-1 ring-white/10'
+            : 'bg-white text-slate-900 border border-slate-200/90 shadow-2xl shadow-slate-900/15 ring-1 ring-black/5'
         }`}
       >
         {/* Ikon Lingkaran Besar: Centang Hijau (Berhasil) / Silang Merah (Gagal) disesuaikan dengan tema */}
@@ -63,14 +63,14 @@ export const CenterToastPopup: React.FC<CenterToastPopupProps> = ({
 
         {/* Judul Status Berhasil / Gagal */}
         <h3 className={`text-base sm:text-lg font-bold tracking-tight transition-colors ${
-          darkMode ? 'text-white' : 'text-stone-900'
+          darkMode ? 'text-white' : 'text-slate-900'
         }`}>
           {toast.title}
         </h3>
 
         {/* Keterangan Detail di Bawah Judul */}
         <p className={`text-xs mt-1.5 leading-relaxed font-normal transition-colors max-w-xs ${
-          darkMode ? 'text-stone-300' : 'text-stone-600'
+          darkMode ? 'text-slate-300' : 'text-slate-600'
         }`}>
           {toast.description}
         </p>

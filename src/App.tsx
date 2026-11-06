@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, AlertCircle, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sampleForm } from './data/sampleForm';
@@ -84,9 +84,9 @@ export default function App() {
             lastOpened: 'Baru saja',
             responseCount: 0,
             iconType: (generated.quizConfig?.isQuizMode || generated.title.toLowerCase().includes('kuis') || generated.title.toLowerCase().includes('quiz')) ? 'quiz' : 'blank',
-            accentColor: generated.theme?.primaryColor || '#b48328',
+            accentColor: generated.theme?.primaryColor || '#223A5E',
             coverImage: generated.theme?.headerCoverUrl || '',
-            accentBg: 'bg-amber-50',
+            accentBg: 'bg-blue-50',
             form: generated,
           };
           const next = [newItem, ...prev];
@@ -113,7 +113,7 @@ export default function App() {
         copy[idx] = {
           ...copy[idx],
           title: updatedForm.title,
-          accentColor: updatedForm.theme?.primaryColor || '#b48328',
+          accentColor: updatedForm.theme?.primaryColor || '#223A5E',
           coverImage: updatedForm.theme?.headerCoverUrl || '',
           form: updatedForm,
           lastOpened: 'Baru saja',
@@ -129,9 +129,9 @@ export default function App() {
           lastOpened: 'Baru saja',
           responseCount: formResponsesMap[updatedForm.id]?.length || 0,
           iconType: 'blank',
-          accentColor: updatedForm.theme?.primaryColor || '#b48328',
+          accentColor: updatedForm.theme?.primaryColor || '#223A5E',
           coverImage: updatedForm.theme?.headerCoverUrl || '',
-          accentBg: 'bg-amber-50',
+          accentBg: 'bg-blue-50',
           form: updatedForm,
         };
         const next = [newItem, ...prev];
@@ -149,16 +149,34 @@ export default function App() {
   );
   
   // Tab di editor hanya Custom dan Bagikan
-  const [activeTab, setActiveTab] = useState<'custom' | 'embed'>('custom');
+  const [activeTab, setActiveTab] = useState<'custom' | 'embed'>(() => {
+    try {
+      return (localStorage.getItem('kedataform_activeTab') as 'custom' | 'embed') || 'custom';
+    } catch {
+      return 'custom';
+    }
+  });
   // Sub-tab di dalam Custom (Pertanyaan vs Desain Canva)
   const [customSubTab, setCustomSubTab] = useState<'questions' | 'design'>('questions');
   
   // Navigation views: 'dashboard' | 'editor'
-  const [currentView, setCurrentView] = useState<'dashboard' | 'editor'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'editor'>(() => {
+    try {
+      return (localStorage.getItem('kedataform_currentView') as 'dashboard' | 'editor') || 'dashboard';
+    } catch {
+      return 'dashboard';
+    }
+  });
   const [dashboardSidebarView, setDashboardSidebarView] = useState<'dashboard' | 'my_forms' | 'system_rules' | 'plans' | 'profile'>('dashboard');
 
   // Modals & dedicated view states
-  const [isLoginPage, setIsLoginPage] = useState(false);
+  const [isLoginPage, setIsLoginPage] = useState(() => {
+    try {
+      return localStorage.getItem('kedataform_isLoginPage') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -266,6 +284,15 @@ export default function App() {
     document.documentElement.style.setProperty('--font-system', targetFont);
     document.body.style.fontFamily = targetFont;
   }, [systemSettings]);
+
+  // Persist navigation state so reload keeps the current page
+  useEffect(() => {
+    try {
+      localStorage.setItem('kedataform_isLoginPage', String(isLoginPage));
+      localStorage.setItem('kedataform_currentView', currentView);
+      localStorage.setItem('kedataform_activeTab', activeTab);
+    } catch {}
+  }, [isLoginPage, currentView, activeTab]);
 
   // Form generated directly with AI
   const handleFormGeneratedByAi = (newForm: FormSchema) => {
@@ -399,17 +426,21 @@ export default function App() {
   // User account state - default to false so landing page is shown first
   const [user, setUser] = useState<UserAccount>(() => {
     let savedAvatar = '';
+    let savedAuth = false;
+    let savedPlan: 'free' | 'pro' = 'free';
     try {
       savedAvatar = localStorage.getItem('kedataform_user_avatar') || '';
+      savedAuth = localStorage.getItem('kedataform_auth') === 'true';
+      savedPlan = (localStorage.getItem('kedataform_plan') as 'free' | 'pro') || 'free';
     } catch {}
     return {
       name: 'Rizka Farida Damayanti',
       email: 'rizkafaridadamayantii@gmail.com',
       avatarUrl: savedAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-      plan: 'free',
-      responseCount: currentResponseCount,
+      plan: savedPlan,
+      responseCount: 0,
       maxFreeResponses: 100,
-      isAuthenticated: false,
+      isAuthenticated: savedAuth,
     };
   });
 
@@ -432,6 +463,10 @@ export default function App() {
       ...prev,
       isAuthenticated: false,
     }));
+    try {
+      localStorage.removeItem('kedataform_auth');
+      localStorage.removeItem('kedataform_plan');
+    } catch {}
     setIsLoginPage(false);
     setCurrentView('dashboard');
   };
@@ -439,6 +474,10 @@ export default function App() {
   // Called when user signs in - SELALU ARAHKAN KE DASHBOARD
   const handleUpdateUser = (updatedUser: UserAccount) => {
     setUser(updatedUser);
+    try {
+      localStorage.setItem('kedataform_auth', String(updatedUser.isAuthenticated));
+      localStorage.setItem('kedataform_plan', updatedUser.plan);
+    } catch {}
     if (updatedUser.isAuthenticated) {
       setPendingTemplate(null);
       setIsLoginPage(false);
@@ -509,11 +548,20 @@ export default function App() {
   };
 
   // Actions from Dashboard
-  const handleOpenFormFromDashboard = (selectedForm: FormSchema) => {
-    // Pastikan mengambil versi paling mutakhir dari recentForms
+  const handleOpenShareFromDashboard = (selectedForm: FormSchema) => {
     const fresh = recentForms.find((item) => item.form.id === selectedForm.id)?.form || selectedForm;
     setForm(fresh);
-    // Inisialisasi list respon jika belum ada
+    if (!formResponsesMap[fresh.id]) {
+      setFormResponsesMap((prev) => ({ ...prev, [fresh.id]: [] }));
+    }
+    setActiveTab('embed');
+    setCustomSubTab('questions');
+    setCurrentView('editor');
+  };
+
+  const handleOpenFormFromDashboard = (selectedForm: FormSchema) => {
+    const fresh = recentForms.find((item) => item.form.id === selectedForm.id)?.form || selectedForm;
+    setForm(fresh);
     if (!formResponsesMap[fresh.id]) {
       setFormResponsesMap((prev) => ({ ...prev, [fresh.id]: [] }));
     }
@@ -644,21 +692,21 @@ export default function App() {
 
   // Dynamic system style background
   const getSystemBackgroundClass = () => {
-    if (isDark) return 'bg-stone-950 text-stone-100 selection:bg-stone-800';
+    if (isDark) return 'bg-slate-950 text-slate-100 selection:bg-slate-800';
     switch (systemSettings.systemStyle) {
       case 'monochrome':
-        return 'bg-white text-stone-950 selection:bg-stone-200';
+        return 'bg-white text-slate-950 selection:bg-slate-200';
       case 'slate':
         return 'bg-slate-50 text-slate-900 selection:bg-slate-200';
       case 'zinc':
         return 'bg-zinc-50 text-zinc-900 selection:bg-zinc-200';
       case 'sunset_amber':
-        return 'bg-amber-50/50 text-stone-900 selection:bg-amber-200';
+        return 'bg-blue-50/50 text-slate-900 selection:bg-blue-200';
       case 'emerald':
-        return 'bg-emerald-50/40 text-stone-900 selection:bg-emerald-200';
+        return 'bg-emerald-50/40 text-slate-900 selection:bg-emerald-200';
       case 'warm_titanium':
       default:
-        return 'bg-[#faf8f5] text-stone-900 selection:bg-orange-100';
+        return 'bg-[#F3F8FD] text-slate-900 selection:bg-orange-100';
     }
   };
 
@@ -672,7 +720,8 @@ export default function App() {
       {currentView === 'dashboard' ? (
         <DashboardView
           user={user}
-          onOpenForm={handleOpenFormFromDashboard}
+                onOpenForm={handleOpenFormFromDashboard}
+                onOpenShare={handleOpenShareFromDashboard}
           onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
           onSignOut={handleSignOut}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
@@ -743,7 +792,7 @@ export default function App() {
 
 
           {/* Konten Editor: Menu Custom & Bagikan */}
-          <main className="flex-1 flex flex-col bg-[#faf8f5] min-h-[calc(100vh-64px)]">
+          <main className="flex-1 flex flex-col bg-[#F3F8FD] min-h-[calc(100vh-64px)]">
             {activeTab === 'custom' && (
               <div className="flex-1 flex flex-col">
                 {customSubTab === 'questions' ? (

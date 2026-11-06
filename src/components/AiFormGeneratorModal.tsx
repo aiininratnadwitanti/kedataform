@@ -72,19 +72,19 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
   const hasMessages = messages.length > 0 || isLoading;
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-4xl bg-[#faf8f5] rounded-3xl shadow-2xl border-2 border-stone-300 overflow-hidden flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-4xl bg-[#F3F8FD] rounded-3xl shadow-2xl border-2 border-slate-300 overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Bar */}
-        <div className="px-5 py-3.5 border-b-2 border-stone-300 bg-white flex items-center justify-between">
+        <div className="px-5 py-3.5 border-b-2 border-slate-300 bg-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 via-yellow-200/30 to-amber-500/20 border border-amber-400/60 backdrop-blur-md shadow-[0_2px_14px_-2px_rgba(245,158,11,0.28)]">
-              <svg className="w-4 h-4 text-[#b48328] fill-current drop-shadow-xs" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-400/20 via-yellow-200/30 to-blue-500/20 border border-blue-400/60 backdrop-blur-md shadow-[0_2px_14px_-2px_rgba(245,158,11,0.28)]">
+              <svg className="w-4 h-4 text-[#223A5E] fill-current drop-shadow-xs" viewBox="0 0 24 24">
                 <path d="M12 2L14.2 8.8L21 11L14.2 13.2L12 20L9.8 13.2L3 11L9.8 8.8L12 2Z" />
               </svg>
-              <span className="font-black text-xs sm:text-sm tracking-wider text-amber-950 font-serif">
+              <span className="font-black text-xs sm:text-sm tracking-wider text-blue-950 font-serif">
                 FormAI
               </span>
             </div>
@@ -101,7 +101,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-stone-600 hover:text-black hover:bg-stone-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-slate-600 hover:text-black hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 stroke-[2.5]" />
           </button>
@@ -111,12 +111,12 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
         <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden min-h-[460px]">
           
           {/* SIDEBAR KIRI: RIWAYAT CHAT (FONT HITAM & BATAS GARIS JELAS) */}
-          <aside className="md:col-span-4 border-b-2 md:border-b-0 md:border-r-2 border-stone-300 bg-white p-4 flex flex-col justify-between gap-3 select-none">
+          <aside className="md:col-span-4 border-b-2 md:border-b-0 md:border-r-2 border-slate-300 bg-white p-4 flex flex-col justify-between gap-3 select-none">
             <div className="space-y-3.5">
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-md bg-stone-100 border border-stone-300 text-black flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-md bg-slate-100 border border-slate-300 text-black flex items-center justify-center">
                     <MessageSquare className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
                   <span className="text-xs font-black uppercase tracking-wider text-black">
@@ -127,7 +127,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                   <button
                     type="button"
                     onClick={() => aiChatStore.clearAllSessions()}
-                    className="p-1 text-stone-500 hover:text-red-600 transition-colors cursor-pointer"
+                    className="p-1 text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
                     title="Hapus riwayat"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -150,8 +150,8 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                         onClick={() => aiChatStore.selectSession(session.id)}
                         className={`group flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${
                           isActive
-                            ? 'bg-amber-100 text-black font-black'
-                            : 'hover:bg-stone-100 text-black font-bold'
+                            ? 'bg-blue-100 text-black font-black'
+                            : 'hover:bg-slate-100 text-black font-bold'
                         }`}
                         title={session.title}
                       >
@@ -165,7 +165,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                             e.stopPropagation();
                             aiChatStore.deleteSession(session.id);
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-0.5 text-stone-400 hover:text-red-600 rounded transition-opacity shrink-0 ml-1.5"
+                          className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-600 rounded transition-opacity shrink-0 ml-1.5"
                           title="Hapus"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -178,13 +178,13 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
 
             </div>
 
-            <div className="pt-2 border-t-2 border-stone-200 text-[10px] text-stone-700 font-bold font-mono">
+            <div className="pt-2 border-t-2 border-slate-200 text-[10px] text-slate-700 font-bold font-mono">
               Model: Gemini 3.8 Flash
             </div>
           </aside>
 
-          {/* AREA KANAN: MENYESUAIKAN DASHBOARD (#faf8f5), BUKAN HITAM */}
-          <main className="md:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[#faf8f5] relative">
+          {/* AREA KANAN: MENYESUAIKAN DASHBOARD (#F3F8FD), BUKAN HITAM */}
+          <main className="md:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-[#F3F8FD] relative">
             
             {!hasMessages ? (
               /* TAMPILAN AWAL: TENGAH DENGAN BATAS GARIS JELAS */
@@ -200,7 +200,7 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                   }}
                   className="w-full relative"
                 >
-                  <div className="relative shadow-sm rounded-2xl overflow-hidden border-2 border-stone-300 focus-within:border-[#b48328] focus-within:ring-2 focus-within:ring-amber-200 transition-all bg-white">
+                  <div className="relative shadow-sm rounded-2xl overflow-hidden border-2 border-slate-300 focus-within:border-[#223A5E] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
                     <textarea
                       rows={3}
                       value={inputValue}
@@ -212,14 +212,14 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                         }
                       }}
                       placeholder="Ketik topik formulir atau kuis yang ingin dibuat... (tekan Enter)"
-                      className="w-full text-xs sm:text-sm p-4 pr-14 focus:outline-none placeholder:text-stone-500 text-black bg-transparent resize-none leading-relaxed font-medium"
+                      className="w-full text-xs sm:text-sm p-4 pr-14 focus:outline-none placeholder:text-slate-500 text-black bg-transparent resize-none leading-relaxed font-medium"
                     />
 
                     <div className="absolute right-3 bottom-3">
                       <button
                         type="submit"
                         disabled={!inputValue.trim() || isLoading}
-                        className="p-2.5 bg-[#b48328] hover:bg-[#966816] disabled:opacity-40 text-white rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border-2 border-[#8c5f10]"
+                        className="p-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-40 text-white rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border-2 border-[#8c5f10]"
                         title="Kirim ke AI"
                       >
                         {isLoading ? (
@@ -235,14 +235,14 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
             ) : (
               /* TAMPILAN AKTIF: PESAN & INPUT DI BAWAH */
               <div className="flex-1 flex flex-col justify-between h-full space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b-2 border-stone-200">
+                <div className="flex items-center justify-between pb-2 border-b-2 border-slate-200">
                   <span className="text-xs font-black text-black">
                     Buat Formulir Cepat Sekarang!
                   </span>
                   <button
                     type="button"
                     onClick={() => aiChatStore.startNewChat()}
-                    className="text-xs text-[#b48328] hover:underline font-black flex items-center gap-1 cursor-pointer"
+                    className="text-xs text-[#223A5E] hover:underline font-black flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Obrolan Baru</span>
@@ -257,23 +257,23 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                     >
                       <div className={`max-w-md p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed space-y-2 ${
                         m.sender === 'user'
-                          ? 'bg-[#b48328] text-white rounded-tr-none font-medium border-2 border-[#8c5f10]'
-                          : 'bg-white border-2 border-stone-200 text-black rounded-tl-none font-medium'
+                          ? 'bg-[#223A5E] text-white rounded-tr-none font-medium border-2 border-[#8c5f10]'
+                          : 'bg-white border-2 border-slate-200 text-black rounded-tl-none font-medium'
                       }`}>
                         <p>{m.text}</p>
 
                         {m.generatedForm && (
-                          <div className="p-3 bg-amber-50 rounded-xl border-2 border-amber-300 space-y-2 text-black">
+                          <div className="p-3 bg-blue-50 rounded-xl border-2 border-blue-300 space-y-2 text-black">
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-black text-xs truncate">{m.generatedForm.title}</span>
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-[#b48328] font-bold border border-amber-300">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 text-[#223A5E] font-bold border border-blue-300">
                                 {m.generatedForm.questions.length} Butir Soal
                               </span>
                             </div>
                             <button
                               type="button"
                               onClick={() => handleOpenFormInEditor(m.generatedForm!)}
-                              className="w-full py-2 bg-[#b48328] hover:bg-[#966816] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-2 border-[#8c5f10]"
+                              className="w-full py-2 bg-[#223A5E] hover:bg-[#1a2d4a] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-2 border-[#8c5f10]"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                               <span>Buka & Edit di Editor Sekarang</span>
@@ -287,8 +287,8 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
 
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-white border-2 border-stone-200 p-3 rounded-2xl rounded-tl-none shadow-xs flex items-center gap-2 text-xs text-black font-semibold">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#b48328]" />
+                      <div className="bg-white border-2 border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-xs flex items-center gap-2 text-xs text-black font-semibold">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#223A5E]" />
                         <span>AI sedang merancang formulir...</span>
                       </div>
                     </div>
@@ -310,12 +310,12 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                     onChange={(e) => setInputValue(e.target.value)}
                     disabled={isLoading}
                     placeholder="Ketik instruksi tambahan untuk formulir..."
-                    className="flex-1 text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-stone-300 focus:border-[#b48328] focus:ring-2 focus:ring-amber-100 focus:outline-none bg-white text-black shadow-xs font-medium"
+                    className="flex-1 text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white text-black shadow-xs font-medium"
                   />
                   <button
                     type="submit"
                     disabled={!inputValue.trim() || isLoading}
-                    className="px-4 py-2.5 bg-[#b48328] hover:bg-[#966816] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border-2 border-[#8c5f10]"
+                    className="px-4 py-2.5 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border-2 border-[#8c5f10]"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

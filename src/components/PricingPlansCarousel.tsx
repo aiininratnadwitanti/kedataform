@@ -81,7 +81,7 @@ const EXTENDED_PLANS: PlanItem[] = [
 export const PricingPlansCarousel: React.FC<PricingPlansCarouselProps> = ({
   onStartBlank,
   onOpenSignIn,
-  accentColor = '#b48328',
+  accentColor = '#223A5E',
   isDarkMode = false,
   borderRadius = 'modern',
 }) => {

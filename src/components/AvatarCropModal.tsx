@@ -39,7 +39,7 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   onClose,
   imageUrl: initialImageUrl,
   onApplyCrop,
-  primaryAccent = '#b48328',
+  primaryAccent = '#223A5E',
   userName = 'Pengguna',
 }) => {
   const [currentImage, setCurrentImage] = useState(initialImageUrl);
@@ -222,29 +222,29 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-stone-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200 select-none"
       onMouseUp={handleEndDrag}
       onTouchEnd={handleEndDrag}
     >
       <div 
-        className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border-2 border-stone-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border-2 border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
         onMouseMove={handleMouseMove}
         onTouchMove={handleTouchMove}
       >
         {/* Header Modal */}
-        <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50/90">
+        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/90">
           <div className="flex items-center gap-3">
             <div 
-              className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center shadow-xs"
+              className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-900 border border-blue-300 flex items-center justify-center shadow-xs"
             >
-              <Crop className="w-5 h-5 text-amber-800 stroke-[2.5]" />
+              <Crop className="w-5 h-5 text-blue-800 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm sm:text-base text-stone-900 leading-tight">
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-tight">
                 Crop & Pilih Bagian Foto Profil
               </h3>
-              <p className="text-[11px] text-stone-500 font-medium">
+              <p className="text-[11px] text-slate-500 font-medium">
                 Geser (drag) dan zoom untuk menentukan area wajah atau bagian terbaik yang ingin dijadikan foto profil.
               </p>
             </div>
@@ -253,7 +253,7 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition-colors cursor-pointer"
+            className="p-2 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"
             title="Tutup jendela crop"
           >
             <X className="w-5 h-5 stroke-[2.5]" />
@@ -266,20 +266,20 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
           {/* Interactive Circular Crop Viewport */}
           <div className="flex flex-col items-center justify-center space-y-3">
             <div className="flex items-center justify-between w-full max-w-sm px-1 text-xs">
-              <span className="font-bold text-stone-800 flex items-center gap-1.5">
-                <Move className="w-3.5 h-3.5 text-amber-700" />
+              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                <Move className="w-3.5 h-3.5 text-blue-700" />
                 <span>Tarik Gambar di Dalam Lingkaran:</span>
               </span>
-              <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200">
+              <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                 Zoom {zoom}% · Posisi {cropX}%, {cropY}%
               </span>
             </div>
 
             {/* Circular Preview Container with Drop Shadow */}
-            <div className="relative p-2 bg-gradient-to-b from-stone-100 to-stone-200 rounded-full shadow-inner border border-stone-300">
+            <div className="relative p-2 bg-gradient-to-b from-slate-100 to-slate-200 rounded-full shadow-inner border border-slate-300">
               <div 
-                className={`relative w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden border-4 border-white shadow-2xl ring-4 ring-amber-400/80 bg-stone-900 cursor-grab ${
-                  isDragging ? 'cursor-grabbing ring-amber-600' : ''
+                className={`relative w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden border-4 border-white shadow-2xl ring-4 ring-blue-400/80 bg-slate-900 cursor-grab ${
+                  isDragging ? 'cursor-grabbing ring-blue-600' : ''
                 }`}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleTouchStart}
@@ -308,8 +308,8 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                 </div>
 
                 {/* Drag Indicator Overlay Pill */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-stone-900/80 backdrop-blur-xs text-white text-[10px] font-bold flex items-center gap-1.5 shadow-md pointer-events-none">
-                  <Move className="w-3 h-3 text-amber-300" />
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold flex items-center gap-1.5 shadow-md pointer-events-none">
+                  <Move className="w-3 h-3 text-blue-300" />
                   <span>Klik & Tarik Foto</span>
                 </div>
               </div>
@@ -317,12 +317,12 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
 
             {/* Live Size Previews */}
             <div className="pt-2 flex items-center gap-4">
-              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 Pratinjau Nyata:
               </span>
               <div className="flex items-center gap-3">
                 <div className="flex flex-col items-center gap-1">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-amber-400 shadow-xs">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-400 shadow-xs">
                     <img
                       src={currentImage}
                       alt="32px preview"
@@ -333,11 +333,11 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                       }}
                     />
                   </div>
-                  <span className="text-[9px] font-mono text-stone-400">Header</span>
+                  <span className="text-[9px] font-mono text-slate-400">Header</span>
                 </div>
 
                 <div className="flex flex-col items-center gap-1">
-                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-amber-400 shadow-xs">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-400 shadow-xs">
                     <img
                       src={currentImage}
                       alt="48px preview"
@@ -348,23 +348,23 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                       }}
                     />
                   </div>
-                  <span className="text-[9px] font-mono text-stone-400">Sidebar</span>
+                  <span className="text-[9px] font-mono text-slate-400">Sidebar</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Preset Alignments (Pilihan Bagian Cepat) */}
-          <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/90 space-y-2">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-amber-700" />
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-blue-700" />
                 <span>Pilihan Bagian Foto (Fokus Cepat):</span>
               </span>
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-[11px] font-bold text-stone-600 hover:text-stone-900 flex items-center gap-1 cursor-pointer transition-colors"
+                className="text-[11px] font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer transition-colors"
                 title="Reset zoom dan posisi ke awal"
               >
                 <RefreshCw className="w-3 h-3" />
@@ -376,35 +376,35 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
               <button
                 type="button"
                 onClick={() => { setCropX(50); setCropY(15); }}
-                className="px-3 py-1.5 text-xs font-bold bg-white border border-stone-300 hover:border-amber-500 hover:bg-amber-50/50 rounded-xl text-stone-800 transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-slate-800 transition-all cursor-pointer shadow-2xs"
               >
                 👤 Wajah / Atas
               </button>
               <button
                 type="button"
                 onClick={() => { setCropX(50); setCropY(50); }}
-                className="px-3 py-1.5 text-xs font-bold bg-white border border-stone-300 hover:border-amber-500 hover:bg-amber-50/50 rounded-xl text-stone-800 transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-slate-800 transition-all cursor-pointer shadow-2xs"
               >
                 🎯 Tepat Tengah
               </button>
               <button
                 type="button"
                 onClick={() => { setCropX(50); setCropY(85); }}
-                className="px-3 py-1.5 text-xs font-bold bg-white border border-stone-300 hover:border-amber-500 hover:bg-amber-50/50 rounded-xl text-stone-800 transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-slate-800 transition-all cursor-pointer shadow-2xs"
               >
                 🔽 Bagian Bawah
               </button>
               <button
                 type="button"
                 onClick={() => { setCropX(20); setCropY(50); }}
-                className="px-3 py-1.5 text-xs font-bold bg-white border border-stone-300 hover:border-amber-500 hover:bg-amber-50/50 rounded-xl text-stone-800 transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-slate-800 transition-all cursor-pointer shadow-2xs"
               >
                 ◀ Sisi Kiri
               </button>
               <button
                 type="button"
                 onClick={() => { setCropX(80); setCropY(50); }}
-                className="px-3 py-1.5 text-xs font-bold bg-white border border-stone-300 hover:border-amber-500 hover:bg-amber-50/50 rounded-xl text-stone-800 transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-slate-800 transition-all cursor-pointer shadow-2xs"
               >
                 ▶ Sisi Kanan
               </button>
@@ -412,27 +412,27 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
           </div>
 
           {/* Sliders: Zoom, Posisi X, Posisi Y, dan Putar Foto */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-white border border-stone-200 shadow-2xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
             {/* Zoom Slider */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <label className="font-bold text-stone-800 flex items-center gap-1.5">
-                  <ZoomIn className="w-3.5 h-3.5 text-stone-600" />
+                <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <ZoomIn className="w-3.5 h-3.5 text-slate-600" />
                   <span>Skala Zoom Foto</span>
                 </label>
                 <div className="flex items-center gap-1">
                   <button 
                     type="button" 
                     onClick={() => setZoom(prev => Math.max(100, prev - 15))}
-                    className="p-1 rounded bg-stone-100 hover:bg-stone-200 text-stone-700 cursor-pointer text-[10px] font-bold"
+                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer text-[10px] font-bold"
                   >
                     -
                   </button>
-                  <span className="font-mono text-stone-900 font-extrabold w-12 text-center text-xs">{zoom}%</span>
+                  <span className="font-mono text-slate-900 font-extrabold w-12 text-center text-xs">{zoom}%</span>
                   <button 
                     type="button" 
                     onClick={() => setZoom(prev => Math.min(300, prev + 15))}
-                    className="p-1 rounded bg-stone-100 hover:bg-stone-200 text-stone-700 cursor-pointer text-[10px] font-bold"
+                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer text-[10px] font-bold"
                   >
                     +
                   </button>
@@ -445,26 +445,26 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                 step="5"
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-full accent-amber-600 cursor-pointer"
+                className="w-full accent-blue-600 cursor-pointer"
               />
             </div>
 
             {/* Putar Foto 90 Derajat */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <label className="font-bold text-stone-800 flex items-center gap-1.5">
-                  <RotateCw className="w-3.5 h-3.5 text-stone-600" />
+                <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <RotateCw className="w-3.5 h-3.5 text-slate-600" />
                   <span>Putar Foto</span>
                 </label>
-                <span className="font-mono text-stone-900 font-extrabold text-xs">{rotation}°</span>
+                <span className="font-mono text-slate-900 font-extrabold text-xs">{rotation}°</span>
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setRotation(prev => (prev + 90) % 360)}
-                  className="flex-1 py-1.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-stone-300 transition-colors cursor-pointer"
+                  className="flex-1 py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-slate-300 transition-colors cursor-pointer"
                 >
-                  <RotateCw className="w-3.5 h-3.5 text-stone-700" />
+                  <RotateCw className="w-3.5 h-3.5 text-slate-700" />
                   <span>Putar 90° Searah Jarum Jam</span>
                 </button>
               </div>
@@ -473,10 +473,10 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
             {/* Posisi Vertikal Y */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <label className="font-bold text-stone-800">
+                <label className="font-bold text-slate-800">
                   Posisi Vertikal (Atas - Bawah)
                 </label>
-                <span className="font-mono text-stone-900 font-extrabold text-xs">{cropY}%</span>
+                <span className="font-mono text-slate-900 font-extrabold text-xs">{cropY}%</span>
               </div>
               <input
                 type="range"
@@ -485,17 +485,17 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                 step="1"
                 value={cropY}
                 onChange={(e) => setCropY(Number(e.target.value))}
-                className="w-full accent-amber-600 cursor-pointer"
+                className="w-full accent-blue-600 cursor-pointer"
               />
             </div>
 
             {/* Posisi Horizontal X */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <label className="font-bold text-stone-800">
+                <label className="font-bold text-slate-800">
                   Posisi Horizontal (Kiri - Kanan)
                 </label>
-                <span className="font-mono text-stone-900 font-extrabold text-xs">{cropX}%</span>
+                <span className="font-mono text-slate-900 font-extrabold text-xs">{cropX}%</span>
               </div>
               <input
                 type="range"
@@ -504,26 +504,26 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                 step="1"
                 value={cropX}
                 onChange={(e) => setCropX(Number(e.target.value))}
-                className="w-full accent-amber-600 cursor-pointer"
+                className="w-full accent-blue-600 cursor-pointer"
               />
             </div>
           </div>
 
           {/* Opsi Upload Foto Baru atau Pilih Foto Sampel */}
-          <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3">
+          <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <span className="text-xs font-bold text-stone-900 block">
+                <span className="text-xs font-bold text-slate-900 block">
                   Ingin menggunakan foto lain?
                 </span>
-                <span className="text-[11px] text-stone-600">
+                <span className="text-[11px] text-slate-600">
                   Pilih file gambar baru dari laptop/HP Anda atau gunakan sampel di bawah.
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer shrink-0 transition-all hover:scale-101"
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer shrink-0 transition-all hover:scale-101"
               >
                 <ImagePlus className="w-4 h-4 stroke-[2.5]" />
                 <span>Pilih Foto Baru</span>
@@ -538,8 +538,8 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
             </div>
 
             {/* Avatar Sample Thumbnails */}
-            <div className="pt-2 border-t border-amber-200/60">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-2">
+            <div className="pt-2 border-t border-blue-200/60">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">
                 Pilihan Avatar Cepat:
               </span>
               <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
@@ -552,7 +552,7 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                       handleReset();
                     }}
                     className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-transform hover:scale-110 cursor-pointer shrink-0 ${
-                      currentImage === url ? 'border-amber-600 ring-2 ring-amber-400' : 'border-stone-300'
+                      currentImage === url ? 'border-blue-600 ring-2 ring-blue-400' : 'border-slate-300'
                     }`}
                   >
                     <img src={url} alt={`Sample ${idx}`} className="w-full h-full object-cover" />
@@ -565,11 +565,11 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
         </div>
 
         {/* Footer Modal: Tombol Aksi yang Terlihat Jelas dengan Kontras Tinggi */}
-        <div className="px-5 py-4 border-t border-stone-200 flex items-center justify-between bg-stone-50">
+        <div className="px-5 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-xs font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+            className="px-5 py-2.5 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
           >
             Batal
           </button>
@@ -578,7 +578,7 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
             type="button"
             onClick={handleSaveCrop}
             disabled={isProcessing}
-            className="px-6 py-2.5 bg-stone-950 hover:bg-stone-800 active:scale-98 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border border-stone-800 hover:border-amber-400 disabled:opacity-50"
+            className="px-6 py-2.5 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border border-slate-800 hover:border-blue-400 disabled:opacity-50"
           >
             <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
             <span>{isProcessing ? 'Menyimpan...' : 'Terapkan & Simpan Foto Profil'}</span>

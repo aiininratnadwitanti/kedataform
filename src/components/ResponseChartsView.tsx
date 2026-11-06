@@ -215,7 +215,7 @@ export const ResponseChartsView: React.FC<ResponseChartsViewProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[11px] font-bold text-indigo-200 uppercase tracking-wider mb-2">
-                <Award className="w-3.5 h-3.5 text-amber-400" />
+                <Award className="w-3.5 h-3.5 text-blue-400" />
                 <span>Statistik Penilaian Kuis & Evaluasi</span>
               </div>
               <h3 className="text-xl sm:text-2xl font-black tracking-tight">
@@ -259,7 +259,7 @@ export const ResponseChartsView: React.FC<ResponseChartsViewProps> = ({
                 Skor Tertinggi
               </span>
               <div className="flex items-baseline gap-1 pt-1">
-                <span className="text-3xl font-black font-mono text-amber-300">{scoreAnalytics.highestScore}</span>
+                <span className="text-3xl font-black font-mono text-blue-300">{scoreAnalytics.highestScore}</span>
                 <span className="text-xs text-indigo-200">poin</span>
               </div>
               <p className="text-[11px] text-indigo-300 mt-1">Pencapaian terbaik</p>
@@ -315,12 +315,12 @@ export const ResponseChartsView: React.FC<ResponseChartsViewProps> = ({
               {/* 55 - 69 */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-amber-300">Nilai 55 – 69 (Cukup / C)</span>
+                  <span className="font-semibold text-blue-300">Nilai 55 – 69 (Cukup / C)</span>
                   <span className="font-mono text-white/80">{scoreAnalytics.brackets.fair} Siswa</span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
                   <div 
-                    className="h-full bg-amber-400 rounded-full transition-all duration-700"
+                    className="h-full bg-blue-400 rounded-full transition-all duration-700"
                     style={{ width: `${Math.max(4, (scoreAnalytics.brackets.fair / totalResponses) * 100)}%` }}
                   />
                 </div>
@@ -408,7 +408,7 @@ export const ResponseChartsView: React.FC<ResponseChartsViewProps> = ({
                          q.type === 'linear_scale' ? 'Skala Nilai' : 'Isian Teks'}
                       </span>
                       {isQuizMode && typeof q.points === 'number' && (
-                        <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
+                        <span className="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md">
                           ★ Bobot: {q.points} Poin
                         </span>
                       )}
@@ -474,7 +474,7 @@ export const ResponseChartsView: React.FC<ResponseChartsViewProps> = ({
                       <div className="text-center px-3 border-r border-neutral-200">
                         <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Rata-rata</span>
                         <div className="flex items-center gap-1 font-mono font-black text-2xl text-neutral-900 pt-0.5">
-                          <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                          <Star className="w-5 h-5 text-blue-500 fill-blue-500" />
                           <span>{item.average}</span>
                         </div>
                       </div>
@@ -491,7 +491,7 @@ export const ResponseChartsView: React.FC<ResponseChartsViewProps> = ({
                           </span>
                           <div className="flex-1 bg-neutral-100 rounded-full h-2 overflow-hidden">
                             <div 
-                              className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                              className="h-full bg-blue-500 rounded-full transition-all duration-500"
                               style={{ width: `${Math.max(2, s.percentage)}%` }}
                             />
                           </div>

@@ -159,16 +159,16 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-amber-200/80 flex items-start justify-between gap-4 bg-gradient-to-r from-amber-100/60 via-[#faf8f5] to-amber-50/50">
+        <div className="p-6 border-b border-blue-200/80 flex items-start justify-between gap-4 bg-gradient-to-r from-blue-100/60 via-[#F3F8FD] to-blue-50/50">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-amber-100 border border-amber-300/80 text-amber-900 text-[10px] font-bold uppercase tracking-wider shadow-2xs">
-              <Users className="w-3.5 h-3.5 text-amber-800" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-blue-100 border border-blue-300/80 text-blue-900 text-[10px] font-bold uppercase tracking-wider shadow-2xs">
+              <Users className="w-3.5 h-3.5 text-blue-800" />
               <span>Realtime Colab</span>
             </div>
-            <h3 className="text-lg sm:text-xl font-extrabold text-stone-900 tracking-tight">
+            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
               Kolaborasi Formulir & Nilai
             </h3>
-            <p className="text-xs text-stone-600 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               Bekerja sama dengan tim untuk merancang soal, menentukan bobot penilaian kuis, dan meninjau respon bersama secara langsung.
             </p>
           </div>
@@ -176,27 +176,27 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-stone-400 hover:text-stone-700 hover:bg-amber-100/70 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-blue-100/70 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-6 overflow-y-auto bg-[#faf8f5]/60">
+        <div className="p-6 space-y-6 overflow-y-auto bg-[#F3F8FD]/60">
           
           {/* 1. Tautan Kolaborasi Bersama */}
-          <div className="p-4 rounded-2xl bg-white border border-amber-200/80 shadow-xs space-y-3 ring-1 ring-amber-900/5">
+          <div className="p-4 rounded-2xl bg-white border border-blue-200/80 shadow-xs space-y-3 ring-1 ring-blue-900/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Link2 className="w-4 h-4 text-amber-800" />
-                <span className="text-xs font-bold text-stone-900">Tautan Kolaborasi Tim</span>
+                <Link2 className="w-4 h-4 text-blue-800" />
+                <span className="text-xs font-bold text-slate-900">Tautan Kolaborasi Tim</span>
               </div>
-              <span className="text-[10px] text-amber-800 font-mono bg-amber-50 px-2 py-0.5 rounded border border-amber-200/80">Real-time Sync</span>
+              <span className="text-[10px] text-blue-800 font-mono bg-blue-50 px-2 py-0.5 rounded border border-blue-200/80">Real-time Sync</span>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-[#faf8f5] border border-amber-200/80 rounded-xl px-3 py-2 text-xs font-mono text-stone-800 truncate select-all">
+              <div className="flex-1 bg-[#F3F8FD] border border-blue-200/80 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 truncate select-all">
                 {colabLink}
               </div>
               <button
@@ -205,7 +205,7 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs ${
                   isCopied
                     ? 'bg-emerald-600 text-white'
-                    : 'bg-[#b48328] hover:bg-[#966816] text-white border border-[#966816]/60'
+                    : 'bg-[#223A5E] hover:bg-[#1a2d4a] text-white border border-[#1a2d4a]/60'
                 }`}
               >
                 {isCopied ? (
@@ -223,12 +223,12 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
             </div>
 
             {/* Hak Akses Tautan Umum */}
-            <div className="pt-2 border-t border-amber-100 flex items-center justify-between text-xs">
-              <span className="text-stone-600 font-medium">Akses Publik:</span>
+            <div className="pt-2 border-t border-blue-100 flex items-center justify-between text-xs">
+              <span className="text-slate-600 font-medium">Akses Publik:</span>
               <select
                 value={generalAccess}
                 onChange={(e) => handleAccessChange(e.target.value as any)}
-                className="bg-[#faf8f5] border border-amber-200 rounded-lg px-2.5 py-1 text-xs text-stone-800 font-semibold focus:outline-none focus:border-[#b48328] cursor-pointer"
+                className="bg-[#F3F8FD] border border-blue-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-semibold focus:outline-none focus:border-[#223A5E] cursor-pointer"
               >
                 <option value="anyone_with_link_editor">Siapa saja dengan tautan dapat Mengedit</option>
                 <option value="anyone_with_link_viewer">Siapa saja dengan tautan hanya Melihat</option>
@@ -239,7 +239,7 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
 
           {/* 2. Form Tambah Kolaborator Baru */}
           <form onSubmit={handleAddCollaborator} className="space-y-2.5">
-            <label className="text-xs font-bold text-stone-800 block">
+            <label className="text-xs font-bold text-slate-800 block">
               Undang Rekan Tim via Email:
             </label>
             <div className="flex items-center gap-2">
@@ -248,12 +248,12 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="nama.rekan@institusi.ac.id"
-                className="flex-1 bg-white border border-amber-200 rounded-xl px-3.5 py-2 text-xs text-stone-800 placeholder:text-stone-400 focus:bg-white focus:outline-none focus:border-[#b48328] shadow-2xs"
+                className="flex-1 bg-white border border-blue-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#223A5E] shadow-2xs"
               />
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as any)}
-                className="bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none cursor-pointer shadow-2xs"
+                className="bg-white border border-blue-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer shadow-2xs"
               >
                 <option value="editor">Editor</option>
                 <option value="viewer">Viewer</option>
@@ -261,7 +261,7 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
               <button
                 type="submit"
                 disabled={!newEmail.trim()}
-                className="px-4 py-2 bg-[#b48328] hover:bg-[#966816] disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border border-[#966816]/60 shadow-xs"
+                className="px-4 py-2 bg-[#223A5E] hover:bg-[#1a2d4a] disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border border-[#1a2d4a]/60 shadow-xs"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span>Undang</span>
@@ -271,45 +271,45 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
 
           {/* 3. Daftar Anggota / Kolaborator Aktif */}
           <div className="space-y-2.5">
-            <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
               Orang yang Memiliki Akses ({collaborators.length + 1}):
             </span>
 
-            <div className="divide-y divide-amber-100 rounded-2xl border border-amber-200/80 overflow-hidden bg-white shadow-xs ring-1 ring-amber-900/5">
+            <div className="divide-y divide-blue-100 rounded-2xl border border-blue-200/80 overflow-hidden bg-white shadow-xs ring-1 ring-blue-900/5">
               {/* Owner / Pemilik */}
-              <div className="p-3.5 flex items-center justify-between gap-3 bg-gradient-to-r from-amber-50/50 to-white">
+              <div className="p-3.5 flex items-center justify-between gap-3 bg-gradient-to-r from-blue-50/50 to-white">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
                     src={user.avatarUrl}
                     alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover border border-amber-300 shrink-0"
+                    className="w-8 h-8 rounded-full object-cover border border-blue-300 shrink-0"
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-stone-900 truncate">{user.name}</span>
-                      <span className="text-[9px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200">
+                      <span className="font-bold text-xs text-slate-900 truncate">{user.name}</span>
+                      <span className="text-[9px] font-bold text-blue-900 bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200">
                         Anda
                       </span>
                     </div>
-                    <span className="text-[11px] text-stone-500 block truncate">{user.email}</span>
+                    <span className="text-[11px] text-slate-500 block truncate">{user.email}</span>
                   </div>
                 </div>
 
-                <span className="text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-md shadow-2xs">
+                <span className="text-[10px] font-bold text-blue-900 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md shadow-2xs">
                   Pemilik (Owner)
                 </span>
               </div>
 
               {/* Invited Collaborators */}
               {collaborators.map((c) => (
-                <div key={c.id} className="p-3.5 flex items-center justify-between gap-3 hover:bg-amber-50/40 transition-colors">
+                <div key={c.id} className="p-3.5 flex items-center justify-between gap-3 hover:bg-blue-50/40 transition-colors">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-xs shrink-0 border border-amber-200">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-900 flex items-center justify-center font-bold text-xs shrink-0 border border-blue-200">
                       {c.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <span className="font-bold text-xs text-stone-900 block truncate">{c.name}</span>
-                      <span className="text-[11px] text-stone-500 block truncate">{c.email}</span>
+                      <span className="font-bold text-xs text-slate-900 block truncate">{c.name}</span>
+                      <span className="text-[11px] text-slate-500 block truncate">{c.email}</span>
                     </div>
                   </div>
 
@@ -317,7 +317,7 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
                     <select
                       value={c.role}
                       onChange={(e) => handleChangeRole(c.id, e.target.value as any)}
-                      className="bg-[#faf8f5] border border-amber-200 rounded-lg px-2.5 py-1 text-xs text-stone-800 font-semibold focus:outline-none cursor-pointer"
+                      className="bg-[#F3F8FD] border border-blue-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-semibold focus:outline-none cursor-pointer"
                     >
                       <option value="editor">Editor</option>
                       <option value="viewer">Viewer</option>
@@ -326,7 +326,7 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveCollaborator(c.id)}
-                      className="p-1.5 rounded-md text-stone-400 hover:text-stone-700 hover:bg-amber-100/60 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-blue-100/60 transition-colors cursor-pointer"
                       title="Hapus akses kolaborator"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -339,19 +339,19 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
 
           {/* 4. Aktivitas Kolaborasi Terkini */}
           {currentColab.activityLogs && currentColab.activityLogs.length > 0 && (
-            <div className="p-3.5 rounded-2xl bg-white border border-amber-200/80 space-y-2 shadow-2xs">
-              <span className="text-[10px] font-bold text-amber-900/80 uppercase tracking-wider block">
+            <div className="p-3.5 rounded-2xl bg-white border border-blue-200/80 space-y-2 shadow-2xs">
+              <span className="text-[10px] font-bold text-blue-900/80 uppercase tracking-wider block">
                 Catatan Kolaborasi Tim:
               </span>
-              <div className="space-y-1.5 text-xs text-stone-600">
+              <div className="space-y-1.5 text-xs text-slate-600">
                 {currentColab.activityLogs.map((log) => (
                   <div key={log.id} className="flex items-center justify-between text-[11px]">
                     <div className="flex items-center gap-1.5 truncate">
-                      <Clock className="w-3 h-3 text-amber-600 shrink-0" />
-                      <strong className="text-stone-800">{log.userName}:</strong>
+                      <Clock className="w-3 h-3 text-blue-600 shrink-0" />
+                      <strong className="text-slate-800">{log.userName}:</strong>
                       <span className="truncate">{log.action}</span>
                     </div>
-                    <span className="text-stone-400 font-mono text-[10px] shrink-0 ml-2">{log.timestamp}</span>
+                    <span className="text-slate-400 font-mono text-[10px] shrink-0 ml-2">{log.timestamp}</span>
                   </div>
                 ))}
               </div>
@@ -361,11 +361,11 @@ export const CollaborationModal: React.FC<CollaborationModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-5 border-t border-amber-200/80 flex items-center justify-end bg-gradient-to-r from-amber-50/50 via-[#faf8f5] to-amber-100/50">
+        <div className="p-5 border-t border-blue-200/80 flex items-center justify-end bg-gradient-to-r from-blue-50/50 via-[#F3F8FD] to-blue-100/50">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2 bg-[#b48328] hover:bg-[#966816] border border-[#966816]/60 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer hover:scale-102 active:scale-98"
+            className="px-6 py-2 bg-[#223A5E] hover:bg-[#1a2d4a] border border-[#1a2d4a]/60 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer hover:scale-102 active:scale-98"
           >
             Selesai
           </button>
