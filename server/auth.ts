@@ -8,8 +8,10 @@ const SESSION_TTL_DAYS = 30;
 // Cookie `secure` hanya saat aplikasi disajikan lewat HTTPS (mis. di Vercel),
 // agar login tetap berfungsi di lokal (http://localhost).
 function useSecureCookies(): boolean {
-  if (String(process.env.COOKIE_SECURE || '').toLowerCase() === 'true') return true;
-  if (String(process.env.COOKIE_SECURE || '').toLowerCase() === 'false') return false;
+  const explicit = String(process.env.COOKIE_SECURE || '').toLowerCase();
+  if (explicit === 'true') return true;
+  if (explicit === 'false') return false;
+  if (process.env.VERCEL) return true;
   return (process.env.APP_URL || '').startsWith('https://');
 }
 
@@ -22,6 +24,11 @@ export function adminEmails(): string[] {
 
 export function appUrl(req?: Request): string {
   if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  // Di Vercel, domain bisa dideteksi otomatis (tidak wajib set APP_URL).
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   const port = Number(process.env.PORT) || 3000;
   return `http://localhost:${port}`;
 }
