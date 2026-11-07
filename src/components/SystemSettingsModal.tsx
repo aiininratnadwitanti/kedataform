@@ -10,7 +10,6 @@ import {
   Sparkles, 
   Bell, 
   ShieldCheck, 
-  Building2, 
   RotateCcw,
   SlidersHorizontal,
   Contrast,
@@ -41,6 +40,7 @@ export interface SystemSettings {
   timezone: string;
   dateFormat: string;
   language: 'id' | 'en';
+  tourCompleted?: boolean;
 
   // 3. Notifikasi & Perilaku
   emailNotifications: boolean;
@@ -60,11 +60,12 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   fontSizeScale: 100,
   enableAnimations: true,
 
-  workspaceName: 'KeDataForm Studio',
-  adminEmail: 'rizkafaridadamayantii@gmail.com',
+  workspaceName: 'KedataForm Studio',
+  adminEmail: '',
   timezone: 'WIB (GMT+7)',
   dateFormat: 'DD/MM/YYYY',
   language: 'id',
+  tourCompleted: false,
 
   emailNotifications: true,
   defaultResponseQuota: 100,
@@ -261,7 +262,7 @@ interface SystemSettingsModalProps {
 }
 
 // Sub-sidebar tabs type
-type SettingsSubTab = 'profile' | 'font' | 'color' | 'theme' | 'appearance' | 'workspace' | 'notifications' | 'security';
+type SettingsSubTab = 'profile' | 'font' | 'color' | 'theme' | 'appearance' | 'notifications' | 'security';
 
 export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
   isOpen,
@@ -429,12 +430,6 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
       label: 'Bentuk & Tampilan', 
       desc: 'Sudut, Kepadatan & Animasi', 
       icon: <SlidersHorizontal className="w-4 h-4" /> 
-    },
-    { 
-      id: 'workspace', 
-      label: 'Preferensi Workspace', 
-      desc: 'Zona Waktu & Bahasa', 
-      icon: <Building2 className="w-4 h-4" />
     },
     { 
       id: 'notifications', 
@@ -773,7 +768,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                     }}
                   >
                     <h5 className="text-base font-extrabold text-slate-900">
-                      KeDataForm Studio - Buat Formulir Cerdas & Kustom
+                      KedataForm Studio - Buat Formulir Cerdas & Kustom
                     </h5>
                     <p className="text-xs text-slate-600 leading-relaxed">
                       Ini adalah sampel tampilan teks pertanyaan formulir, deskripsi, dan tombol dengan jenis huruf <span className="font-bold text-slate-900">{current.systemFont === 'sans' ? 'Plus Jakarta Sans' : current.systemFont === 'serif' ? 'Playfair Display' : 'JetBrains Mono'}</span>.
@@ -1107,114 +1102,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
             )}
 
             {/* ------------------------------------------------------------ */}
-            {/* 5. SUB-MENU: WORKSPACE & BAHASA                              */}
-            {/* ------------------------------------------------------------ */}
-            {activeSubTab === 'workspace' && (
-              <div className="space-y-4 animate-in fade-in duration-150">
-                <div className="border-b border-slate-100 pb-3">
-                  <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-slate-700" />
-                    <span>Preferensi Workspace</span>
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Atur zona waktu dan bahasa default untuk workspace Anda.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200 space-y-4">
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-slate-800 block mb-1">
-                        Zona Waktu Default
-                      </label>
-                      <select
-                        value={current.timezone}
-                        onChange={(e) => handleUpdate({ timezone: e.target.value })}
-                        className="w-full text-xs bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 cursor-pointer focus:outline-none"
-                      >
-                        <option value="WIB (GMT+7)">WIB (GMT+7) - Jakarta, Bandung</option>
-                        <option value="WITA (GMT+8)">WITA (GMT+8) - Bali, Makassar</option>
-                        <option value="WIT (GMT+9)">WIT (GMT+9) - Jayapura, Ambon</option>
-                        <option value="UTC">UTC Universal Time</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-bold text-slate-800 block mb-1">
-                        Format Tampilan Tanggal
-                      </label>
-                      <select
-                        value={current.dateFormat}
-                        onChange={(e) => handleUpdate({ dateFormat: e.target.value })}
-                        className="w-full text-xs bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 cursor-pointer focus:outline-none"
-                      >
-                        <option value="DD/MM/YYYY">DD/MM/YYYY (Contoh: 03/11/2026)</option>
-                        <option value="YYYY-MM-DD">YYYY-MM-DD (Contoh: 2026-11-03)</option>
-                        <option value="DD MMMM YYYY">DD MMMM YYYY (Contoh: 3 November 2026)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Bahasa Sistem / System Language */}
-                  <div className="pt-3 border-t border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">
-                      Bahasa Sistem / System Language
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => handleUpdate({ language: 'id' })}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                          current.language === 'id'
-                            ? 'bg-white border-[#223A5E] text-slate-900 font-bold shadow-xs ring-1 ring-[#223A5E]'
-                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-8 h-6 rounded border font-mono text-[11px] font-bold flex items-center justify-center bg-red-50 text-red-700 border-red-200 shrink-0">
-                             ID
-                          </span>
-                          <div>
-                            <div className="text-xs font-semibold">Bahasa Indonesia</div>
-                            <div className="text-[10px] text-slate-400">Default sistem</div>
-                          </div>
-                        </div>
-                        {current.language === 'id' && (
-                          <Check className="w-4 h-4 text-[#223A5E]" />
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleUpdate({ language: 'en' })}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                          current.language === 'en'
-                            ? 'bg-white border-[#223A5E] text-slate-900 font-bold shadow-xs ring-1 ring-[#223A5E]'
-                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-8 h-6 rounded border font-mono text-[11px] font-bold flex items-center justify-center bg-blue-50 text-blue-800 border-blue-200 shrink-0">
-                            EN
-                          </span>
-                          <div>
-                            <div className="text-xs font-semibold">English (US)</div>
-                            <div className="text-[10px] text-slate-400">International</div>
-                          </div>
-                        </div>
-                        {current.language === 'en' && (
-                          <Check className="w-4 h-4 text-[#223A5E]" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ------------------------------------------------------------ */}
-            {/* 6. SUB-MENU: NOTIFIKASI & KUOTA                              */}
+            {/* 5. SUB-MENU: NOTIFIKASI & KUOTA                              */}
             {/* ------------------------------------------------------------ */}
             {activeSubTab === 'notifications' && (
               <div className="space-y-4 animate-in fade-in duration-150">
@@ -1272,7 +1160,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
             )}
 
             {/* ------------------------------------------------------------ */}
-            {/* 7. SUB-MENU: KEAMANAN & RESET                                */}
+            {/* 6. SUB-MENU: KEAMANAN & RESET                                */}
             {/* ------------------------------------------------------------ */}
             {activeSubTab === 'security' && (
               <div className="space-y-4 animate-in fade-in duration-150">
