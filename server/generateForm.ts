@@ -7,7 +7,7 @@ import { GoogleGenAI } from '@google/genai';
  */
 export async function generateForm(req: Request, res: Response): Promise<void> {
   try {
-    const { prompt, isQuizRequested, questionCount } = req.body;
+    const { prompt, isQuizRequested, questionCount, attachments } = req.body;
     if (!prompt || typeof prompt !== 'string') {
       res.status(400).json({ error: 'Prompt is required' });
       return;
@@ -58,12 +58,36 @@ CRITICAL SUBJECT & TOPIC ACCURACY:
 Output ONLY valid raw JSON matching FormSchema without markdown formatting or code blocks.
 `;
 
+    // Susun konten multimodal jika ada lampiran (gambar/PDF/dokumen teks)
+    type Attachment = { name?: string; mimeType?: string; data?: string; text?: string };
+    const safeAttachments: Attachment[] = Array.isArray(attachments) ? attachments.slice(0, 5) : [];
+    const docText = safeAttachments
+      .filter((a) => typeof a.text === 'string' && String(a.text).trim())
+      .map((a) => `\n\n--- Dokumen: ${a.name || 'lampiran'} ---\n${a.text}`)
+      .join('');
+
+    const buildContents = (basePrompt: string) => {
+      const hasAttachments = safeAttachments.some((a) => a.data && a.mimeType) || Boolean(docText);
+      const text = `${basePrompt}${docText}${
+        hasAttachments
+          ? '\n\nPENTING: Gunakan isi dokumen/gambar yang dilampirkan sebagai sumber materi utama. Jika dokumen berisi daftar soal atau materi, susun formulir/kuis berdasarkan isi tersebut.'
+          : ''
+      }`;
+      const parts: any[] = [{ text }];
+      for (const a of safeAttachments) {
+        if (a.data && a.mimeType) {
+          parts.push({ inlineData: { mimeType: a.mimeType, data: a.data } });
+        }
+      }
+      return parts.length > 1 ? [{ role: 'user', parts }] : text;
+    };
+
     let response;
     try {
       response = await ai.models.generateContent({
         model: 'gemini-3.5-flash',
-        contents: `User Prompt: "${prompt}". Mode Kuis: ${Boolean(isQuizRequested)}. Target Jumlah Soal: ${targetCount}.
-Create a complete form or quiz with exactly ${targetCount} questions strictly matching the requested topic. If prompt mentions English / Bahasa Inggris, generate English questions only!`,
+        contents: buildContents(`User Prompt: "${prompt}". Mode Kuis: ${Boolean(isQuizRequested)}. Target Jumlah Soal: ${targetCount}.
+Create a complete form or quiz with exactly ${targetCount} questions strictly matching the requested topic. If prompt mentions English / Bahasa Inggris, generate English questions only!`),
         config: {
           systemInstruction,
           responseMimeType: 'application/json',
@@ -73,8 +97,8 @@ Create a complete form or quiz with exactly ${targetCount} questions strictly ma
       console.warn('gemini-3.5-flash failed, attempting fallback to gemini-3-flash-preview:', primaryErr?.message);
       response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `User Prompt: "${prompt}". Mode Kuis: ${Boolean(isQuizRequested)}. Target Jumlah Soal: ${targetCount}.
-Create a complete form or quiz strictly matching the requested subject.`,
+        contents: buildContents(`User Prompt: "${prompt}". Mode Kuis: ${Boolean(isQuizRequested)}. Target Jumlah Soal: ${targetCount}.
+Create a complete form or quiz strictly matching the requested subject.`),
         config: {
           systemInstruction,
           responseMimeType: 'application/json',

@@ -1,10 +1,20 @@
 import { GoogleGenAI } from '@google/genai';
 import { FormSchema, Question, QuestionType, FormQuizConfig } from '../types/form';
 
+export interface AiAttachment {
+  name: string;
+  mimeType: string;
+  /** Base64 tanpa prefix `data:` — untuk gambar / PDF. */
+  data?: string;
+  /** Teks hasil ekstraksi — untuk berkas teks. */
+  text?: string;
+}
+
 export interface AiGenerationPrompt {
   prompt: string;
   isQuizRequested?: boolean;
   questionCount?: number;
+  attachments?: AiAttachment[];
 }
 
 /**
@@ -1078,7 +1088,7 @@ function generateSmartFallbackForm(userPrompt: string, forceQuiz?: boolean): For
  * with robust error handling and rich fallback.
  */
 export async function generateFormWithAI(params: AiGenerationPrompt): Promise<FormSchema> {
-  const { prompt, isQuizRequested, questionCount } = params;
+  const { prompt, isQuizRequested, questionCount, attachments } = params;
 
   // 1. Prioritas Utama: Panggil Backend Server Proxy (/api/generate-form)
   // Menjalankan Gemini API secara aman di server dengan GEMINI_API_KEY
@@ -1087,7 +1097,7 @@ export async function generateFormWithAI(params: AiGenerationPrompt): Promise<Fo
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, isQuizRequested, questionCount }),
+      body: JSON.stringify({ prompt, isQuizRequested, questionCount, attachments }),
     });
 
     if (res.ok) {

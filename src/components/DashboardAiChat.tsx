@@ -9,12 +9,16 @@ import {
   GraduationCap,
   FileText,
   Bot,
-  Wand2
+  Wand2,
+  Paperclip,
+  X,
+  Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { FormSchema } from '../types/form';
 import { RecentFormItem } from '../data/formTemplates';
 import { aiChatStore, AiChatState } from '../utils/aiChatStore';
+import type { AiAttachment } from '../utils/aiFormGenerator';
 
 interface DashboardAiChatProps {
   onOpenForm: (form: FormSchema) => void;
@@ -33,6 +37,9 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
 }) => {
   const [chatState, setChatState] = useState<AiChatState>(() => aiChatStore.getState());
   const [inputValue, setInputValue] = useState('');
+  const [attachments, setAttachments] = useState<AiAttachment[]>([]);
+  const [attachError, setAttachError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,12 +62,61 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
     }
   }, [messages, isLoading]);
 
+  const MAX_FILE_MB = 3;
+
+  const handlePickFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setAttachError('');
+    const picked: AiAttachment[] = [];
+
+    for (const file of Array.from(files).slice(0, 3)) {
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        setAttachError(`"${file.name}" terlalu besar (maks ${MAX_FILE_MB} MB).`);
+        continue;
+      }
+      const isText = file.type.startsWith('text/') || /\.(txt|md|csv|json)$/i.test(file.name);
+      const isImage = file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf';
+
+      if (!isText && !isImage && !isPdf) {
+        setAttachError('Format didukung: gambar (JPG/PNG), PDF, atau teks (TXT/MD/CSV).');
+        continue;
+      }
+
+      try {
+        if (isText) {
+          const text = await file.text();
+          picked.push({ name: file.name, mimeType: file.type || 'text/plain', text });
+        } else {
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ''));
+            reader.onerror = () => reject(new Error('read_failed'));
+            reader.readAsDataURL(file);
+          });
+          const base64 = dataUrl.split(',')[1] || '';
+          if (base64) picked.push({ name: file.name, mimeType: file.type, data: base64 });
+        }
+      } catch {
+        setAttachError(`Gagal membaca "${file.name}".`);
+      }
+    }
+
+    if (picked.length) setAttachments((prev) => [...prev, ...picked].slice(0, 5));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputValue).trim();
-    if (!text || isLoading) return;
+    const hasAttachments = attachments.length > 0;
+    if ((!text && !hasAttachments) || isLoading) return;
+
+    const promptText = text || 'Buatkan formulir/kuis berdasarkan dokumen yang saya lampirkan.';
 
     setInputValue('');
-    await aiChatStore.sendMessage(text, (generated) => {
+    setAttachments([]);
+    setAttachError('');
+    await aiChatStore.sendMessage(promptText, attachments, (generated) => {
       if (onUpdateRecentForms) {
         const newRecent: RecentFormItem = {
           id: generated.id,
@@ -282,6 +338,28 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                   className="w-full relative"
                 >
                   <div className="relative shadow-sm rounded-2xl overflow-hidden border border-slate-300 focus-within:border-[var(--system-primary)] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
+                    {(attachments.length > 0 || attachError) && (
+                      <div className="px-3 pt-3 flex flex-wrap items-center gap-1.5">
+                        {attachments.map((a, i) => (
+                          <span key={`${a.name}-${i}`} className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-800 border border-blue-200 rounded-lg px-2 py-1">
+                            {a.data ? <ImageIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                            <span className="max-w-[140px] truncate">{a.name}</span>
+                            <button type="button" onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="cursor-pointer hover:text-rose-600" title="Hapus lampiran">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                        {attachError && <span className="text-[10px] text-rose-600 font-semibold">{attachError}</span>}
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*,application/pdf,.txt,.md,.csv,.json"
+                      className="hidden"
+                      onChange={(e) => handlePickFiles(e.target.files)}
+                    />
                     <textarea
                       rows={3}
                       value={inputValue}
@@ -296,10 +374,19 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       className="w-full text-xs sm:text-sm p-4 pr-14 focus:outline-none placeholder:text-slate-400 text-slate-800 bg-transparent resize-none leading-relaxed font-normal"
                     />
 
-                    <div className="absolute right-3 bottom-3">
+                    <div className="absolute right-3 bottom-3 flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isLoading}
+                        className="p-2 rounded-xl text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40"
+                        title="Lampirkan gambar atau dokumen (gambar/PDF/TXT)"
+                      >
+                        <Paperclip className="w-4 h-4" />
+                      </button>
                       <button
                         type="submit"
-                        disabled={!inputValue.trim() || isLoading}
+                        disabled={(!inputValue.trim() && attachments.length === 0) || isLoading}
                         className="p-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border border-[var(--system-primary)]"
                         title="Kirim ke AI"
                       >
@@ -414,8 +501,31 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="flex items-center gap-2 pt-2"
+                  className="pt-2 space-y-1.5"
                 >
+                  {(attachments.length > 0 || attachError) && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {attachments.map((a, i) => (
+                        <span key={`${a.name}-${i}`} className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-800 border border-blue-200 rounded-lg px-2 py-1">
+                          {a.data ? <ImageIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                          <span className="max-w-[140px] truncate">{a.name}</span>
+                          <button type="button" onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="cursor-pointer hover:text-rose-600" title="Hapus lampiran">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                      {attachError && <span className="text-[10px] text-rose-600 font-semibold">{attachError}</span>}
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*,application/pdf,.txt,.md,.csv,.json"
+                    className="hidden"
+                    onChange={(e) => handlePickFiles(e.target.files)}
+                  />
+                  <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <input
                       id="dashboard-ai-chat-input"
@@ -423,14 +533,24 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       disabled={isLoading}
-                      placeholder="Ketik instruksi tambahan untuk formulir ini..."
+                      placeholder="Ketik instruksi (mis. 'buat kuis dari dokumen ini')..."
                       className="w-full text-xs sm:text-sm pl-4 pr-10 py-3 rounded-2xl border border-slate-300 focus:border-[var(--system-primary)] focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all placeholder:text-slate-400 bg-white text-slate-800 shadow-xs font-normal"
                     />
                   </div>
 
                   <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading}
+                    className="p-3 text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 rounded-2xl transition-colors cursor-pointer shrink-0 disabled:opacity-40"
+                    title="Lampirkan gambar atau dokumen (gambar/PDF/TXT)"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+
+                  <button
                     type="submit"
-                    disabled={!inputValue.trim() || isLoading}
+                    disabled={(!inputValue.trim() && attachments.length === 0) || isLoading}
                     className="px-5 py-3 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] font-medium text-xs rounded-2xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95 border border-[var(--system-primary)]"
                   >
                     {isLoading ? (
@@ -442,6 +562,7 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       </>
                     )}
                   </button>
+                  </div>
                 </form>
 
               </div>

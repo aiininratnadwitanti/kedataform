@@ -480,6 +480,30 @@ function MainApp() {
     }
   };
 
+  // Header "Simpan Formulir": popup aturan hanya saat form pertama kali dibuat.
+  // Saat mengedit form yang sudah ada, langsung simpan perubahan tanpa popup.
+  const handleSaveFormClick = () => {
+    if (!canEditActiveForm) {
+      showCenterToast('Akses Dibatasi', 'Anda hanya memiliki akses lihat pada formulir ini.', 'error', 2500);
+      return;
+    }
+
+    const isExistingForm = recentForms.some((r) => r.id === form.id);
+    if (!isExistingForm) {
+      setIsSaveValidationModalOpen(true);
+      return;
+    }
+
+    try {
+      syncFormToRecentForms(form);
+      setIsFormSaved(true);
+      setIsFormDirty(false);
+      showCenterToast('Berhasil Disimpan', 'Perubahan formulir telah tersimpan.', 'success', 2000);
+    } catch (err) {
+      showCenterToast('Gagal Menyimpan', 'Terjadi kendala saat menyimpan perubahan formulir.', 'error', 2000);
+    }
+  };
+
   // Konfirmasi simpan setelah validasi nilai/kuis selesai
   const handleConfirmSaveWithScoring = (updatedForm: FormSchema) => {
     if (!canEditActiveForm) {
@@ -1087,7 +1111,7 @@ function MainApp() {
             onExportCSV={handleExportActiveFormCSV}
             form={form}
             onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
-            onOpenSaveConfigModal={() => setIsSaveValidationModalOpen(true)}
+            onOpenSaveConfigModal={handleSaveFormClick}
             isFormDirty={isFormDirty}
             isFormSaved={isFormSaved}
             onSaveDesign={handleSaveDesign}

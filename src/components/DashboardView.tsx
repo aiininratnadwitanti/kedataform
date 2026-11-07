@@ -2011,30 +2011,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                           <span>{isEn ? 'Schedule & Availability' : 'Atur Jadwal Buka'}</span>
                                         </button>
                                       )}
-                                      {item.accessRole !== 'viewer' && (
-                                        <button
-                                          type="button"
-                                          onClick={(e) => handleToggleQuizModeFromMenu(item, e)}
-                                          className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between cursor-pointer ${
-                                            isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
-                                          }`}
-                                        >
-                                          <div className="flex items-center gap-2">
-                                            <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-blue-500' : 'text-slate-400'}`} />
-                                            <span>{isEn ? 'Quiz & Scoring' : 'Mode Kuis & Skor'}</span>
-                                          </div>
-                                          <span
-                                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border"
-                                            style={{
-                                              backgroundColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined,
-                                              color: item.form.quizConfig?.isQuizMode ? contrastTextColor : undefined,
-                                              borderColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined
-                                            }}
-                                          >
-                                            {item.form.quizConfig?.isQuizMode ? (isEn ? 'On' : 'Aktif') : (isEn ? 'Off' : 'Nonaktif')}
-                                          </span>
-                                        </button>
-                                      )}
                                       {(!item.accessRole || item.accessRole === 'owner') && (
                                         <button
                                           type="button"
@@ -2209,28 +2185,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     >
                                       <CalendarClock className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
                                       <span>{isEn ? 'Schedule & Availability' : 'Atur Jadwal Buka'}</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => handleToggleQuizModeFromMenu(item, e)}
-                                      className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between cursor-pointer ${
-                                        isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
-                                      }`}
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <Award className={`w-3.5 h-3.5 stroke-[2] ${item.form.quizConfig?.isQuizMode ? 'text-blue-500' : 'text-slate-400'}`} />
-                                        <span>{isEn ? 'Quiz & Scoring' : 'Mode Kuis & Skor'}</span>
-                                      </div>
-                                      <span 
-                                        className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border"
-                                        style={{
-                                          backgroundColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined,
-                                          color: item.form.quizConfig?.isQuizMode ? contrastTextColor : undefined,
-                                          borderColor: item.form.quizConfig?.isQuizMode ? primaryAccent : undefined
-                                        }}
-                                      >
-                                        {item.form.quizConfig?.isQuizMode ? (isEn ? 'On' : 'Aktif') : (isEn ? 'Off' : 'Nonaktif')}
-                                      </span>
                                     </button>
                                     <button
                                       type="button"

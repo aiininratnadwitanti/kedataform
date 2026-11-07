@@ -1,5 +1,5 @@
 import { FormSchema } from '../types/form';
-import { generateFormWithAI } from './aiFormGenerator';
+import { generateFormWithAI, type AiAttachment } from './aiFormGenerator';
 import confetti from 'canvas-confetti';
 import { api } from './api';
 
@@ -233,6 +233,7 @@ export const aiChatStore = {
 
   async sendMessage(
     text: string,
+    attachments?: AiAttachment[],
     onFormGeneratedCallback?: (form: FormSchema) => void
   ): Promise<FormSchema | null> {
     const trimmed = text.trim();
@@ -290,6 +291,7 @@ export const aiChatStore = {
       const generated = await generateFormWithAI({
         prompt: trimmed,
         isQuizRequested: isQuiz,
+        attachments,
       });
 
       if (generated.theme) {
