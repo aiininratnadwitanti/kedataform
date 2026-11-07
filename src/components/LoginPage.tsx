@@ -170,7 +170,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         setOtp('');
         setOtpSentTo('');
         setResendCooldown(0);
-        setEmail(cleanEmail);
+        setEmail('');
         setMode('login');
         setSuccessMessage('Akun berhasil dibuat. Silakan masuk dengan email dan kata sandi Anda.');
       } else {
@@ -214,7 +214,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           src="/assets/landing/login.png"
-          alt="KeDataForm Studio Editorial Workspace"
+          alt="KedataForm Studio Editorial Workspace"
           referrerPolicy="no-referrer"
           className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.82] contrast-[1.06]"
         />
@@ -325,7 +325,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     <PenTool className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs font-serif font-bold tracking-[0.2em] text-[var(--system-primary)] uppercase">
-                    KeDataForm Studio
+                    KedataForm Studio
                   </span>
                 </div>
 
@@ -420,6 +420,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     <input
                       type="email"
                       required
+                      autoComplete="off"
+                      name="kdf-login-email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="nama@domain.com"
@@ -438,6 +440,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
+                      autoComplete="new-password"
+                      name="kdf-login-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Minimal 8 karakter"
