@@ -10,11 +10,15 @@ import {
   Loader2, 
   FileText, 
   GraduationCap,
-  Wand2
+  Wand2,
+  Paperclip,
+  Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { FormSchema } from '../types/form';
 import { aiChatStore, AiChatState } from '../utils/aiChatStore';
+import type { AiAttachment } from '../utils/aiFormGenerator';
+import { registerAiPasteHandler } from '../utils/aiAttachmentPaste';
 
 interface AiFormGeneratorModalProps {
   isOpen: boolean;
@@ -29,7 +33,66 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
 }) => {
   const [chatState, setChatState] = useState<AiChatState>(() => aiChatStore.getState());
   const [inputValue, setInputValue] = useState('');
+  const [attachments, setAttachments] = useState<AiAttachment[]>([]);
+  const [attachError, setAttachError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const MAX_FILE_MB = 3;
+
+  const processFiles = async (incoming: File[]) => {
+    if (incoming.length === 0) return;
+    setAttachError('');
+    const picked: AiAttachment[] = [];
+
+    for (const file of incoming.slice(0, 3)) {
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        setAttachError(`"${file.name}" terlalu besar (maks ${MAX_FILE_MB} MB).`);
+        continue;
+      }
+      const isText = file.type.startsWith('text/') || /\.(txt|md|csv|json)$/i.test(file.name);
+      const isImage = file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf';
+
+      if (!isText && !isImage && !isPdf) {
+        setAttachError('Format didukung: gambar (JPG/PNG), PDF, atau teks (TXT/MD/CSV).');
+        continue;
+      }
+
+      try {
+        if (isText) {
+          const text = await file.text();
+          picked.push({ name: file.name, mimeType: file.type || 'text/plain', text });
+        } else {
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ''));
+            reader.onerror = () => reject(new Error('read_failed'));
+            reader.readAsDataURL(file);
+          });
+          const base64 = dataUrl.split(',')[1] || '';
+          if (base64) picked.push({ name: file.name, mimeType: file.type, data: base64 });
+        }
+      } catch {
+        setAttachError(`Gagal membaca "${file.name}".`);
+      }
+    }
+
+    if (picked.length) setAttachments((prev) => [...prev, ...picked].slice(0, 5));
+  };
+
+  const handlePickFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    await processFiles(Array.from(files));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // Tangkap Ctrl+V (tempel gambar/dokumen) walau fokus keyboard di luar input.
+  useEffect(() => {
+    if (!isOpen) return;
+    return registerAiPasteHandler((files) => { void processFiles(files); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   useEffect(() => {
     setChatState(aiChatStore.getState());
@@ -51,10 +114,15 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
 
   const handleSendMessage = async (textToUse?: string) => {
     const text = (textToUse || inputValue).trim();
-    if (!text || isLoading) return;
+    const hasAttachments = attachments.length > 0;
+    if ((!text && !hasAttachments) || isLoading) return;
 
+    const promptText = text || 'Buatkan formulir/kuis berdasarkan dokumen yang saya lampirkan.';
+    const toSend = attachments;
     setInputValue('');
-    await aiChatStore.sendMessage(text);
+    setAttachments([]);
+    setAttachError('');
+    await aiChatStore.sendMessage(promptText, toSend);
   };
 
   const handleOpenFormInEditor = (f: FormSchema) => {
@@ -201,25 +269,55 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                   className="w-full relative"
                 >
                   <div className="relative shadow-sm rounded-2xl overflow-hidden border-2 border-slate-300 focus-within:border-[var(--system-primary)] focus-within:ring-2 focus-within:ring-blue-200 transition-all bg-white">
-                    <textarea
-                      rows={3}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      placeholder="Ketik topik formulir atau kuis yang ingin dibuat... (tekan Enter)"
-                      className="w-full text-xs sm:text-sm p-4 pr-14 focus:outline-none placeholder:text-slate-500 text-black bg-transparent resize-none leading-relaxed font-medium"
+                    {(attachments.length > 0 || attachError) && (
+                      <div className="px-3 pt-3 flex flex-wrap items-center gap-1.5">
+                        {attachments.map((a, i) => (
+                          <span key={`${a.name}-${i}`} className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-800 border border-blue-200 rounded-lg px-2 py-1">
+                            {a.data ? <ImageIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                            <span className="max-w-[140px] truncate">{a.name}</span>
+                            <button type="button" onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="cursor-pointer hover:text-rose-600" title="Hapus lampiran">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                        {attachError && <span className="text-[10px] text-rose-600 font-semibold">{attachError}</span>}
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*,application/pdf,.txt,.md,.csv,.json"
+                      className="hidden"
+                      onChange={(e) => handlePickFiles(e.target.files)}
                     />
-
-                    <div className="absolute right-3 bottom-3">
+                    <div className="flex items-end gap-2 p-3">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isLoading}
+                        className="p-2 rounded-xl text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40 shrink-0"
+                        title="Lampirkan gambar/dokumen, atau tempel (Ctrl+V)"
+                      >
+                        <Paperclip className="w-4 h-4" />
+                      </button>
+                      <textarea
+                        rows={3}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                        placeholder="Ketik topik formulir atau kuis yang ingin dibuat... (tekan Enter)"
+                        className="flex-1 text-xs sm:text-sm py-2 focus:outline-none placeholder:text-slate-500 text-black bg-transparent resize-none leading-relaxed font-medium"
+                      />
                       <button
                         type="submit"
-                        disabled={!inputValue.trim() || isLoading}
-                        className="p-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border-2 border-[var(--system-primary)]"
+                        disabled={(!inputValue.trim() && attachments.length === 0) || isLoading}
+                        className="p-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border-2 border-[var(--system-primary)] shrink-0"
                         title="Kirim ke AI"
                       >
                         {isLoading ? (
@@ -302,30 +400,63 @@ export const AiFormGeneratorModal: React.FC<AiFormGeneratorModalProps> = ({
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="flex items-center gap-2 pt-1"
+                  className="space-y-1.5 pt-1"
                 >
+                  {(attachments.length > 0 || attachError) && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {attachments.map((a, i) => (
+                        <span key={`${a.name}-${i}`} className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-800 border border-blue-200 rounded-lg px-2 py-1">
+                          {a.data ? <ImageIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                          <span className="max-w-[140px] truncate">{a.name}</span>
+                          <button type="button" onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="cursor-pointer hover:text-rose-600" title="Hapus lampiran">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                      {attachError && <span className="text-[10px] text-rose-600 font-semibold">{attachError}</span>}
+                    </div>
+                  )}
                   <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    disabled={isLoading}
-                    placeholder="Ketik instruksi tambahan untuk formulir..."
-                    className="flex-1 text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-[var(--system-primary)] focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white text-black shadow-xs font-medium"
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*,application/pdf,.txt,.md,.csv,.json"
+                    className="hidden"
+                    onChange={(e) => handlePickFiles(e.target.files)}
                   />
-                  <button
-                    type="submit"
-                    disabled={!inputValue.trim() || isLoading}
-                    className="px-4 py-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border-2 border-[var(--system-primary)]"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <span>Kirim</span>
-                        <Send className="w-3.5 h-3.5" />
-                      </>
-                    )}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isLoading}
+                      className="p-2.5 text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 rounded-xl transition-colors cursor-pointer shrink-0 disabled:opacity-40"
+                      title="Lampirkan gambar/dokumen, atau tempel (Ctrl+V)"
+                    >
+                      <Paperclip className="w-4 h-4" />
+                    </button>
+                    <input
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      disabled={isLoading}
+                      placeholder="Ketik instruksi (mis. 'buat kuis dari dokumen ini')..."
+                      className="flex-1 text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-[var(--system-primary)] focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white text-black shadow-xs font-medium"
+                    />
+                    <button
+                      type="submit"
+                      disabled={(!inputValue.trim() && attachments.length === 0) || isLoading}
+                      className="px-4 py-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border-2 border-[var(--system-primary)]"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <span>Kirim</span>
+                          <Send className="w-3.5 h-3.5" />
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </form>
               </div>
             )}

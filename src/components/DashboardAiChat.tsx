@@ -19,6 +19,7 @@ import { FormSchema } from '../types/form';
 import { RecentFormItem } from '../data/formTemplates';
 import { aiChatStore, AiChatState } from '../utils/aiChatStore';
 import type { AiAttachment } from '../utils/aiFormGenerator';
+import { registerAiPasteHandler } from '../utils/aiAttachmentPaste';
 
 interface DashboardAiChatProps {
   onOpenForm: (form: FormSchema) => void;
@@ -64,12 +65,12 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
 
   const MAX_FILE_MB = 3;
 
-  const handlePickFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const processFiles = async (incoming: File[]) => {
+    if (incoming.length === 0) return;
     setAttachError('');
     const picked: AiAttachment[] = [];
 
-    for (const file of Array.from(files).slice(0, 3)) {
+    for (const file of incoming.slice(0, 3)) {
       if (file.size > MAX_FILE_MB * 1024 * 1024) {
         setAttachError(`"${file.name}" terlalu besar (maks ${MAX_FILE_MB} MB).`);
         continue;
@@ -103,8 +104,20 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
     }
 
     if (picked.length) setAttachments((prev) => [...prev, ...picked].slice(0, 5));
+  };
+
+  const handlePickFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    await processFiles(Array.from(files));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  // Tangkap Ctrl+V (tempel gambar/dokumen) walau fokus keyboard di luar input.
+  useEffect(
+    () => registerAiPasteHandler((files) => { void processFiles(files); }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputValue).trim();
@@ -360,34 +373,33 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       className="hidden"
                       onChange={(e) => handlePickFiles(e.target.files)}
                     />
-                    <textarea
-                      rows={3}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      placeholder="Ketik topik formulir atau kuis yang ingin dibuat... (tekan Enter)"
-                      className="w-full text-xs sm:text-sm p-4 pr-14 focus:outline-none placeholder:text-slate-400 text-slate-800 bg-transparent resize-none leading-relaxed font-normal"
-                    />
-
-                    <div className="absolute right-3 bottom-3 flex items-center gap-1.5">
+                    <div className="flex items-end gap-2 p-3">
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isLoading}
-                        className="p-2 rounded-xl text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40"
-                        title="Lampirkan gambar atau dokumen (gambar/PDF/TXT)"
+                        className="p-2 rounded-xl text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40 shrink-0"
+                        title="Lampirkan gambar/dokumen, atau tempel (Ctrl+V)"
                       >
                         <Paperclip className="w-4 h-4" />
                       </button>
+                      <textarea
+                        rows={3}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                        placeholder="Ketik topik formulir atau kuis yang ingin dibuat... (tekan Enter)"
+                        className="flex-1 text-xs sm:text-sm py-2 focus:outline-none placeholder:text-slate-400 text-slate-800 bg-transparent resize-none leading-relaxed font-normal"
+                      />
                       <button
                         type="submit"
                         disabled={(!inputValue.trim() && attachments.length === 0) || isLoading}
-                        className="p-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border border-[var(--system-primary)]"
+                        className="p-2.5 bg-[var(--system-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--system-primary-contrast)] rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 border border-[var(--system-primary)] shrink-0"
                         title="Kirim ke AI"
                       >
                         {isLoading ? (
@@ -526,6 +538,16 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                     onChange={(e) => handlePickFiles(e.target.files)}
                   />
                   <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading}
+                    className="p-3 text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 rounded-2xl transition-colors cursor-pointer shrink-0 disabled:opacity-40"
+                    title="Lampirkan gambar/dokumen, atau tempel (Ctrl+V)"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+
                   <div className="relative flex-1">
                     <input
                       id="dashboard-ai-chat-input"
@@ -537,16 +559,6 @@ export const DashboardAiChat: React.FC<DashboardAiChatProps> = ({
                       className="w-full text-xs sm:text-sm pl-4 pr-10 py-3 rounded-2xl border border-slate-300 focus:border-[var(--system-primary)] focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all placeholder:text-slate-400 bg-white text-slate-800 shadow-xs font-normal"
                     />
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isLoading}
-                    className="p-3 text-slate-500 hover:text-[var(--system-primary)] hover:bg-slate-100 rounded-2xl transition-colors cursor-pointer shrink-0 disabled:opacity-40"
-                    title="Lampirkan gambar atau dokumen (gambar/PDF/TXT)"
-                  >
-                    <Paperclip className="w-4 h-4" />
-                  </button>
 
                   <button
                     type="submit"
