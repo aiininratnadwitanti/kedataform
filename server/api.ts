@@ -279,6 +279,9 @@ function isFormOpen(schedule: any): { open: boolean; reason: string } {
       }
     }
   }
+  if (schedule.scheduleType === 'deadline') {
+    return { open: false, reason: schedule.closedMessage || 'Formulir ini sedang ditutup sementara.' };
+  }
   return { open: true, reason: '' };
 }
 

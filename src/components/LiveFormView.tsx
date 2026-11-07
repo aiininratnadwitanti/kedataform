@@ -642,8 +642,12 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                 </div>
               )}
 
-              {/* Fieldset yang dinonaktifkan jika kuota penuh atau form ditutup */}
-              <fieldset disabled={isQuotaExceeded || !availability.isOpen} className="space-y-4 border-none p-0 m-0">
+              {/* Field pertanyaan & tombol kirim hanya tampil saat formulir DIBUKA.
+                  Saat tutup sementara/tertutup, cukup pesan tutup di atas yang ditampilkan. */}
+              {availability.isOpen && (
+                <>
+              {/* Fieldset yang dinonaktifkan jika kuota penuh */}
+              <fieldset disabled={isQuotaExceeded} className="space-y-4 border-none p-0 m-0">
                 {/* Question Cards */}
                 {questions.map((q, idx) => (
                   <div
@@ -743,6 +747,8 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   )}
                 </button>
               </div>
+                </>
+              )}
             </form>
           )}
 
