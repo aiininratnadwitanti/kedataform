@@ -46,7 +46,7 @@ const BASE_PLANS: PlanItem[] = [
     features: [
       'Tanggapan Tanpa Batas (Unlimited)',
       'Ekspor CSV, Excel & Google Sheets',
-      'Hapus watermark KeDataForm',
+      'Hapus watermark KedataForm',
       'Dukungan prioritas 24/7',
     ],
     ctaLabel: 'Tingkatkan ke Pro',
@@ -347,7 +347,7 @@ export const PricingPlansCarousel: React.FC<PricingPlansCarouselProps> = ({
                       type="button"
                       onClick={() => {
                         if (plan.id === 'enterprise') {
-                          window.open('https://wa.me/6282120882818?text=Halo%20Tim%20KeDataForm%2C%20saya%20ingin%20konsultasi%20paket%20Enterprise%20Kustom', '_blank', 'noopener,noreferrer');
+                          window.open('https://wa.me/6282120882818?text=Halo%20Tim%20KedataForm%2C%20saya%20ingin%20konsultasi%20paket%20Enterprise%20Kustom', '_blank', 'noopener,noreferrer');
                         } else if (plan.id === 'starter') {
                           onStartBlank();
                         } else {

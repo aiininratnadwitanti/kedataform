@@ -223,7 +223,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
                   </li>
                   <li className="flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 text-[#223A5E] shrink-0" />
-                    <span>Hapus watermark KeDataForm</span>
+                    <span>Hapus watermark KedataForm</span>
                   </li>
                   <li className="flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 text-[#223A5E] shrink-0" />

@@ -1,4 +1,4 @@
-# PRD: KeDataForm Studio — Persistensi MySQL & Google Login
+# PRD: KedataForm Studio — Persistensi MySQL & Google Login
 
 **Status:** Approved · **Version:** 1.0 · **Owner:** Rizka Farida Damayanti · **Issue:** —
 
@@ -6,7 +6,7 @@
 
 | Item | Detail |
 |------|--------|
-| **What** | Mengubah KeDataForm (FormCraft) dari SPA client-side penuh localStorage menjadi aplikasi dengan backend Express + REST API `/api/v1/` yang mempersistensikan semua data ke MySQL, dengan autentikasi nyata lewat Google OAuth 2.0. |
+| **What** | Mengubah KedataForm (FormCraft) dari SPA client-side penuh localStorage menjadi aplikasi dengan backend Express + REST API `/api/v1/` yang mempersistensikan semua data ke MySQL, dengan autentikasi nyata lewat Google OAuth 2.0. |
 | **Who** | Pembuat form (guru, UMKM, event organizer) dan responden; admin sistem. |
 | **Why** | Data form/responden hilang saat reload, auth palsu (password tak divalidasi), analytics difabrikasi, kuota dapat di-bypass — aplikasi belum layak produksi. |
 | **Success Metric** | 0 data hilang setelah reload (form, respons, user, settings, chat); login Google berhasil end-to-end; semua mutasi data tercatat di MySQL. |

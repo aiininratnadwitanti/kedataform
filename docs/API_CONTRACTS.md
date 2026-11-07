@@ -1,4 +1,4 @@
-# API Contracts — KeDataForm `/api/v1`
+# API Contracts — KedataForm `/api/v1`
 
 **Envelope:** setiap respons berbentuk `{ "data": {}, "message": "", "error": "" }`.
 Auth memakai cookie sesi `kdf_session` (httpOnly) yang dibuat saat callback Google OAuth.

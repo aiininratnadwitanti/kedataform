@@ -1,4 +1,4 @@
-# KeDataForm Studio
+# KedataForm Studio
 
 Aplikasi pembuat formulir modern dengan backend **Express + MySQL** dan **login Google OAuth 2.0**.
 Frontend: React 19 + Vite + Tailwind. Semua data (form, respons, user, settings, chat AI) tersimpan di MySQL.

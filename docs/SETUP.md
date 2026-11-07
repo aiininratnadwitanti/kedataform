@@ -1,4 +1,4 @@
-# Setup & Menjalankan KeDataForm
+# Setup & Menjalankan KedataForm
 
 Aplikasi ini sekarang memakai **backend Express + MySQL** dengan **login Google OAuth 2.0**.
 Semua data (form, respons, user, settings, chat AI) disimpan di MySQL.

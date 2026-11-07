@@ -102,12 +102,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div>
               <h3 className="font-extrabold text-sm text-slate-900 leading-tight">
                 {user.isAuthenticated 
-                  ? 'Profil Akun KeDataForm' 
+                  ? 'Profil Akun KedataForm' 
                   : authMode === 'forgot_password'
                   ? 'Pemulihan Kata Sandi'
                   : authMode === 'signin'
                   ? 'Daftar Akun Baru'
-                  : 'Masuk ke KeDataForm Studio'}
+                  : 'Masuk ke KedataForm Studio'}
               </h3>
               <p className="text-[11px] text-slate-500">
                 {user.isAuthenticated 
@@ -273,7 +273,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <div className="text-[11px] text-slate-500 text-center flex items-center justify-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#223A5E]" />
-                <span>Akun Anda terhubung aman dengan KeDataForm Studio.</span>
+                <span>Akun Anda terhubung aman dengan KedataForm Studio.</span>
               </div>
             </>
           ) : authMode === 'forgot_password' ? (
@@ -467,7 +467,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="submit"
                     className="w-full py-2.5 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer mt-1 hover:scale-101 active:scale-99 border border-[var(--system-primary)]"
                   >
-                    <span className="text-white font-bold">Masuk ke KeDataForm</span>
+                    <span className="text-white font-bold">Masuk ke KedataForm</span>
                   </button>
 
                   <div className="pt-2 text-center">

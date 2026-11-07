@@ -104,7 +104,7 @@ export const InvitePage: React.FC<InvitePageProps> = ({ inviteId }) => {
           </div>
           <div>
             <h1 className="text-sm font-extrabold text-slate-900">Undangan Kolaborasi</h1>
-            <p className="text-[11px] text-slate-500">KeDataForm</p>
+            <p className="text-[11px] text-slate-500">KedataForm</p>
           </div>
         </div>
 

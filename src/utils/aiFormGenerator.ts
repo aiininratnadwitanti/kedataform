@@ -1232,7 +1232,7 @@ Output ONLY raw JSON without markdown code fences.
           return {
             id: `form_ai_${timestamp}`,
             title: cleanTitle,
-            description: parsed.description || 'Dibuat otomatis dengan asisten AI KeDataForm.',
+            description: parsed.description || 'Dibuat otomatis dengan asisten AI KedataForm.',
             theme: {
               primaryColor: '#223A5E',
               canvasBg: '#F3F8FD',

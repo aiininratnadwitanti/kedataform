@@ -46,7 +46,7 @@ export const AiMiniChatWidget: React.FC<AiMiniChatWidgetProps> = ({
     {
       id: 'm_welcome',
       sender: 'ai',
-      text: 'Halo! Saya asisten pintar KeDataForm AI. Tuliskan jenis formulir yang ingin Anda buat, atau tanyakan seputar kuota dan jadwal buka form!',
+      text: 'Halo! Saya asisten pintar KedataForm AI. Tuliskan jenis formulir yang ingin Anda buat, atau tanyakan seputar kuota dan jadwal buka form!',
       timestamp: 'Baru saja',
     },
   ]);
@@ -71,8 +71,8 @@ export const AiMiniChatWidget: React.FC<AiMiniChatWidgetProps> = ({
     const isAcademic = prompt.toLowerCase().includes('dosen') || prompt.toLowerCase().includes('evaluasi') || prompt.toLowerCase().includes('skripsi');
 
     const formId = `form_ai_${Date.now()}`;
-    let title = 'Formulir Kustom KeDataForm AI';
-    let desc = 'Dibuat otomatis oleh KeDataForm AI Assistant berdasarkan permintaan Anda.';
+    let title = 'Formulir Kustom KedataForm AI';
+    let desc = 'Dibuat otomatis oleh KedataForm AI Assistant berdasarkan permintaan Anda.';
     let questions: Question[] = [];
 
     if (isQuiz) {
@@ -336,7 +336,7 @@ export const AiMiniChatWidget: React.FC<AiMiniChatWidgetProps> = ({
           type="button"
           onClick={onToggle}
           className="fixed bottom-6 right-6 z-40 px-4 py-2.5 rounded-full bg-gradient-to-b from-slate-800 to-slate-950 text-white font-bold text-xs shadow-xl border border-slate-700/80 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer group"
-          title="Buka Asisten Percakapan KeDataForm AI"
+          title="Buka Asisten Percakapan KedataForm AI"
         >
           <div className="relative">
             <Sparkles className="w-4 h-4 text-slate-300 group-hover:rotate-12 transition-transform" />
@@ -360,7 +360,7 @@ export const AiMiniChatWidget: React.FC<AiMiniChatWidgetProps> = ({
               <div>
                 <div className="flex items-center gap-1.5">
                   <h4 className="font-extrabold text-xs text-white tracking-tight">
-                    KeDataForm AI Assistant
+                    KedataForm AI Assistant
                   </h4>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 </div>
@@ -479,7 +479,7 @@ export const AiMiniChatWidget: React.FC<AiMiniChatWidgetProps> = ({
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]" />
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]" />
                 </span>
-                <span className="text-[10px] font-medium text-slate-500">KeDataForm AI sedang merancang...</span>
+                <span className="text-[10px] font-medium text-slate-500">KedataForm AI sedang merancang...</span>
               </div>
             )}
             <div ref={messagesEndRef} />

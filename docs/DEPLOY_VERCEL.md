@@ -1,4 +1,4 @@
-# Deploy KeDataForm ke Vercel (frontend + API + MySQL eksternal)
+# Deploy KedataForm ke Vercel (frontend + API + MySQL eksternal)
 
 Aplikasi ini terdiri dari:
 
@@ -52,7 +52,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=<gmail>
 SMTP_PASS=<app-password>
-MAIL_FROM="KeDataForm <gmail>"
+MAIL_FROM="KedataForm <gmail>"
 
 MIDTRANS_IS_PRODUCTION=false
 MIDTRANS_SERVER_KEY=<server-key>

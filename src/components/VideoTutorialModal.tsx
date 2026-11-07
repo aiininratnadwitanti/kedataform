@@ -45,7 +45,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({
               </div>
               <div>
                 <h3 className="font-serif font-bold text-sm sm:text-base text-white">
-                  Video Tutorial: Panduan Lengkap KeDataForm
+                  Video Tutorial: Panduan Lengkap KedataForm
                 </h3>
                 <p className="text-[11px] text-slate-300">
                   Pelajari cara membuat kuesioner, mengatur jam buka-tutup, dan mengevaluasi kuis skor.
@@ -69,7 +69,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({
                 {/* Poster Image */}
                 <img
                   src="/assets/aistudio/image_3dc53054.png"
-                  alt="KeDataForm Tutorial Video Thumbnail"
+                  alt="KedataForm Tutorial Video Thumbnail"
                   className="absolute inset-0 w-full h-full object-cover filter brightness-[0.75] contrast-[1.05]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-slate-950/60" />
@@ -99,7 +99,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({
             ) : (
               <iframe
                 src={embedUrl}
-                title="KeDataForm Tutorial YouTube Video"
+                title="KedataForm Tutorial YouTube Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="w-full h-full border-0"

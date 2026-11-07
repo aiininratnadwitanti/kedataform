@@ -48,7 +48,7 @@ export async function sendOtpEmail(params: OtpEmailParams): Promise<{ sent: bool
   if (!isMailConfigured()) return { sent: false, error: 'not_configured' };
 
   const { to, code, name, expiresMinutes } = params;
-  const subject = `Kode verifikasi KeDataForm: ${code}`;
+  const subject = `Kode verifikasi KedataForm: ${code}`;
 
   const html = `<!doctype html>
 <html lang="id">
@@ -60,19 +60,19 @@ export async function sendOtpEmail(params: OtpEmailParams): Promise<{ sent: bool
       </div>
       <div style="padding:26px;color:#0f172a;font-size:14px;line-height:1.6;">
         <p style="margin:0 0 12px;">Halo${name ? ` <strong>${escapeHtml(name)}</strong>` : ''},</p>
-        <p style="margin:0 0 16px;">Gunakan kode berikut untuk menyelesaikan pendaftaran akun KeDataForm Anda:</p>
+        <p style="margin:0 0 16px;">Gunakan kode berikut untuk menyelesaikan pendaftaran akun KedataForm Anda:</p>
         <p style="margin:0 0 18px;">
           <span style="display:inline-block;font-size:30px;font-weight:800;letter-spacing:8px;color:#223A5E;background:#F3F8FD;border:1px dashed #93c5fd;border-radius:12px;padding:14px 24px;">${escapeHtml(code)}</span>
         </p>
         <p style="margin:0 0 8px;">Kode ini berlaku selama <strong>${expiresMinutes} menit</strong>.</p>
-        <p style="font-size:12px;color:#64748b;margin:0;">Jika Anda tidak merasa mendaftar di KeDataForm, abaikan saja email ini.</p>
+        <p style="font-size:12px;color:#64748b;margin:0;">Jika Anda tidak merasa mendaftar di KedataForm, abaikan saja email ini.</p>
       </div>
     </div>
   </body>
 </html>`;
 
   const text = [
-    'Verifikasi Pendaftaran KeDataForm',
+    'Verifikasi Pendaftaran KedataForm',
     '',
     `Kode verifikasi Anda: ${code}`,
     `Berlaku ${expiresMinutes} menit.`,
@@ -134,7 +134,7 @@ export async function sendInviteEmail(params: InviteEmailParams): Promise<{ sent
 </html>`;
 
   const text = [
-    'Undangan Kolaborasi KeDataForm',
+    'Undangan Kolaborasi KedataForm',
     '',
     `${inviterName} mengundang Anda untuk berkolaborasi pada formulir:`,
     formTitle,

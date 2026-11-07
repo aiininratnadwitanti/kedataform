@@ -1,4 +1,4 @@
-# Data Catalog — KeDataForm (MySQL)
+# Data Catalog — KedataForm (MySQL)
 
 Database: `formcraft_studio` (MySQL 8, InnoDB, utf8mb4). Skema dibuat/diperluas otomatis saat server start (`server/schema.ts`, idempoten).
 

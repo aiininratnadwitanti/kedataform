@@ -62,7 +62,7 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
   const activeQuestion: Question | undefined = chartableQuestions[currentQIndex];
 
   // Warna solid profesional (TANPA GRADIENT)
-  // Palet biru senada tema KeDataForm
+  // Palet biru senada tema KedataForm
   const SOLID_PALETTE = [
     '#223A5E', // Navy
     '#1e40af', // Blue 800
