@@ -27,6 +27,8 @@ interface LiveFormViewProps {
   userPlan?: 'free' | 'pro' | 'business';
   onOpenUpgradeModal?: () => void;
   isEmbed?: boolean;
+  /** Halaman publik (/f/:id) — sembunyikan bar pratinjau editor. */
+  hideTopBar?: boolean;
 }
 
 export const LiveFormView: React.FC<LiveFormViewProps> = ({
@@ -37,6 +39,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
   userPlan,
   onOpenUpgradeModal,
   isEmbed = false,
+  hideTopBar = false,
 }) => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -252,9 +255,9 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
   };
 
   return (
-    <div className={isEmbed ? 'min-h-screen w-full flex flex-col' : 'fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex flex-col'}>
-      {/* Top Floating Control (disembunyikan di mode embed) */}
-      {!isEmbed && (
+    <div className={isEmbed || hideTopBar ? 'min-h-screen w-full flex flex-col' : 'fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex flex-col'}>
+      {/* Top Floating Control (disembunyikan di mode embed & halaman publik) */}
+      {!isEmbed && !hideTopBar && (
       <div className="sticky top-0 z-20 bg-white border-b border-blue-200/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-2.5 min-w-0">
           <button
