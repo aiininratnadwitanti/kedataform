@@ -33,7 +33,6 @@ import {
   Contrast, 
   Type, 
   Palette, 
-  Building2, 
   Bell, 
   RotateCcw, 
   Save, 
@@ -62,7 +61,8 @@ import {
   Users,
   Camera,
   AlertCircle,
-  Share2
+  Share2,
+  Languages
 } from 'lucide-react';
 import { api } from '../utils/api';
 import confetti from 'canvas-confetti';
@@ -166,6 +166,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       setActiveSidebarView(initialSidebarView);
     }
   }, [initialSidebarView]);
+
+  // Sinkronkan tampilan sidebar aktif ke induk (App) setiap kali berubah, termasuk
+  // saat dipindah langsung (mis. lewat kotak pencarian atau tombol "Buka Semua").
+  // Tanpa ini, saat kembali dari editor posisi bisa ter-reset ke 'dashboard'.
+  React.useEffect(() => {
+    onSidebarViewChange?.(activeSidebarView);
+  }, [activeSidebarView, onSidebarViewChange]);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -400,7 +407,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
 
   // In-page sub-sidebar state for System Settings
-  const [settingsSubTab, setSettingsSubTab] = useState<'appearance' | 'workspace' | 'notifications' | 'security'>('appearance');
+  const [settingsSubTab, setSettingsSubTab] = useState<'appearance' | 'notifications' | 'security'>('appearance');
   const [settingsAutoSaved, setSettingsAutoSaved] = useState(false);
   const [isAiGenerating, setIsAiGenerating] = useState(() => aiChatStore.getState().isLoading);
 
@@ -449,14 +456,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: 'notif_1',
-      title: isEn ? 'Welcome to KeDataForm Studio' : 'Selamat Datang di KeDataForm Studio',
+      title: isEn ? 'Welcome to KedataForm Studio' : 'Selamat Datang di KedataForm Studio',
       desc: isEn ? 'Your form workspace is live and active.' : 'Sistem formulir Anda siap digunakan.',
       time: isEn ? 'Just now' : 'Baru saja',
       read: false,
       type: 'system',
       details: isEn 
-        ? 'Welcome to KeDataForm Studio! Your workspace is fully active with responsive form building, custom branding themes, and real-time response capture.'
-        : 'Selamat datang di KeDataForm Studio! Ruang kerja Anda telah siap digunakan dengan instrumen survei responsif, kustomisasi visual, dan pencatatan tanggapan real-time.',
+        ? 'Welcome to KedataForm Studio! Your workspace is fully active with responsive form building, custom branding themes, and real-time response capture.'
+        : 'Selamat datang di KedataForm Studio! Ruang kerja Anda telah siap digunakan dengan instrumen survei responsif, kustomisasi visual, dan pencatatan tanggapan real-time.',
     },
     {
       id: 'notif_2',
@@ -581,9 +588,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  // Category filter state for Formulir Saya
-  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('Semua');
-
   // Filter status jadwal formulir
   const [activeScheduleFilter, setActiveScheduleFilter] = useState<'all' | 'always_open' | 'custom_schedule' | 'closed'>('all');
   
@@ -678,12 +682,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q || f.title.toLowerCase().includes(q) || (f.form.description || '').toLowerCase().includes(q);
     
-    let matchesCategory = true;
-    if (activeCategoryFilter === 'Riset') matchesCategory = f.title.toLowerCase().includes('kuesioner') || f.title.toLowerCase().includes('riset');
-    else if (activeCategoryFilter === 'Bisnis') matchesCategory = f.title.toLowerCase().includes('order') || f.title.toLowerCase().includes('pesanan');
-    else if (activeCategoryFilter === 'Kuis') matchesCategory = f.title.toLowerCase().includes('kuis') || !!f.form.quizConfig?.isQuizMode;
-    else if (activeCategoryFilter === 'Acara') matchesCategory = f.title.toLowerCase().includes('rsvp') || f.title.toLowerCase().includes('acara');
-
     let matchesSchedule = true;
     if (activeScheduleFilter !== 'all') {
       const sch = f.form.schedule;
@@ -694,7 +692,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       matchesSchedule = modeKey === activeScheduleFilter;
     }
 
-    return matchesSearch && matchesCategory && matchesSchedule;
+    return matchesSearch && matchesSchedule;
   });
 
   // Action: Create from template
@@ -1084,6 +1082,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           {/* Right Header Navigation: Notifications, Quota & Profile */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+
+            {/* Tombol Ganti Bahasa ID/EN */}
+            <div
+              className={`flex items-center rounded-full border p-0.5 text-[11px] font-bold ${
+                isDark ? 'border-slate-700 bg-[#222226]' : 'border-slate-300 bg-slate-50'
+              }`}
+              title={isEn ? 'Change language' : 'Ganti bahasa'}
+            >
+              <Languages className={`w-3.5 h-3.5 mx-1.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+              {(['id', 'en'] as const).map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => handleUpdateSetting({ language: lang })}
+                  className={`px-2 py-1 rounded-full transition-colors cursor-pointer ${
+                    currentSettings.language === lang
+                      ? 'text-white'
+                      : isDark
+                        ? 'text-slate-400 hover:text-slate-200'
+                        : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  style={currentSettings.language === lang ? { backgroundColor: primaryAccent, color: contrastTextColor } : {}}
+                >
+                  {lang === 'id' ? 'ID' : 'EN'}
+                </button>
+              ))}
+            </div>
 
             {/* Live Notification Center Dropdown with Auto-Close on Click Outside */}
             <div className="relative">
@@ -1691,10 +1716,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
               {/* TAB 2: FORMULIR SAYA (KELOLA SELURUH FORM DENGAN COVER OTOMATIS) */}
               {activeSidebarView === 'my_forms' && (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   
                   {/* Header Form Saya */}
-                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border shadow-xs transition-colors ${
+                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border shadow-xs transition-colors ${
                     isDark ? 'bg-[#18181b] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                   }`}>
                     <div>
@@ -1737,44 +1762,51 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Filter & View Switcher */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  {/* Filter Jadwal & Tampilan (satu baris, padat) */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {['Semua', 'Riset', 'Bisnis', 'Kuis', 'Acara'].map((cat) => {
-                        const isCatSelected = activeCategoryFilter === cat;
+                      {[
+                        { key: 'all', label: 'Semua Jadwal' },
+                        { key: 'always_open', label: 'Buka 24 Jam' },
+                        { key: 'custom_schedule', label: 'Jadwal Khusus' },
+                        { key: 'closed', label: 'Tutup Sementara' },
+                      ].map((opt) => {
+                        const isSelected = activeScheduleFilter === opt.key;
                         return (
                           <button
-                            key={cat}
+                            key={opt.key}
                             type="button"
-                            onClick={() => setActiveCategoryFilter(cat)}
+                            onClick={() =>
+                              setActiveScheduleFilter(opt.key as 'all' | 'always_open' | 'custom_schedule' | 'closed')
+                            }
                             style={{
-                              backgroundColor: isCatSelected ? primaryAccent : undefined,
-                              color: isCatSelected ? contrastTextColor : undefined,
-                              fontFamily: systemFontFamily
+                              backgroundColor: isSelected ? primaryAccent : undefined,
+                              color: isSelected ? contrastTextColor : undefined,
+                              fontFamily: systemFontFamily,
                             }}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                              isCatSelected
+                            className={`px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all cursor-pointer ${
+                              isSelected
                                 ? 'font-bold shadow-xs'
                                 : isDark
                                   ? 'bg-[#18181b] text-slate-300 hover:bg-slate-800 border border-slate-800'
                                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                             }`}
                           >
-                            {cat}
+                            {opt.label}
                           </button>
                         );
                       })}
                     </div>
 
-                    <div className={`flex items-center gap-1 p-1 rounded-xl border shadow-2xs self-end sm:self-auto ${
+                    <div className={`flex items-center gap-1 p-1 rounded-xl border shadow-2xs shrink-0 self-end sm:self-auto ${
                       isDark ? 'bg-[#18181b] border-slate-800' : 'bg-white border-slate-200'
                     }`}>
                       <button
                         type="button"
                         onClick={() => setViewMode('grid')}
                         className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                          viewMode === 'grid' 
-                            ? isDark ? 'bg-slate-800 text-white font-bold' : 'bg-slate-100 text-slate-900 font-bold' 
+                          viewMode === 'grid'
+                            ? isDark ? 'bg-slate-800 text-white font-bold' : 'bg-slate-100 text-slate-900 font-bold'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
                         title="Tampilan Grid"
@@ -1785,8 +1817,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         type="button"
                         onClick={() => setViewMode('list')}
                         className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                          viewMode === 'list' 
-                            ? isDark ? 'bg-slate-800 text-white font-bold' : 'bg-slate-100 text-slate-900 font-bold' 
+                          viewMode === 'list'
+                            ? isDark ? 'bg-slate-800 text-white font-bold' : 'bg-slate-100 text-slate-900 font-bold'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
                         title="Tampilan List"
@@ -1794,41 +1826,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <List className="w-4 h-4 stroke-[2]" />
                       </button>
                     </div>
-                  </div>
-
-                  {/* Filter Status Jadwal */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {[
-                      { key: 'all', label: 'Semua Jadwal' },
-                      { key: 'always_open', label: 'Buka 24 Jam' },
-                      { key: 'custom_schedule', label: 'Jadwal Khusus' },
-                      { key: 'closed', label: 'Tutup Sementara' },
-                    ].map((opt) => {
-                      const isSelected = activeScheduleFilter === opt.key;
-                      return (
-                        <button
-                          key={opt.key}
-                          type="button"
-                          onClick={() =>
-                            setActiveScheduleFilter(opt.key as 'all' | 'always_open' | 'custom_schedule' | 'closed')
-                          }
-                          style={{
-                            backgroundColor: isSelected ? primaryAccent : undefined,
-                            color: isSelected ? contrastTextColor : undefined,
-                            fontFamily: systemFontFamily,
-                          }}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all cursor-pointer ${
-                            isSelected
-                              ? 'font-bold shadow-xs'
-                              : isDark
-                                ? 'bg-[#18181b] text-slate-300 hover:bg-slate-800 border border-slate-800'
-                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
                   </div>
 
                   {/* Grid / List Mode */}
@@ -2265,12 +2262,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             badge: ({ dark: 'Dark', light: 'Light', auto: 'Auto', sepia: 'Sepia', dim: 'Dim' } as Record<string, string>)[currentSettings.themeMode] || 'Auto'
                           },
                           { 
-                            id: 'workspace', 
-                            label: 'Preferensi Workspace', 
-                            desc: 'Zona Waktu & Format', 
-                            icon: <Building2 className="w-4 h-4 stroke-[2]" />
-                          },
-                          { 
                             id: 'notifications', 
                             label: 'Notifikasi & Kuota', 
                             desc: 'Email & Limit respon', 
@@ -2582,145 +2573,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </div>
                       )}
 
-                      {/* SUB-TAB 2: WORKSPACE */}
-                      {settingsSubTab === 'workspace' && (
-                        <div className="space-y-4 animate-in fade-in duration-150">
-                          <div className={`border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-                            <h3 
-                              className={`text-base font-bold flex items-center gap-2 ${
-                                isDark ? 'text-white' : 'text-slate-900'
-                              }`}
-                              style={{ fontFamily: systemFontFamily }}
-                            >
-                              <Building2 className="w-4 h-4 stroke-[2]" style={{ color: primaryAccent }} />
-                              <span>Preferensi Workspace</span>
-                            </h3>
-                            <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                              Atur zona waktu dan format tanggal default untuk workspace Anda.
-                            </p>
-                          </div>
-
-                          <div className={`p-5 rounded-2xl border space-y-4 ${
-                            isDark ? 'bg-[#1f1f23] border-slate-800 text-slate-100' : 'bg-[var(--system-bg-soft)] border-slate-200 text-slate-800'
-                          }`}>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <div>
-                                <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
-                                  Zona Waktu Default
-                                </label>
-                                <select
-                                  value={currentSettings.timezone}
-                                  onChange={(e) => handleUpdateSetting({ timezone: e.target.value })}
-                                  className={`w-full text-xs rounded-xl p-2.5 cursor-pointer focus:outline-none ${
-                                    isDark 
-                                      ? 'bg-[#161619] border border-slate-700 text-slate-100' 
-                                      : 'bg-white border border-slate-300 text-slate-800'
-                                  }`}
-                                >
-                                  <option value="WIB (GMT+7)">WIB (GMT+7) - Jakarta, Bandung</option>
-                                  <option value="WITA (GMT+8)">WITA (GMT+8) - Bali, Makassar</option>
-                                  <option value="WIT (GMT+9)">WIT (GMT+9) - Jayapura, Ambon</option>
-                                  <option value="UTC">UTC Universal Time</option>
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
-                                  {isEn ? 'Date Display Format' : 'Format Tampilan Tanggal'}
-                                </label>
-                                <select
-                                  value={currentSettings.dateFormat}
-                                  onChange={(e) => handleUpdateSetting({ dateFormat: e.target.value })}
-                                  className={`w-full text-xs rounded-xl p-2.5 cursor-pointer focus:outline-none ${
-                                    isDark 
-                                      ? 'bg-[#161619] border border-slate-700 text-slate-100' 
-                                      : 'bg-white border border-slate-300 text-slate-800'
-                                  }`}
-                                >
-                                  <option value="DD/MM/YYYY">DD/MM/YYYY (Contoh: 03/11/2026)</option>
-                                  <option value="YYYY-MM-DD">YYYY-MM-DD (Contoh: 2026-11-03)</option>
-                                  <option value="DD MMMM YYYY">DD MMMM YYYY (Contoh: 3 November 2026)</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            {/* BAHASA SISTEM / SYSTEM LANGUAGE SELECTOR */}
-                            <div className={`pt-3 border-t space-y-2 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-                              <label className={`text-xs font-semibold block ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
-                                {isEn ? 'System Language' : 'Bahasa Sistem'}
-                              </label>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleUpdateSetting({ language: 'id' });
-                                    setToastMessage('✓ Bahasa sistem diubah ke Bahasa Indonesia');
-                                    setTimeout(() => setToastMessage(null), 2500);
-                                  }}
-                                  style={currentSettings.language === 'id' ? { borderColor: primaryAccent } : {}}
-                                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                                    currentSettings.language === 'id'
-                                      ? isDark
-                                        ? 'bg-slate-800 text-white font-bold ring-1'
-                                        : 'bg-white text-slate-900 font-bold shadow-xs ring-1'
-                                      : isDark
-                                        ? 'bg-[#161619] border-slate-700 text-slate-400 hover:text-slate-200'
-                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2.5">
-                                    <span className="w-8 h-6 rounded border font-mono text-[11px] font-bold flex items-center justify-center bg-red-50 text-red-700 border-red-200 shrink-0">
-                                      ID
-                                    </span>
-                                    <div>
-                                      <div className="text-xs font-semibold">Bahasa Indonesia</div>
-                                      <div className="text-[10px] text-slate-400">Bahasa resmi & utama</div>
-                                    </div>
-                                  </div>
-                                  {currentSettings.language === 'id' && (
-                                    <Check className="w-4 h-4" style={{ color: primaryAccent }} />
-                                  )}
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleUpdateSetting({ language: 'en' });
-                                    setToastMessage('✓ System language changed to English');
-                                    setTimeout(() => setToastMessage(null), 2500);
-                                  }}
-                                  style={currentSettings.language === 'en' ? { borderColor: primaryAccent } : {}}
-                                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                                    currentSettings.language === 'en'
-                                      ? isDark
-                                        ? 'bg-slate-800 text-white font-bold ring-1'
-                                        : 'bg-white text-slate-900 font-bold shadow-xs ring-1'
-                                      : isDark
-                                        ? 'bg-[#161619] border-slate-700 text-slate-400 hover:text-slate-200'
-                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2.5">
-                                    <span className="w-8 h-6 rounded border font-mono text-[11px] font-bold flex items-center justify-center bg-blue-50 text-blue-800 border-blue-200 shrink-0">
-                                      EN
-                                    </span>
-                                    <div>
-                                      <div className="text-xs font-semibold">English (US)</div>
-                                      <div className="text-[10px] text-slate-400">Global & International</div>
-                                    </div>
-                                  </div>
-                                  {currentSettings.language === 'en' && (
-                                    <Check className="w-4 h-4" style={{ color: primaryAccent }} />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* SUB-TAB 3: NOTIFICATIONS */}
+                      {/* SUB-TAB 2: NOTIFICATIONS */}
                       {settingsSubTab === 'notifications' && (
                         <div className="space-y-4 animate-in fade-in duration-150">
                           <div className={`border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
@@ -2838,7 +2691,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </div>
                       )}
 
-                      {/* SUB-TAB 4: SECURITY */}
+                      {/* SUB-TAB 3: SECURITY */}
                       {settingsSubTab === 'security' && (
                         <div className="space-y-4 animate-in fade-in duration-150">
                           <div className={`border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
@@ -2935,7 +2788,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </span>
                       </div>
                       <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                        Tingkatkan paket untuk tanggapan tanpa batas, hapus watermark KeDataForm, dan ekspor instan ke Google Sheets.
+                        Tingkatkan paket untuk tanggapan tanpa batas, hapus watermark KedataForm, dan ekspor instan ke Google Sheets.
                       </p>
                     </div>
 
@@ -3003,7 +2856,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <ul className="space-y-2.5 text-xs text-slate-300">
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Tanggapan Tanpa Batas (Unlimited)</li>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Ekspor CSV, Excel & Google Sheets</li>
-                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Hapus watermark KeDataForm</li>
+                        <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Hapus watermark KedataForm</li>
                         <li className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] text-blue-400" /> Dukungan prioritas 24/7</li>
                       </ul>
                       <button
@@ -3040,7 +2893,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         type="button"
                         onClick={() => {
                           window.open(
-                            'https://wa.me/6282120882818?text=Halo%20Tim%20KeDataForm%2C%20saya%20tertarik%20konsultasi%20paket%20Enterprise%20Kustom',
+                            'https://wa.me/6282120882818?text=Halo%20Tim%20KedataForm%2C%20saya%20tertarik%20konsultasi%20paket%20Enterprise%20Kustom',
                             '_blank',
                             'noopener,noreferrer'
                           );
@@ -3291,7 +3144,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               </label>
                               <input
                                 type="email"
-                                value={user.email || 'rizkafaridadamayantii@gmail.com'}
+                                value={user.email}
                                 disabled
                                 className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium cursor-not-allowed ${
                                   isDark 
