@@ -96,6 +96,8 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
   }, [form.title, isEmbed]);
 
   const { theme, questions } = form;
+  // Warna aksen biru default untuk halaman sukses (bukan abu-abu tema lama).
+  const successAccent = '#2563EB';
   const legacyDefaultCovers = ['/assets/aistudio/image_3ec5f637.png', '/public/assets/aistudio/image_3ec5f637.png'];
   const isDefaultCover = !theme.headerCoverUrl || legacyDefaultCovers.includes(theme.headerCoverUrl);
   const cardBorderColor = !theme.cardBorderColor || ['#fde68a', '#fed7aa', '#eedaa2'].includes(theme.cardBorderColor)
@@ -423,7 +425,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   <>
                     <div 
                       className="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-white"
-                      style={{ backgroundColor: theme.primaryColor }}
+                      style={{ backgroundColor: successAccent }}
                     >
                       <Check className="w-6 h-6 stroke-[3]" />
                     </div>
@@ -439,7 +441,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                 <>
                   <div 
                     className="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-white"
-                    style={{ backgroundColor: theme.primaryColor }}
+                    style={{ backgroundColor: successAccent }}
                   >
                     <Check className="w-6 h-6 stroke-[3]" />
                   </div>
@@ -457,9 +459,9 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#223A5E]" />
+                  <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
                   <span>Kirim Jawaban Lain</span>
                 </button>
                 {!isEmbed && (
@@ -467,9 +469,9 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                     type="button"
                     onClick={onClose}
                     className="px-4 py-2 text-xs font-bold text-white rounded-xl transition-all cursor-pointer shadow-xs"
-                    style={{ backgroundColor: theme.primaryColor }}
+                    style={{ backgroundColor: successAccent }}
                   >
-                    Kembali ke Editor
+                    Kembali
                   </button>
                 )}
               </div>
