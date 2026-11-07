@@ -93,6 +93,16 @@ export function checkFormAvailability(schedule?: FormScheduleConfig): FormAvaila
     }
   }
 
+  // Mode: Tutup Sementara (penjadwalan aktif tetapi tanpa tanggal buka/tutup)
+  if (schedule.scheduleType === 'deadline') {
+    return {
+      isOpen: false,
+      badgeText: 'Tutup',
+      badgeColor: 'bg-red-100 text-red-800 border-red-200',
+      reasonText: schedule.closedMessage || 'Formulir ini sedang ditutup sementara.',
+    };
+  }
+
   // Mode 2: Hari & Jam Kerja / Operasional (Days & Hours)
   if (schedule.scheduleType === 'days_and_hours') {
     const currentDayName = INDONESIAN_DAYS[now.getDay()];

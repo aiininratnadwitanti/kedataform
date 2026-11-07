@@ -54,6 +54,10 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
   const [showMissingAlertModal, setShowMissingAlertModal] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
+  // Origin aktual (bukan domain hardcoded) agar tautan & QR selalu mengarah ke aplikasi ini.
+  const shareOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.vercel.app';
+  const shareUrl = `${shareOrigin}/f/${form.id}`;
+
   // Ref untuk scroll otomatis ke soal yang belum ada kunci
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -397,13 +401,13 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                 <input
                   type="text"
                   readOnly
-                  value={`https://kedataform.app/f/${form.id}`}
+                  value={shareUrl}
                   className="flex-1 text-xs font-mono bg-slate-50 border border-blue-200 rounded-lg p-2 text-slate-700 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://kedataform.app/f/${form.id}`);
+                    navigator.clipboard.writeText(shareUrl);
                   }}
                   className="px-3 py-2 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
                 >
@@ -414,7 +418,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
               {/* WhatsApp & QR */}
               <div className="flex flex-wrap items-center gap-2">
                 <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\nhttps://kedataform.app/f/${form.id}`)}`}
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${shareUrl}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex py-2 px-4 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg items-center gap-2 transition-colors cursor-pointer"
@@ -434,7 +438,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
               {showQR && (
                 <div className="flex items-center gap-3">
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`https://kedataform.app/f/${form.id}`)}`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(shareUrl)}`}
                     alt="QR Code"
                     className="w-24 h-24 object-contain border border-blue-200 rounded-lg"
                   />

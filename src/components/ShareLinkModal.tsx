@@ -34,7 +34,9 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
 
   if (!isOpen) return null;
 
-  const formUrl = `https://kedataform.app/f/${form.id}`;
+  const formUrl = `${
+    typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.vercel.app'
+  }/f/${form.id}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(formUrl);

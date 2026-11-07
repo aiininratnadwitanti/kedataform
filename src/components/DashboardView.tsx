@@ -583,6 +583,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   
   // Category filter state for Formulir Saya
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('Semua');
+
+  // Filter status jadwal formulir
+  const [activeScheduleFilter, setActiveScheduleFilter] = useState<'all' | 'always_open' | 'custom_schedule' | 'closed'>('all');
   
   // Recent Forms state
   const [localRecentForms, setLocalRecentForms] = useState<RecentFormItem[]>(INITIAL_RECENT_FORMS);
@@ -681,7 +684,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     else if (activeCategoryFilter === 'Kuis') matchesCategory = f.title.toLowerCase().includes('kuis') || !!f.form.quizConfig?.isQuizMode;
     else if (activeCategoryFilter === 'Acara') matchesCategory = f.title.toLowerCase().includes('rsvp') || f.title.toLowerCase().includes('acara');
 
-    return matchesSearch && matchesCategory;
+    let matchesSchedule = true;
+    if (activeScheduleFilter !== 'all') {
+      const sch = f.form.schedule;
+      let modeKey: 'always_open' | 'custom_schedule' | 'closed' = 'always_open';
+      if (sch && sch.isEnabled) {
+        modeKey = sch.scheduleType === 'date_range' || sch.openDate || sch.closeDate ? 'custom_schedule' : 'closed';
+      }
+      matchesSchedule = modeKey === activeScheduleFilter;
+    }
+
+    return matchesSearch && matchesCategory && matchesSchedule;
   });
 
   // Action: Create from template
@@ -1815,6 +1828,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <List className="w-4 h-4 stroke-[2]" />
                       </button>
                     </div>
+                  </div>
+
+                  {/* Filter Status Jadwal */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      { key: 'all', label: 'Semua Jadwal' },
+                      { key: 'always_open', label: 'Buka 24 Jam' },
+                      { key: 'custom_schedule', label: 'Jadwal Khusus' },
+                      { key: 'closed', label: 'Tutup Sementara' },
+                    ].map((opt) => {
+                      const isSelected = activeScheduleFilter === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() =>
+                            setActiveScheduleFilter(opt.key as 'all' | 'always_open' | 'custom_schedule' | 'closed')
+                          }
+                          style={{
+                            backgroundColor: isSelected ? primaryAccent : undefined,
+                            color: isSelected ? contrastTextColor : undefined,
+                            fontFamily: systemFontFamily,
+                          }}
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all cursor-pointer ${
+                            isSelected
+                              ? 'font-bold shadow-xs'
+                              : isDark
+                                ? 'bg-[#18181b] text-slate-300 hover:bg-slate-800 border border-slate-800'
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Grid / List Mode */}
