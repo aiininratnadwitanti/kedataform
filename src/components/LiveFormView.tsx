@@ -96,8 +96,8 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
   }, [form.title, isEmbed]);
 
   const { theme, questions } = form;
-  // Warna aksen biru default untuk halaman sukses (bukan abu-abu tema lama).
-  const successAccent = '#2563EB';
+  // Biru default untuk tombol aksi utama & halaman sukses (menggantikan aksen abu tema lama).
+  const defaultAccent = '#2563EB';
   const legacyDefaultCovers = ['/assets/aistudio/image_3ec5f637.png', '/public/assets/aistudio/image_3ec5f637.png'];
   const isDefaultCover = !theme.headerCoverUrl || legacyDefaultCovers.includes(theme.headerCoverUrl);
   const cardBorderColor = !theme.cardBorderColor || ['#fde68a', '#fed7aa', '#eedaa2'].includes(theme.cardBorderColor)
@@ -425,7 +425,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                   <>
                     <div 
                       className="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-white"
-                      style={{ backgroundColor: successAccent }}
+                      style={{ backgroundColor: defaultAccent }}
                     >
                       <Check className="w-6 h-6 stroke-[3]" />
                     </div>
@@ -441,7 +441,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                 <>
                   <div 
                     className="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-white"
-                    style={{ backgroundColor: successAccent }}
+                    style={{ backgroundColor: defaultAccent }}
                   >
                     <Check className="w-6 h-6 stroke-[3]" />
                   </div>
@@ -469,7 +469,7 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                     type="button"
                     onClick={onClose}
                     className="px-4 py-2 text-xs font-bold text-white rounded-xl transition-all cursor-pointer shadow-xs"
-                    style={{ backgroundColor: successAccent }}
+                    style={{ backgroundColor: defaultAccent }}
                   >
                     Kembali
                   </button>
@@ -717,9 +717,9 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                     theme.buttonStyle === 'brutal' ? 'border-2 border-black shadow-[4px_4px_0px_#000]' : ''
                   }`}
                   style={{ 
-                    backgroundColor: (availability.isOpen && !isQuotaExceeded) ? theme.primaryColor : undefined,
+                    backgroundColor: (availability.isOpen && !isQuotaExceeded) ? defaultAccent : undefined,
                     borderRadius: `${theme.borderRadiusNum}px`,
-                    boxShadow: (availability.isOpen && !isQuotaExceeded) && theme.buttonStyle === 'glow' ? `0 10px 25px -5px ${theme.primaryColor}66` : undefined
+                    boxShadow: (availability.isOpen && !isQuotaExceeded) && theme.buttonStyle === 'glow' ? `0 10px 25px -5px ${defaultAccent}66` : undefined
                   }}
                 >
                   {isQuotaExceeded ? (
