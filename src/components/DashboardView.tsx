@@ -838,40 +838,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const handleToggleQuizModeFromMenu = (item: RecentFormItem, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    const currentIsQuiz = !!item.form.quizConfig?.isQuizMode;
-    const newIsQuiz = !currentIsQuiz;
-
-    const updatedQuestions = item.form.questions.map((q) => {
-      if (newIsQuiz && (q.points === undefined || q.points === null)) {
-        return { ...q, points: 20 };
-      }
-      return q;
-    });
-
-    const updatedForm: FormSchema = {
-      ...item.form,
-      questions: updatedQuestions,
-      quizConfig: {
-        ...item.form.quizConfig,
-        isQuizMode: newIsQuiz,
-        showScoreImmediately: item.form.quizConfig?.showScoreImmediately ?? true,
-        passingScore: item.form.quizConfig?.passingScore || 70,
-        showCorrectAnswers: item.form.quizConfig?.showCorrectAnswers ?? true,
-        totalMaxScore: updatedQuestions.reduce((sum, q) => sum + (q.points || 0), 0) || 100,
-      },
-    };
-
-    setRecentForms((prev) =>
-      prev.map((rf) => (rf.id === item.id ? { ...rf, form: updatedForm } : rf))
-    );
-
-    setActiveMenuFormId(null);
-    setToastMessage(newIsQuiz ? `✓ Mode Kuis & Penilaian berhasil diaktifkan untuk "${item.title}"!` : `✓ Mode Kuis dinonaktifkan (Formulir Standar)`);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
   const handleOpenResponsesFromMenu = (formId: string) => {
     setSelectedFormForResponsesId(formId);
     setIsViewingResponses(true);
