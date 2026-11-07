@@ -106,7 +106,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   const [simDays, setSimDays] = useState<string[]>(['Sen', 'Sel', 'Rab', 'Kam', 'Jum']);
   const [simHour, setSimHour] = useState<number>(14);
-  const [pricingBillingCycle, setPricingBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [isScrolled, setIsScrolled] = useState(false);
   const landingRef = useRef<HTMLDivElement>(null);
 
@@ -133,7 +132,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'KeDataForm_Sampel_Respon_UTF8.csv');
+    link.setAttribute('download', 'KedataForm_Sampel_Respon_UTF8.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -206,12 +205,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="relative pt-28 pb-20 px-4 sm:px-8 overflow-hidden flex items-center justify-center" style={{ backgroundColor: lightBg, minHeight: '70vh' }}>
         <div className="w-full max-w-4xl mx-auto text-center space-y-6">
           <motion.h1 variants={morphLineVariants} initial="hidden" animate="visible" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-[#0f172a]">
-            Membuat Pengumpulan Data <br />
-            <span style={{ color: blue }}>Lebih Cerdas &amp; Rapi</span>
+            Bikin Formulir &amp; Kuis <br />
+            <span style={{ color: blue }}>yang Tampil Sesuai Gaya Anda</span>
           </motion.h1>
 
           <motion.p variants={morphLineVariants} initial="hidden" animate="visible" className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Rancang formulir estetis dengan kanvas visual, aturan jadwal otomatis, dan wadah 100 kuota respon terisolasi untuk pengguna gratis, premium mendapat 100 data ++ per form. Semua dalam satu platform yang rapi dan siap pakai.
+            Desain formulir dan kuis dengan tema sepenuhnya kustom: warna, font, header, kartu, sampai tombol kirim. Susun cepat dengan AI, atur jadwal buka-tutup otomatis, nilai kuis tanpa hitung manual, dan ekspor data ke CSV. Mulai gratis sampai 100 respon per formulir, atau buka respon tanpa batas lewat paket Premium.
           </motion.p>
 
           <motion.div variants={morphLineVariants} initial="hidden" animate="visible" className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
@@ -234,7 +233,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-white text-sm font-bold tracking-wide shadow-lg transition-all cursor-pointer whitespace-nowrap"
               style={{ backgroundColor: blue }}
             >
-              <span>Mulai Sekarang</span>
+              <span>Mulai Gratis</span>
               <ArrowRight className="w-4 h-4" />
             </motion.button>
           </motion.div>
@@ -246,9 +245,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div variants={morphImageLeftVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} className="relative">
             <div className="relative">
-              <img src="/assets/landing/formulir.jpeg" alt="Pratinjau Formulir KeDataForm" className="rounded-2xl shadow-lg w-full object-cover aspect-[4/3]" />
+              <img src="/assets/landing/landing.png" alt="Ilustrasi pengelolaan formulir KedataForm" className="rounded-2xl shadow-lg w-full object-cover aspect-[4/3] bg-white" />
               <div className="absolute top-6 -left-4 bg-white rounded-xl shadow-lg px-4 py-3">
-                <div className="text-2xl font-bold" style={{ color: blue }}>100+</div>
+                <div className="text-2xl font-bold" style={{ color: blue }}>100</div>
                 <div className="text-[11px] text-slate-500 font-medium">Respon Gratis<br/>per Formulir</div>
               </div>
             </div>
@@ -257,19 +256,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <motion.div variants={morphContainerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} className="space-y-5">
             <motion.span variants={morphLineVariants} className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: blue }}>Tentang Kami</motion.span>
             <motion.h2 variants={morphLineVariants} className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0f172a]">
-              Kami membantu tim mengumpulkan data dengan kapasitas terstruktur
+              Formulir berkarakter, bukan template yang itu-itu saja
             </motion.h2>
             <motion.p variants={morphLineVariants} className="text-sm text-slate-600 leading-relaxed">
-              Platform perancangan formulir berkelas editorial dengan sistem wadah responden mandiri yang kedap data. Setiap survei memiliki wadah folder mandiri, rekap data terpusat, dan ekspor CSV standar internasional.
+              Banyak pembuat formulir mengunci tampilan Anda pada satu gaya. Di KedataForm, Anda yang memegang kendali penuh: pilih warna, font, kanvas, header, kartu, dan tombol kirim. Hasilnya formulir dan kuis yang tampil rapi, khas Anda, dan siap dibagikan.
             </motion.p>
             <motion.div variants={morphLineVariants} className="space-y-4 pt-2">
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: blue }}>
-                  <FolderLock className="w-5 h-5" />
+                  <PenTool className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-bold text-[#0f172a]">Wadah Respon Terisolasi</div>
-                  <div className="text-xs text-slate-500">Kuesioner riset, formulir order, dan kuis tersimpan di folder terpisah tanpa resiko data tertukar.</div>
+                  <div className="font-bold text-[#0f172a]">Kustom Tema Sepenuhnya</div>
+                  <div className="text-xs text-slate-500">Warna, font, kanvas, header, kartu, dan tombol, semua bisa Anda atur bebas.</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -277,8 +276,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-bold text-[#0f172a]">Penilaian Kuis Otomatis</div>
-                  <div className="text-xs text-slate-500">Tetapkan bobot poin dan kunci jawaban untuk mengkalkulasi skor responden secara real-time.</div>
+                  <div className="font-bold text-[#0f172a]">Kuis Dinilai Otomatis</div>
+                  <div className="text-xs text-slate-500">Tetapkan kunci jawaban dan poin, skor responden langsung dihitung saat dikirim.</div>
                 </div>
               </div>
             </motion.div>
@@ -295,41 +294,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: blue }}>Mengapa Kami</span>
             </motion.div>
             <motion.h2 variants={morphLineVariants} className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0f172a]">
-              Solusi formulir kustom untuk bisnis Anda
+              Kenapa tim memilih KedataForm
             </motion.h2>
             <motion.p variants={morphLineVariants} className="text-sm text-slate-600 leading-relaxed">
-              Beralih dari tumpukan kertas formulir yang rentan rusak dan tercecer ke sistem pengumpulan data modern yang rapi, terisolasi, dan otomatis. Setiap formulir memiliki wadah database tersendiri dan ekspor CSV format standar internasional.
+              Satu tempat untuk membuat, menyebarkan, dan membaca hasil formulir. Tanpa merangkai banyak tools, tanpa desain yang terasa generik.
             </motion.p>
           </motion.div>
 
           <div className="grid grid-cols-2 gap-4">
             <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 text-white shadow-lg" style={{ backgroundColor: blue }}>
               <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center mb-3">
-                <Database className="w-5 h-5" />
+                <PenTool className="w-5 h-5" />
               </div>
-              <div className="font-bold text-sm mb-1">Wadah Respon</div>
-              <div className="text-[11px] text-white/80 leading-relaxed">Kuesioner riset, formulir order, dan kuis tersimpan terpisah.</div>
+              <div className="font-bold text-sm mb-1">Tema Sepenuhnya Kustom</div>
+              <div className="text-[11px] text-white/80 leading-relaxed">Atur warna, font, kanvas, header, kartu, dan tombol sesuai selera.</div>
             </motion.div>
             <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 bg-white shadow-md border border-slate-200 mt-6">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: lightBg, color: blue }}>
-                <Cloud className="w-5 h-5" />
+                <Sparkles className="w-5 h-5" />
               </div>
-              <div className="font-bold text-sm mb-1 text-[#0f172a]">Cloud &amp; Ekspor</div>
-              <div className="text-[11px] text-slate-500 leading-relaxed">Ekspor CSV UTF-8 BOM langsung terbaca di Excel.</div>
+              <div className="font-bold text-sm mb-1 text-[#0f172a]">Susun Cepat dengan AI</div>
+              <div className="text-[11px] text-slate-500 leading-relaxed">Tulis topik, atau lampirkan gambar dan dokumen, lalu biarkan AI menyusun pertanyaannya.</div>
             </motion.div>
             <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 bg-white shadow-md border border-slate-200 mt-6">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: lightBg, color: blue }}>
-                <ShieldCheck className="w-5 h-5" />
+                <Award className="w-5 h-5" />
               </div>
-              <div className="font-bold text-sm mb-1 text-[#0f172a]">Keamanan Data</div>
-              <div className="text-[11px] text-slate-500 leading-relaxed">Enkripsi TLS dan pemisahan database mandiri.</div>
+              <div className="font-bold text-sm mb-1 text-[#0f172a]">Kuis Dinilai Otomatis</div>
+              <div className="text-[11px] text-slate-500 leading-relaxed">Tetapkan kunci jawaban dan poin, skor dihitung otomatis saat responden mengirim.</div>
             </motion.div>
             <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl p-5 text-white shadow-lg" style={{ backgroundColor: blue }}>
               <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center mb-3">
-                <RefreshCw className="w-5 h-5" />
+                <UserCheck className="w-5 h-5" />
               </div>
-              <div className="font-bold text-sm mb-1">Backup &amp; Recovery</div>
-              <div className="text-[11px] text-white/80 leading-relaxed">Rekap data terpusat dan unduhan instan.</div>
+              <div className="font-bold text-sm mb-1">Kolaborasi Tim</div>
+              <div className="text-[11px] text-white/80 leading-relaxed">Undang rekan sebagai editor atau viewer dan atur akses cukup lewat email.</div>
             </motion.div>
           </div>
         </div>
@@ -339,18 +338,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section id="process" className="py-16 px-4 sm:px-8 bg-white">
         <motion.div variants={morphContainerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} className="max-w-3xl mx-auto text-center space-y-3">
           <motion.span variants={morphLineVariants} className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: blue }}>Proses</motion.span>
-          <motion.h2 variants={morphLineVariants} className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0f172a]">Bagaimana kami bekerja</motion.h2>
+          <motion.h2 variants={morphLineVariants} className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0f172a]">Dari ide sampai data, dalam tiga langkah</motion.h2>
           <motion.div variants={morphLineVariants} className="w-12 h-0.5 mx-auto" style={{ backgroundColor: blue }} />
           <motion.p variants={morphLineVariants} className="text-sm text-slate-600 leading-relaxed">
-            Mulai dari pembuatan formulir, pengaturan jadwal, hingga ekspor data, semua dalam satu alur yang rapi dan otomatis.
+            Alur yang jelas: rancang, sebarkan, lalu baca hasilnya. Tanpa langkah yang membingungkan.
           </motion.p>
         </motion.div>
 
         <div className="max-w-5xl mx-auto mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
-            { n: '01', t: 'Rancang Formulir', d: 'Gunakan kanvas visual ala Canva untuk membuat form estetis.' },
-            { n: '02', t: 'Atur Jadwal', d: 'Tentukan hari dan jam operasional pengisian formulir.' },
-            { n: '03', t: 'Ekspor Data', d: 'Unduh rekap tanggapan dalam format CSV UTF-8 BOM.' },
+            { n: '01', t: 'Rancang & Percantik', d: 'Mulai dari template, AI, atau lembar kosong, lalu sesuaikan tema sampai benar-benar pas.' },
+            { n: '02', t: 'Sebarkan dengan Mudah', d: 'Bagikan lewat tautan, QR, WhatsApp, atau embed. Atur jadwal buka-tutup otomatis.' },
+            { n: '03', t: 'Baca Hasilnya', d: 'Pantau respon masuk, lihat skor kuis otomatis, dan ekspor CSV siap dibuka di Excel.' },
           ].map((s) => (
             <motion.div key={s.n} variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="rounded-2xl border border-slate-200 p-6 text-center space-y-2 bg-white shadow-sm">
               <div className="text-3xl font-bold" style={{ color: blue }}>{s.n}</div>
@@ -364,9 +363,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* CTA */}
       <section className="py-16 px-4 sm:px-8" style={{ backgroundColor: blue }}>
         <motion.div variants={morphContainerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} className="max-w-4xl mx-auto text-center space-y-5 text-white">
-          <motion.h3 variants={morphLineVariants} className="text-2xl sm:text-4xl font-bold tracking-tight">Siap merancang formulir dengan standar tertinggi?</motion.h3>
+          <motion.h3 variants={morphLineVariants} className="text-2xl sm:text-4xl font-bold tracking-tight">Siap membuat formulir yang benar-benar orang isi?</motion.h3>
           <motion.p variants={morphLineVariants} className="text-sm text-white/80 max-w-xl mx-auto leading-relaxed">
-            Dapatkan kuota 100 tanggapan gratis untuk setiap formulir baru. Tanpa batas waktu, tanpa instalasi, langsung siap pakai.
+            Mulai gratis sampai 100 respon per formulir. Butuh lebih? Paket Premium membuka respon tanpa batas, semua fitur kustom tema, dan kolaborasi tim.
           </motion.p>
           <motion.div variants={morphLineVariants} className="pt-3 flex flex-wrap items-center justify-center gap-3">
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onStartBlank} className="px-8 py-3 bg-white rounded-full text-xs font-bold tracking-[0.15em] uppercase shadow-lg cursor-pointer" style={{ color: blue }}>
@@ -390,13 +389,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span className="font-bold text-sm tracking-[0.15em] uppercase text-white">KEDATAFORM</span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Platform manajemen formulir modern dengan pemisahan database respon mandiri, kanvas desain visual, dan otomasi jadwal presisi.
+              KedataForm membantu Anda membuat formulir dan kuis dengan tema sepenuhnya kustom, menyusunnya cepat dengan AI, menilai otomatis, dan mengekspor data dengan rapi. Gratis sampai 100 respon per formulir.
             </p>
           </div>
           <div className="space-y-2">
             <h5 className="font-bold text-xs uppercase tracking-[0.15em] text-white">Fitur</h5>
             <ul className="space-y-1.5 text-xs text-slate-300">
-              <li><button onClick={() => { const el = document.getElementById('about-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white cursor-pointer">Wadah Respon Terisolasi</button></li>
+              <li><button onClick={() => { const el = document.getElementById('about-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white cursor-pointer">Kustom Tema Sepenuhnya</button></li>
               <li><button onClick={() => setIsScheduleSimModalOpen(true)} className="hover:text-white cursor-pointer">Mesin Jadwal &amp; Auto-Close</button></li>
               <li><button onClick={() => { const el = document.getElementById('why-us'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white cursor-pointer">Kanvas Desain</button></li>
               <li><button onClick={handleDownloadSampleCsv} className="hover:text-white cursor-pointer">Ekspor CSV UTF-8 BOM</button></li>
@@ -414,7 +413,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <h5 className="font-bold text-xs uppercase tracking-[0.15em] text-white">Lokasi</h5>
             <div className="rounded-xl overflow-hidden border border-slate-700">
               <iframe
-                title="Peta Lokasi KeDataForm"
+                title="Peta Lokasi KedataForm"
                 src="https://www.google.com/maps?q=Maguwoharjo,%20Depok,%20Sleman,%20Daerah%20Istimewa%20Yogyakarta&output=embed"
                 className="w-full h-36"
                 loading="lazy"
@@ -501,15 +500,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ duration: 0.35, ease: morphEase }} className="relative z-10 bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] text-left">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-base text-slate-900">Rincian Fitur KeDataForm Studio</h3>
+                <h3 className="font-bold text-base text-slate-900">Rincian Fitur KedataForm Studio</h3>
                 <p className="text-xs text-slate-500">Semua kemudahan pengelolaan formulir modern dalam satu tempat</p>
               </div>
               <button onClick={() => setIsDetailsModalOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 cursor-pointer"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-600 leading-relaxed">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-                <div className="flex items-center gap-2 font-bold text-slate-900 text-sm"><FolderLock className="w-4 h-4" style={{ color: blue }} /><span>1. Wadah Database Respon Terisolasi</span></div>
-                <p>Setiap formulir memiliki wadah database tersendiri. Kuesioner riset mahasiswa, formulir pesanan barang, dan kuis evaluasi tersimpan aman tanpa tercampur satu sama lain.</p>
+                <div className="flex items-center gap-2 font-bold text-slate-900 text-sm"><FolderLock className="w-4 h-4" style={{ color: blue }} /><span>1. Data Respon Terpisah per Formulir</span></div>
+                <p>Setiap formulir menyimpan responnya sendiri. Kuesioner riset, formulir pesanan, dan kuis evaluasi tidak tercampur satu sama lain, lengkap dengan rekap dan ekspor CSV.</p>
               </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-slate-900 text-sm"><FileSpreadsheet className="w-4 h-4 text-emerald-600" /><span>2. Ekspor CSV Standard UTF-8 BOM</span></div>
@@ -543,19 +542,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white text-[11px] font-mono uppercase tracking-wider font-bold mb-1.5">
                   <Crown className="w-3.5 h-3.5 stroke-[2]" /><span>Plans &amp; Kuota Resmi Sistem</span>
                 </div>
-                <h3 className="font-bold text-lg sm:text-xl text-white">Pilihan Paket KeDataForm Studio</h3>
-                <p className="text-xs text-white/90 mt-0.5">Mulai gratis dengan kuota 100 respon per form atau upgrade untuk kuota tanpa batas.</p>
+                <h3 className="font-bold text-lg sm:text-xl text-white">Pilihan Paket KedataForm Studio</h3>
+                <p className="text-xs text-white/90 mt-0.5">Mulai gratis, upgrade saat butuh lebih. Tanpa biaya tersembunyi.</p>
               </div>
               <button onClick={() => setIsPricingModalOpen(false)} className="p-1.5 rounded-full hover:bg-white/15 text-white cursor-pointer"><X className="w-5 h-5 stroke-[2]" /></button>
-            </div>
-            <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-              <span className="text-xs font-semibold text-slate-700">Pilih Periode Langganan:</span>
-              <div className="inline-flex items-center bg-slate-200/80 p-1 rounded-xl">
-                <button onClick={() => setPricingBillingCycle('monthly')} className={`px-3.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${pricingBillingCycle === 'monthly' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'}`}>Tagihan Bulanan</button>
-                <button onClick={() => setPricingBillingCycle('yearly')} className={`px-3.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${pricingBillingCycle === 'yearly' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'}`}>
-                  <span>Tahunan</span><span className="text-[10px] px-1.5 py-0.2 rounded font-bold text-white" style={{ backgroundColor: blue }}>Hemat 20%</span>
-                </button>
-              </div>
             </div>
             <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-white">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -567,11 +557,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </div>
                     <div>
                       <div className="text-3xl font-bold text-slate-900">Rp 0</div>
-                      <span className="text-[11px] text-slate-500 block mt-0.5">Aktif selamanya tanpa batas waktu</span>
+                      <span className="text-[11px] text-slate-500 block mt-0.5">Mulai gratis untuk pengujian lapangan</span>
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">Cocok untuk kuesioner skala kecil, riset skripsi, formulir pendaftaran, atau survei komunitas.</p>
                     <ul className="space-y-2.5 text-xs text-slate-700 border-t border-slate-200/70 pt-3">
-                      {['Maksimal 100 Respon / Formulir', 'Arsip Formulir Terisolasi', 'Aturan Jadwal Buka & Jam Kerja', 'Ekspor CSV Standard UTF-8 BOM', 'Embed iFrame Standar'].map(i => (
+                      {['100 respon per formulir', 'Akses 10 jenis pertanyaan', 'Aturan jadwal buka hari & jam', 'Ekspor file spreadsheet CSV'].map(i => (
                         <li key={i} className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] shrink-0" style={{ color: blue }} /><span>{i}</span></li>
                       ))}
                     </ul>
@@ -579,19 +568,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <button onClick={() => { setIsPricingModalOpen(false); onStartBlank(); }} className="w-full py-2.5 text-white text-xs font-bold tracking-wider uppercase rounded-xl cursor-pointer shadow-sm" style={{ backgroundColor: blue }}>Mulai Gratis Sekarang</button>
                 </div>
                 <div className="text-white rounded-2xl border border-slate-800 p-5 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden" style={{ backgroundColor: '#0f172a' }}>
-                  <div className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-wider text-white px-2.5 py-0.5 rounded-full font-bold" style={{ backgroundColor: blue }}>POPULER</div>
+                  <div className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-wider text-white px-2.5 py-0.5 rounded-full font-bold" style={{ backgroundColor: blue }}>UNGGULAN</div>
                   <div className="space-y-3">
                     <span className="text-[10px] font-mono uppercase tracking-widest font-bold block" style={{ color: blue }}>PRO EXPEDITION</span>
                     <div>
                       <div className="text-3xl font-bold text-white flex items-baseline gap-1">
-                        <span>{pricingBillingCycle === 'yearly' ? 'Rp 79.000' : 'Rp 99.000'}</span>
+                        <span>Rp 79.000</span>
                         <span className="text-xs font-normal text-slate-300">/ bln</span>
                       </div>
-                      <span className="text-[11px] text-slate-300 block mt-0.5">{pricingBillingCycle === 'yearly' ? 'Ditagih Rp 948.000 per tahun' : 'Ditagih bulanan, batalkan kapan saja'}</span>
+                      <span className="text-[11px] text-slate-300 block mt-0.5">Untuk respon data tak terbatas</span>
                     </div>
-                    <p className="text-xs text-slate-200 leading-relaxed">Solusi profesional untuk bisnis, riset akademik skala besar, dan pengumpulan pesanan harian.</p>
                     <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800 pt-3">
-                      {['Tanggapan Tanpa Batas (Unlimited)', 'Formulir & Kuesioner Tanpa Batas', 'Hapus Watermark KeDataForm', 'Ekspor Excel & Google Sheets', 'Kustomisasi Domain & Branding Penuh', 'Dukungan Prioritas 24/7'].map(i => (
+                      {['Tanggapan Tanpa Batas (Unlimited)', 'Ekspor CSV, Excel & Google Sheets', 'Hapus watermark KedataForm', 'Dukungan prioritas 24/7'].map(i => (
                         <li key={i} className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] shrink-0" style={{ color: blue }} /><span>{i.includes('Tanpa Batas') || i.includes('Watermark') ? <strong>{i}</strong> : i}</span></li>
                       ))}
                     </ul>
@@ -601,21 +589,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between space-y-4 shadow-sm">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">ENTERPRISE</span>
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">ENTERPRISE ARCHIVAL</span>
                       <span className="text-[10px] uppercase font-bold text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-full">Tim &amp; Instansi</span>
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-slate-900">Rp 299.000</div>
-                      <span className="text-[11px] text-slate-500 block mt-0.5">Per bulan / atau kontrak tahunan</span>
+                      <div className="text-3xl font-bold text-slate-900">Kustom</div>
+                      <span className="text-[11px] text-slate-500 block mt-0.5">Untuk lembaga riset & instansi</span>
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">Untuk institusi pendidikan, instansi riset, dan tim perusahaan yang butuh akses bersama.</p>
                     <ul className="space-y-2.5 text-xs text-slate-700 border-t border-slate-200/70 pt-3">
-                      {['Seluruh fitur Pro Expedition', 'Multi-user & Manajemen Hak Akses Tim', 'Integrasi Webhook & API Kustom', 'Jaminan Uptime SLA 99.9%', 'Account Manager Dedikasi'].map(i => (
+                      {['Semua fitur Pro', 'Multi-user tim & role akses', 'Integrasi webhook kustom', 'Dedicated support & SLA 99.9%'].map(i => (
                         <li key={i} className="flex items-center gap-2"><Check className="w-4 h-4 stroke-[2.5] shrink-0" style={{ color: blue }} /><span>{i}</span></li>
                       ))}
                     </ul>
                   </div>
-                  <button onClick={() => { setIsPricingModalOpen(false); window.open('https://wa.me/6282120882818?text=Halo%20Tim%20KeDataForm%2C%20saya%20ingin%20konsultasi%20paket%20Enterprise%20Kustom', '_blank', 'noopener,noreferrer'); }} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold tracking-wider uppercase rounded-xl cursor-pointer shadow-sm">Hubungi Penjualan (WhatsApp)</button>
+                  <button onClick={() => { setIsPricingModalOpen(false); window.open('https://wa.me/6282120882818?text=Halo%20Tim%20KedataForm%2C%20saya%20ingin%20konsultasi%20paket%20Enterprise%20Kustom', '_blank', 'noopener,noreferrer'); }} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold tracking-wider uppercase rounded-xl cursor-pointer shadow-sm">Hubungi Tim Kami (WhatsApp)</button>
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start gap-3">
