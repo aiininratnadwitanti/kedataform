@@ -5,6 +5,63 @@ import { GoogleGenAI } from '@google/genai';
  * Proxy pembuatan formulir/kuis dengan Gemini.
  * Dipakai baik oleh server lokal (server.ts) maupun Vercel Function (api/index.ts).
  */
+/**
+ * Normalisasi keluaran AI agar selalu memakai struktur yang dipakai aplikasi:
+ * `questions[]` dengan `title`, bukan `fields[]`/`label` (variasi dari model).
+ */
+function normalizeGeneratedForm(raw: any) {
+  if (!raw || typeof raw !== 'object') return raw;
+
+  const list: any[] = Array.isArray(raw.questions)
+    ? raw.questions
+    : Array.isArray(raw.fields)
+      ? raw.fields
+      : Array.isArray(raw.items)
+        ? raw.items
+        : [];
+
+  const normalizeType = (t: any) => {
+    const v = String(t || '').toLowerCase();
+    if (['radio', 'multiple_choice', 'multiple-choice', 'choice', 'mcq', 'select'].includes(v)) return 'multiple_choice';
+    if (['checkbox', 'checkboxes', 'multi_select', 'multi-select'].includes(v)) return 'checkbox';
+    if (['short_text', 'text', 'short_answer', 'input', 'short'].includes(v)) return 'short_text';
+    if (['paragraph', 'long_text', 'textarea', 'long_answer'].includes(v)) return 'paragraph';
+    if (['dropdown'].includes(v)) return 'dropdown';
+    if (['rating', 'scale', 'linear_scale'].includes(v)) return 'rating';
+    if (['date'].includes(v)) return 'date';
+    if (['time'].includes(v)) return 'time';
+    if (['email'].includes(v)) return 'email';
+    if (['number'].includes(v)) return 'number';
+    return t || 'multiple_choice';
+  };
+
+  const questions = list.map((q: any, idx: number) => {
+    const rawOptions = Array.isArray(q?.options) ? q.options : [];
+    const options = rawOptions.map((o: any, i: number) => {
+      if (typeof o === 'string') return { id: `opt_${i + 1}`, text: o };
+      return {
+        id: o?.id || `opt_${i + 1}`,
+        text: o?.text || o?.label || o?.value || `Pilihan ${i + 1}`,
+        ...(o?.value ? { value: o.value } : {}),
+      };
+    });
+
+    return {
+      id: q?.id || `q_${idx + 1}`,
+      type: normalizeType(q?.type),
+      title: q?.title || q?.label || q?.question || q?.text || `Pertanyaan ${idx + 1}`,
+      description: q?.description || undefined,
+      required: q?.required !== false,
+      options: options.length ? options : undefined,
+      points: q?.points,
+      correctAnswer: q?.correctAnswer ?? q?.correct_answer,
+      explanation: q?.explanation,
+    };
+  });
+
+  return { ...raw, questions };
+}
+
 export async function generateForm(req: Request, res: Response): Promise<void> {
   try {
     const { prompt, isQuizRequested, questionCount, attachments } = req.body;
@@ -54,6 +111,21 @@ CRITICAL SUBJECT & TOPIC ACCURACY:
 5. Question formatting:
    - Do NOT include question number prefixes like "1.", "Soal 1:", or "Q1:" in question titles.
    - For multiple choice, provide 4 plausible options with distinct text and clear unique IDs.
+
+6. Bentuk JSON WAJIB (jangan pakai nama kunci lain):
+   {
+     "title": string,
+     "description": string,
+     "quizConfig": { "isQuizMode": boolean, "passingScore": number },
+     "questions": [
+       { "id": string, "type": "multiple_choice"|"short_text"|"paragraph"|"checkbox"|"dropdown"|"rating",
+         "title": string, "required": boolean,
+         "options": [{ "id": string, "text": string }],
+         "points": number, "correctAnswer": string, "explanation": string }
+     ]
+   }
+   - Gunakan kunci "questions" (BUKAN "fields"/"items") dan "title" (BUKAN "label").
+   - "correctAnswer" harus sama persis dengan id opsi yang benar (contoh "opt_2").
 
 Output ONLY valid raw JSON matching FormSchema without markdown formatting or code blocks.
 `;
@@ -112,7 +184,7 @@ Create a complete form or quiz strictly matching the requested subject.`),
       return;
     }
 
-    res.json(JSON.parse(text));
+    res.json(normalizeGeneratedForm(JSON.parse(text)));
   } catch (error: any) {
     console.error('Error generating form with Gemini:', error);
     if (!res.headersSent) {
