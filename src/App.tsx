@@ -125,6 +125,17 @@ function MainApp() {
   // Persistent recent forms list across entire system (source of truth: MySQL via /api/v1)
   const [recentForms, setRecentForms] = useState<RecentFormItem[]>([]);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
+  // ID formulir yang sudah pernah disimpan. Form baru belum ada di sini, sehingga
+  // popup aturan simpan (kuis/jadwal) muncul hanya pada penyimpanan pertama kali.
+  const [savedFormIds, setSavedFormIds] = useState<Set<string>>(() => new Set());
+  const markFormSaved = React.useCallback((id: string) => {
+    setSavedFormIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
   const [invitations, setInvitations] = useState<CollaborationInvitation[]>([]);
   const [activeFormCollaborators, setActiveFormCollaborators] = useState<FormCollaborator[]>([]);
 
@@ -144,6 +155,8 @@ function MainApp() {
       const { items } = await api.listForms();
       const list = items as unknown as RecentFormItem[];
       setRecentForms(list);
+      // Semua form yang datang dari server dianggap sudah tersimpan.
+      setSavedFormIds(new Set(list.map((i) => i.form?.id || i.id)));
       return list;
     } catch (e) {
       console.error('Gagal memuat daftar form dari server', e);
@@ -270,6 +283,9 @@ function MainApp() {
   const [isFormSaved, setIsFormSaved] = useState(false);
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  // Penanda bahwa system settings sudah dimuat dari server (per akun).
+  // Mencegah autosave menimpa settings server & mencegah tutorial muncul prematur.
+  const [settingsHydrated, setSettingsHydrated] = useState(false);
   const [pendingTemplate, setPendingTemplate] = useState<FormTemplateItem | null>(null);
   const [themeActiveTab, setThemeActiveTab] = useState<'presets' | 'canvas' | 'card' | 'typography' | 'button' | 'header'>('presets');
   
@@ -480,22 +496,23 @@ function MainApp() {
     }
   };
 
-  // Header "Simpan Formulir": popup aturan hanya saat form pertama kali dibuat.
-  // Saat mengedit form yang sudah ada, langsung simpan perubahan tanpa popup.
+  // Header "Simpan Formulir": popup aturan (kuis/jadwal) hanya pada penyimpanan
+  // PERTAMA kali untuk formulir baru. Saat mengedit form yang sudah pernah disimpan,
+  // perubahan langsung tersimpan tanpa popup.
   const handleSaveFormClick = () => {
     if (!canEditActiveForm) {
       showCenterToast('Akses Dibatasi', 'Anda hanya memiliki akses lihat pada formulir ini.', 'error', 2500);
       return;
     }
 
-    const isExistingForm = recentForms.some((r) => r.id === form.id);
-    if (!isExistingForm) {
+    if (!savedFormIds.has(form.id)) {
       setIsSaveValidationModalOpen(true);
       return;
     }
 
     try {
       syncFormToRecentForms(form);
+      markFormSaved(form.id);
       setIsFormSaved(true);
       setIsFormDirty(false);
       showCenterToast('Berhasil Disimpan', 'Perubahan formulir telah tersimpan.', 'success', 2000);
@@ -513,6 +530,7 @@ function MainApp() {
     try {
       setForm(updatedForm);
       syncFormToRecentForms(updatedForm);
+      markFormSaved(updatedForm.id);
       setIsSaveValidationModalOpen(false);
       setIsDesignSaved(true);
       setIsFormSaved(true);
@@ -593,10 +611,11 @@ function MainApp() {
     };
   }, [user.isAuthenticated, form.id]);
 
-  // Simpan system settings ke MySQL setiap berubah (setelah login)
+  // Simpan system settings ke MySQL setiap berubah. Hanya setelah settings di-load
+  // dari server, agar default tidak menimpa settings tersimpan (mis. tourCompleted).
   React.useEffect(() => {
-    if (user.isAuthenticated) api.saveSettings(systemSettings).catch(() => {});
-  }, [systemSettings, user.isAuthenticated]);
+    if (user.isAuthenticated && settingsHydrated) api.saveSettings(systemSettings).catch(() => {});
+  }, [systemSettings, user.isAuthenticated, settingsHydrated]);
 
   const loadSettingsAndChatFromServer = async () => {
     try {
@@ -625,6 +644,8 @@ function MainApp() {
       if (sessions && sessions.length) aiChatStore.hydrate(sessions as any);
     } catch (e) {
       console.error('Gagal memuat chat', e);
+    } finally {
+      setSettingsHydrated(true);
     }
   };
 
@@ -692,6 +713,18 @@ function MainApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Tampilkan tutorial onboarding sekali untuk user baru yang belum pernah melihatnya.
+  // Status "sudah dilihat" tersimpan per akun (systemSettings.tourCompleted, tersinkron ke server).
+  React.useEffect(() => {
+    if (!isBootstrapped || !settingsHydrated || !user.isAuthenticated) return;
+    if (currentView !== 'dashboard') return;
+    if (systemSettings.tourCompleted) return;
+    if (isTourOpen) return;
+    const t = setTimeout(() => setIsTourOpen(true), 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBootstrapped, settingsHydrated, user.isAuthenticated, currentView, systemSettings.tourCompleted, isTourOpen]);
+
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
   const startProCheckout = async () => {
@@ -749,6 +782,8 @@ function MainApp() {
       localStorage.removeItem('formcraft_system_settings');
     } catch {}
     setSystemSettings(DEFAULT_SYSTEM_SETTINGS);
+    setSettingsHydrated(false);
+    setSavedFormIds(new Set());
     setIsLoginPage(false);
     setCurrentView('dashboard');
   };
@@ -772,6 +807,8 @@ function MainApp() {
       if (!wasAuthenticated) {
         reloadFormsFromServer();
         reloadInvitations();
+        // Muat settings akun dari server agar tutorial & kuota sesuai milik akun ini.
+        loadSettingsAndChatFromServer();
       }
     }
   };
@@ -1095,29 +1132,23 @@ function MainApp() {
             onOpenCropModal={() => handleOpenGlobalCrop(user.avatarUrl)}
             responseCount={currentResponseCount}
             onBackToDashboard={() => {
-              if (activeTab === 'embed') {
-                setActiveTab('custom');
-                return;
-              }
-              if (customSubTab === 'design') {
-                setCustomSubTab('questions');
-                return;
-              }
               if (canEditActiveForm) {
                 syncFormToRecentForms(form);
               }
+              // Kembali selalu menuju halaman "Formulir Saya"
+              setDashboardSidebarView('my_forms');
               setCurrentView('dashboard');
             }}
             onExportCSV={handleExportActiveFormCSV}
             form={form}
             onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
-            onOpenSaveConfigModal={handleSaveFormClick}
+            onOpenSaveConfigModal={activeTab === 'embed' ? undefined : handleSaveFormClick}
             isFormDirty={isFormDirty}
             isFormSaved={isFormSaved}
             onSaveDesign={handleSaveDesign}
             isDesignSaved={isDesignSaved}
             onOpenAiGenerator={() => setIsAiModalOpen(true)}
-            onOpenCollaboration={() => setIsColabModalOpen(true)}
+            onOpenCollaboration={activeTab === 'embed' ? undefined : () => setIsColabModalOpen(true)}
             onOpenSettings={() => setIsSettingsModalOpen(true)}
             customSubTab={customSubTab}
             onSaveThemeDesign={handleSaveThemeDesign}
@@ -1303,7 +1334,18 @@ function MainApp() {
       {/* Onboarding Spotlight Tour "Mode Belajar" */}
       <OnboardingTour
         isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
+        onClose={() => {
+          setIsTourOpen(false);
+          setSystemSettings((prev) => {
+            const next = { ...prev, tourCompleted: true };
+            try {
+              localStorage.setItem('kedataform_system_settings', JSON.stringify(next));
+            } catch {
+              // ignore
+            }
+            return next;
+          });
+        }}
         onOpenVideoTutorial={() => {
           setIsTourOpen(false);
           setIsVideoModalOpen(true);
