@@ -121,10 +121,26 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
     `Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${formUrl}`
   );
   const qrCaption = `Yuk, isi formulir "${form.title}"!\nScan QR atau klik link berikut: ${formUrl}\nTerima kasih atas waktu Anda.`;
+  const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
 
-  const handleShareQrWhatsApp = async (e?: any) => {
-    e?.stopPropagation?.();
-    e?.preventDefault?.();
+  const handleShareQrWhatsApp = async () => {
+    // Satu-satunya cara mengesankan foto + teks ke WhatsApp sebagai satu pesan
+    // adalah Web Share API dengan file + text. Di ponsel yang mendukung share
+    // file, WhatsApp akan menerima satu pesan berisi keduanya.
+    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=16&data=${encodeURIComponent(formUrl)}`;
+    try {
+      const res = await fetch(qrApi, { cache: 'no-store' });
+      const blob = await res.blob();
+      const file = new File([blob], qrFilename, { type: 'image/png' });
+      const payload = { files: [file], text: qrCaption, title: `Formulir ${form.title}` };
+      const nav: any = navigator as any;
+      if (nav.canShare && nav.canShare(payload)) {
+        await nav.share(payload);
+        return;
+      }
+    } catch (e) {
+      // diamkan: fallback di bawah
+    }
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
   };
 
