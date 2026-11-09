@@ -121,45 +121,10 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
     `Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${formUrl}`
   );
   const qrCaption = `Yuk, isi formulir "${form.title}"!\nScan QR atau klik link berikut: ${formUrl}\nTerima kasih atas waktu Anda.`;
-  const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
 
   const handleShareQrWhatsApp = async (e?: any) => {
     e?.stopPropagation?.();
     e?.preventDefault?.();
-    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=16&data=${encodeURIComponent(formUrl)}`;
-    let blob: Blob;
-    try {
-      const res = await fetch(qrApi, { cache: 'no-store' });
-      blob = await res.blob();
-    } catch {
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
-      return;
-    }
-    const file = new File([blob], qrFilename, { type: 'image/png' });
-    const nav: any = navigator as any;
-    const payload = { files: [file], text: qrCaption, title: `Formulir ${form.title}` };
-    // Preflight: hanya share jika bisa membawa file + teks sekaligus (WA dkk.)
-    let shareable = false;
-    try {
-      shareable = !!(nav.canShare && nav.canShare(payload));
-    } catch {
-      shareable = false;
-    }
-    if (shareable) {
-      try {
-        await nav.share(payload);
-        return;
-      } catch {
-        // user batal / share gagal — berhenti, jangan unduh agar tidak dobel
-        return;
-      }
-    }
-    // Fallback desktop: unduh QR lalu buka WhatsApp dengan teksnya
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = qrFilename;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href), 3000);
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
   };
 
