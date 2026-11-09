@@ -7,6 +7,7 @@ export type QuestionType =
   | 'linear_scale'
   | 'rating'
   | 'date'
+  | 'time'
   | 'file_upload'
   | 'image_block'       // Blok gambar mandiri di antara pertanyaan
   | 'section_header';   // Judul pemisah / label seksi
@@ -35,6 +36,7 @@ export interface Question {
   points?: number;          // Bobot nilai / skor untuk pertanyaan ini (misal 20 poin)
   correctAnswer?: string | string[]; // Kunci jawaban yang benar
   explanation?: string;     // Pembahasan atau alasan kunci jawaban
+  secondaryType?: QuestionType; // Isian kedua opsional (mis. tanggal/jam/teks singkat)
 }
 
 export type LayoutMode = 'flow_canvas' | 'card_slide' | 'bento_grid';
@@ -167,6 +169,7 @@ export interface FormCollaborationConfig {
 export interface FormSchema {
   id: string;
   title: string;
+  name?: string;          // Nama formulir di daftar/dashboard (terpisah dari judul di dalam form)
   description: string;
   coverImage?: string;
   folderId?: string;

@@ -83,6 +83,7 @@ function rowToQuestion(row: Row) {
     points: row.points ?? undefined,
     correctAnswer: parseJson(row.correct_answer),
     explanation: row.explanation ?? undefined,
+    secondaryType: row.secondary_type ?? undefined,
   };
 }
 
@@ -90,6 +91,7 @@ function rowToSchema(form: Row, questions: Row[]) {
   return {
     id: form.id,
     title: form.title,
+    name: form.name ?? undefined,
     description: form.description ?? '',
     coverImage: form.cover_image ?? undefined,
     folderId: form.folder_id ?? undefined,
@@ -118,6 +120,7 @@ function rowToRecentItem(
   return {
     id: form.id,
     title: form.title,
+    name: form.name ?? undefined,
     lastOpened: form.last_opened ? new Date(form.last_opened).toISOString() : 'Baru saja',
     responseCount,
     coverImage: form.cover_image || '',
@@ -198,6 +201,7 @@ function normalizeFormInput(body: any) {
   return {
     id: f.id || item.id,
     title: f.title ?? 'Formulir Tanpa Judul',
+    name: f.name ?? item.name ?? null,
     description: f.description ?? '',
     coverImage: f.coverImage ?? item.coverImage ?? null,
     folderId: f.folderId ?? item.folderId ?? null,
@@ -217,17 +221,17 @@ function normalizeFormInput(body: any) {
 async function writeForm(conn: any, userId: string, id: string, form: ReturnType<typeof normalizeFormInput>) {
   await conn.query(
     `INSERT INTO forms
-      (id, user_id, title, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg,
+      (id, user_id, title, name, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg,
        theme, schedule, quiz_config, collaboration, status, last_opened, created_at, updated_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW(),NOW())
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW(),NOW())
      ON DUPLICATE KEY UPDATE
-       title=VALUES(title), description=VALUES(description), cover_image=VALUES(cover_image),
+       title=VALUES(title), name=VALUES(name), description=VALUES(description), cover_image=VALUES(cover_image),
        folder_id=VALUES(folder_id), folder_name=VALUES(folder_name), icon_type=VALUES(icon_type),
        accent_color=VALUES(accent_color), accent_bg=VALUES(accent_bg), theme=VALUES(theme),
        schedule=VALUES(schedule), quiz_config=VALUES(quiz_config), collaboration=VALUES(collaboration),
        status=VALUES(status), last_opened=NOW(), updated_at=NOW()`,
     [
-      id, userId, form.title, form.description, form.coverImage, form.folderId, form.folderName,
+      id, userId, form.title, form.name, form.description, form.coverImage, form.folderId, form.folderName,
       form.iconType, form.accentColor, form.accentBg, j(form.theme), j(form.schedule),
       j(form.quizConfig), j(form.collaboration), form.status,
     ]
@@ -237,11 +241,11 @@ async function writeForm(conn: any, userId: string, id: string, form: ReturnType
   for (const question of form.questions) {
     await conn.query(
       `INSERT INTO questions
-        (form_id, id, position, type, title, description, required, options, scale_min, scale_max,
+        (form_id, id, position, type, secondary_type, title, description, required, options, scale_min, scale_max,
          scale_min_label, scale_max_label, placeholder, icon, image_url, image_caption, points, correct_answer, explanation)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
-        id, question.id || `q_${position}`, position, question.type || 'short_text', question.title ?? '',
+        id, question.id || `q_${position}`, position, question.type || 'short_text', question.secondaryType ?? null, question.title ?? '',
         question.description ?? null, question.required ? 1 : 0, j(question.options),
         question.scaleMin ?? null, question.scaleMax ?? null, question.scaleMinLabel ?? null,
         question.scaleMaxLabel ?? null, question.placeholder ?? null, question.icon ?? null,

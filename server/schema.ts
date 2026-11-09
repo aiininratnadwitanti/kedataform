@@ -110,6 +110,7 @@ export async function ensureSchema(): Promise<void> {
 
   await addColumn('forms', 'is_template', 'is_template TINYINT(1) NOT NULL DEFAULT 0');
   await addColumn('forms', 'status', "status ENUM('draft','published','closed') NOT NULL DEFAULT 'draft'");
+  await addColumn('forms', 'name', 'name VARCHAR(255) NULL');
   await q(`ALTER TABLE forms MODIFY last_opened DATETIME NULL`);
   await q(`ALTER TABLE forms MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
   await q(`ALTER TABLE forms MODIFY updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`);
@@ -156,6 +157,8 @@ export async function ensureSchema(): Promise<void> {
     PRIMARY KEY (form_id, id),
     CONSTRAINT fk_questions_form FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+
+  await addColumn('questions', 'secondary_type', 'secondary_type VARCHAR(32) NULL');
 
   await q(`CREATE TABLE IF NOT EXISTS submissions (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
