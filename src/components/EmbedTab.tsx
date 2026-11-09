@@ -123,11 +123,13 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const qrCaption = `Yuk, isi formulir "${form.title}"!\nScan QR atau klik link berikut: ${formUrl}\nTerima kasih atas waktu Anda.`;
   const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
 
-  const handleShareQrWhatsApp = async () => {
+  const handleShareQrWhatsApp = async (e?: any) => {
+    e?.stopPropagation?.();
+    e?.preventDefault?.();
     const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=16&data=${encodeURIComponent(formUrl)}`;
     let blob: Blob;
     try {
-      const res = await fetch(qrApi);
+      const res = await fetch(qrApi, { cache: 'no-store' });
       blob = await res.blob();
     } catch {
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
@@ -135,19 +137,30 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
     }
     const file = new File([blob], qrFilename, { type: 'image/png' });
     const nav: any = navigator as any;
-    if (nav.canShare && nav.canShare({ files: [file], text: qrCaption })) {
+    const payload = { files: [file], text: qrCaption, title: `Formulir ${form.title}` };
+    // Preflight: hanya share jika bisa membawa file + teks sekaligus (WA dkk.)
+    let shareable = false;
+    try {
+      shareable = !!(nav.canShare && nav.canShare(payload));
+    } catch {
+      shareable = false;
+    }
+    if (shareable) {
       try {
-        await nav.share({ files: [file], text: qrCaption, title: `Formulir ${form.title}` });
+        await nav.share(payload);
         return;
       } catch {
-        // user batal atau share gagal
+        // user batal / share gagal — berhenti, jangan unduh agar tidak dobel
+        return;
       }
     }
+    // Fallback desktop: unduh QR lalu buka WhatsApp dengan teksnya
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = qrFilename;
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 3000);
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
   };
 
   return (
@@ -324,7 +337,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
                 />
               </div>
 
-              <p className="text-[11px] text-slate-500 leading-relaxed">{qrCaption}</p>
+              <p className="text-[11px] text-slate-500 leading-relaxed whitespace-pre-line">{qrCaption}</p>
 
               <div className="flex flex-col sm:flex-row items-center gap-2 justify-center">
                 <button
@@ -337,7 +350,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
                 </button>
               </div>
 
-              <p className="text-[10px] text-slate-500">Bagikan QR: di ponsel, lembar bagikan langsung membuka WhatsApp dengan gambar QR dan tulisan di atas. Di desktop, QR diunduh lalu WhatsApp dibuka.</p>
+              <p className="text-[10px] text-slate-500">Satu kiriman: foto QR + teks ajakan terkirim bersamaan ke WhatsApp (tanpa mengetik manual).</p>
             </div>
           </div>
         </div>
