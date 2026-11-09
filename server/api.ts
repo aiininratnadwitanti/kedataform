@@ -673,6 +673,9 @@ router.put(
     }
     const form = normalizeFormInput(req.body);
     form.id = req.params.id;
+    // Jika client mengirim slug (kustom nama link), gunakan; jika tidak,
+    // jangan menimpa slug yang sudah tersimpan — ambil dari DB.
+    if (!form.slug) form.slug = access.form.slug ?? null;
     await withTransaction(async (conn) => writeForm(conn, access.form.user_id, req.params.id, form));
     const rows = await q<Row[]>(`SELECT * FROM forms WHERE id = ?`, [req.params.id]);
     const questions = await q<Row[]>(`SELECT * FROM questions WHERE form_id = ? ORDER BY position`, [req.params.id]);

@@ -1218,6 +1218,12 @@ function MainApp() {
                 onSaveDesign={handleSaveDesign}
                 isDesignSaved={isDesignSaved}
                 onOpenPreview={() => setIsPreviewOpen(true)}
+                onUpdateForm={(updated) => {
+                  setForm(updated);
+                  setIsFormDirty(true);
+                  setIsFormSaved(false);
+                  syncFormToRecentForms(updated);
+                }}
               />
             )}
           </main>
