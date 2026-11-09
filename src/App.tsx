@@ -973,12 +973,11 @@ function MainApp() {
     }
   };
 
-  // Muat data respons sebuah form dari MySQL (sekali per form)
+  // Muat ulang data respons sebuah form dari server (selalu segar, tidak pakai cache lama)
   const ensureResponsesLoaded = async (formId: string) => {
-    if (formResponsesMap[formId]) return;
     try {
       const { submissions } = await api.listSubmissions(formId);
-      setFormResponsesMap((prev) => (prev[formId] ? prev : { ...prev, [formId]: submissions }));
+      setFormResponsesMap((prev) => ({ ...prev, [formId]: submissions }));
     } catch (e) {
       console.error('Gagal memuat respons', e);
     }

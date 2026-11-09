@@ -155,7 +155,10 @@ function collabRowToItem(row: Row) {
 }
 
 async function getFormAccess(user: Row, formId: string): Promise<{ form: Row; role: AccessRole } | null> {
-  const formRows = await q<Row[]>(`SELECT * FROM forms WHERE id = ?`, [formId]);
+  let formRows = await q<Row[]>(`SELECT * FROM forms WHERE id = ?`, [formId]);
+  if (!formRows.length) {
+    formRows = await q<Row[]>(`SELECT * FROM forms WHERE slug = ?`, [formId]);
+  }
   if (!formRows.length) return null;
   const form = formRows[0];
   if (form.user_id === user.id) return { form, role: 'owner' };
@@ -164,7 +167,7 @@ async function getFormAccess(user: Row, formId: string): Promise<{ form: Row; ro
     `SELECT * FROM form_collaborators
      WHERE form_id = ? AND status = 'active' AND (user_id = ? OR LOWER(email) = LOWER(?))
      LIMIT 1`,
-    [formId, user.id, user.email]
+    [form.id, user.id, user.email]
   );
   if (!collabRows.length) return { form, role: null };
 
@@ -951,7 +954,7 @@ router.get(
     const user = (req as any).user as Row;
     const access = await getFormAccess(user, req.params.id);
     if (!access || !access.role) return fail(res, 404, 'Form not found');
-    const rows = await q<Row[]>(`SELECT * FROM submissions WHERE form_id = ? ORDER BY submitted_at DESC`, [req.params.id]);
+    const rows = await q<Row[]>(`SELECT * FROM submissions WHERE form_id = ? ORDER BY submitted_at DESC`, [access.form.id]);
     ok(res, {
       submissions: rows.map((r) => ({
         id: r.id,

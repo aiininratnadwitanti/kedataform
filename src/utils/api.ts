@@ -222,11 +222,11 @@ export const api = {
   },
 
   listSubmissions(formId: string): Promise<{ submissions: FormSubmission[] }> {
-    return request(`/forms/${formId}/submissions`);
+    return request(`/forms/${encodeURIComponent(formId)}/submissions`);
   },
 
   submit(formId: string, answers: Record<string, any>): Promise<{ submission: FormSubmission }> {
-    return request(`/forms/${formId}/submissions`, {
+    return request(`/forms/${encodeURIComponent(formId)}/submissions`, {
       method: 'POST',
       body: JSON.stringify({ answers }),
     });

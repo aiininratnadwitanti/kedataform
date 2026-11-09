@@ -104,14 +104,10 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
       });
 
       const optionsData = (activeQuestion.options || []).map((opt, idx) => {
-        let count = counts[opt.text] || 0;
-        
-        if (count === 0 && total > 0) {
-          const distribution = [30, 29, 29, 10];
-          count = distribution[idx % distribution.length] || 5;
-        }
+        const count = counts[opt.text] || 0;
 
-        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        const base = answeredCount || total;
+        const pct = base > 0 ? Math.round((count / base) * 100) : 0;
         const solidColor = SOLID_PALETTE[idx % SOLID_PALETTE.length];
 
         return {
@@ -146,7 +142,7 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
       const distribution: { label: string; count: number; percentage: number }[] = [];
 
       for (let i = min; i <= max; i++) {
-        const valCount = answersForQ.filter((a) => Number(a) === i).length || Math.max(1, Math.round(total * (i === max ? 0.55 : i === max - 1 ? 0.3 : 0.05)));
+        const valCount = answersForQ.filter((a) => Number(a) === i).length;
         distribution.push({
           label: `${i} ★`,
           count: valCount,
