@@ -120,12 +120,10 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const whatsappMessage = encodeURIComponent(
     `Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${formUrl}`
   );
-  const qrCaption = `Scan QR untuk membuka formulir "${form.title}"`;
+  const qrCaption = `Yuk, isi formulir "${form.title}"!\nScan QR atau klik link berikut: ${formUrl}\nTerima kasih atas waktu Anda.`;
   const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
 
   const handleShareQrWhatsApp = async () => {
-    // Tulis judul + link di bawah QR di dalam gambarnya agar terbawa ke WhatsApp
-    // (WA tidak konsisten memuat teks `share` bersama file; caption di gambar selalu terbawa).
     const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=16&data=${encodeURIComponent(formUrl)}`;
     let blob: Blob;
     try {
@@ -135,101 +133,18 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
       return;
     }
-    let imgBlob = blob;
-    try {
-      imgBlob = await new Promise<Blob>((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          const W = img.width;
-          const padX = Math.round(W * 0.05);
-          const padTop = Math.round(W * 0.08);
-          const padBot = Math.round(W * 0.06);
-          const fontSize = Math.round(W * 0.048);
-          const linkSize = Math.round(W * 0.038);
-          const meas = document.createElement('canvas').getContext('2d');
-          if (!meas) return reject(new Error('canvas'));
-          meas.font = `600 ${fontSize}px sans-serif`;
-          const titleLines = (() => {
-            const words = qrCaption.split(' ');
-            const lines: string[] = [];
-            let cur = '';
-            for (const w of words) {
-              const t = cur ? `${cur} ${w}` : w;
-              if (meas.measureText(t).width > W - padX * 2 && cur) {
-                lines.push(cur);
-                cur = w;
-              } else cur = t;
-            }
-            if (cur) lines.push(cur);
-            return lines;
-          })();
-          meas.font = `400 ${linkSize}px sans-serif`;
-          const linkLines = (() => {
-            const max = W - padX * 2;
-            const parts = [formUrl];
-            const ls: string[] = [];
-            for (const p of parts) {
-              if (meas.measureText(p).width <= max) ls.push(p);
-              else {
-                let cur = '';
-                for (const ch of p) {
-                  const t = cur + ch;
-                  if (meas.measureText(t).width > max && cur) {
-                    ls.push(cur);
-                    cur = ch;
-                  } else cur = t;
-                }
-                if (cur) ls.push(cur);
-              }
-            }
-            return ls;
-          })();
-          const lineH = fontSize * 1.3;
-          const linkH = linkSize * 1.35;
-          const textH = padTop + titleLines.length * lineH + linkLines.length * linkH + padBot;
-          const canvas = document.createElement('canvas');
-          canvas.width = W;
-          canvas.height = img.height + textH;
-          const c = canvas.getContext('2d');
-          if (!c) return reject(new Error('canvas'));
-          c.fillStyle = '#ffffff';
-          c.fillRect(0, 0, canvas.width, canvas.height);
-          c.drawImage(img, 0, 0);
-          c.textAlign = 'center';
-          let y = textH;
-          c.fillStyle = '#1a2d4a';
-          c.font = `600 ${fontSize}px sans-serif`;
-          c.textBaseline = 'bottom';
-          for (let i = titleLines.length - 1; i >= 0; i--) {
-            y -= lineH;
-            c.fillText(titleLines[i], W / 2, y + lineH);
-          }
-          c.fillStyle = '#475569';
-          c.font = `400 ${linkSize}px sans-serif`;
-          for (const ln of linkLines) {
-            y -= linkH;
-            c.fillText(ln, W / 2, y + linkH);
-          }
-          canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('canvas'))), 'image/png');
-        };
-        img.onerror = reject;
-        img.src = URL.createObjectURL(blob);
-      });
-    } catch {
-      imgBlob = blob;
-    }
-    const file = new File([imgBlob], qrFilename, { type: 'image/png' });
+    const file = new File([blob], qrFilename, { type: 'image/png' });
     const nav: any = navigator as any;
-    if (nav.canShare && nav.canShare({ files: [file] })) {
+    if (nav.canShare && nav.canShare({ files: [file], text: qrCaption })) {
       try {
-        await nav.share({ files: [file], title: `Formulir ${form.title}` });
+        await nav.share({ files: [file], text: qrCaption, title: `Formulir ${form.title}` });
         return;
       } catch {
-        // user batal atau share gagal -> lanjut unduh
+        // user batal atau share gagal
       }
     }
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(imgBlob);
+    link.href = URL.createObjectURL(blob);
     link.download = qrFilename;
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 3000);
