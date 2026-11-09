@@ -118,6 +118,7 @@ interface DashboardViewProps {
   onOpenAuthModal?: () => void;
   formResponsesMap: Record<string, FormSubmission[]>;
   onUpdateResponsesMap?: (newMap: Record<string, FormSubmission[]>) => void;
+  onOpenResponses?: (formId: string) => void | Promise<void>;
   onOpenAiGenerator?: () => void;
   onOpenSettings?: () => void;
   systemSettings?: SystemSettings;
@@ -142,6 +143,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onSignOut,
   formResponsesMap,
   onUpdateResponsesMap,
+  onOpenResponses,
   onOpenAiGenerator,
   systemSettings,
   onUpdateSystemSettings,
@@ -860,7 +862,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const handleOpenResponsesFromMenu = (formId: string) => {
+  const handleOpenResponsesFromMenu = async (formId: string) => {
+    if (onOpenResponses) await onOpenResponses(formId);
     setSelectedFormForResponsesId(formId);
     setIsViewingResponses(true);
     setActiveMenuFormId(null);

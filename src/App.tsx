@@ -983,6 +983,11 @@ function MainApp() {
     }
   };
 
+  // Buka modal data responden dari Dashboard - pastikan selalu segar agar angka menu sama dengan isi modal
+  const handleOpenResponses = async (formId: string) => {
+    await ensureResponsesLoaded(formId);
+  };
+
   // Sinkronkan perubahan daftar form dari DashboardView ke MySQL (buat/ubah/hapus)
   const handleUpdateRecentForms = (updater: RecentFormItem[] | ((prev: RecentFormItem[]) => RecentFormItem[])) => {
     setRecentForms((prev) => {
@@ -1093,6 +1098,7 @@ function MainApp() {
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           formResponsesMap={formResponsesMap}
           onUpdateResponsesMap={setFormResponsesMap}
+          onOpenResponses={handleOpenResponses}
           onOpenAiGenerator={() => setIsAiModalOpen(true)}
           onOpenSettings={() => setIsSettingsModalOpen(true)}
           systemSettings={systemSettings}
