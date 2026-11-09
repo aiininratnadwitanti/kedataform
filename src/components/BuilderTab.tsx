@@ -15,6 +15,7 @@ import {
   Star,
   SlidersHorizontal,
   Calendar,
+  Clock,
   Layers,
   Sparkles,
   FileText,
@@ -56,6 +57,7 @@ const ELEMENT_CATALOG: { type: QuestionType; label: string; desc: string; icon: 
   { type: 'rating', label: 'Rating Bintang', desc: 'Skala 1 - 5 bintang', icon: <Star className="w-4 h-4 text-neutral-700" /> },
   { type: 'linear_scale', label: 'Skala Nilai 1 - 5', desc: 'Penilaian angka berurutan', icon: <SlidersHorizontal className="w-4 h-4 text-neutral-700" /> },
   { type: 'date', label: 'Pemilih Tanggal', desc: 'Kalender tanggal acara/sesi', icon: <Calendar className="w-4 h-4 text-neutral-700" /> },
+  { type: 'time', label: 'Pemilih Jam', desc: 'Input jam / waktu', icon: <Clock className="w-4 h-4 text-neutral-700" /> },
 ];
 
 export const BuilderTab: React.FC<BuilderTabProps> = ({
@@ -82,6 +84,9 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
   const [showBottomAddMenu, setShowBottomAddMenu] = useState(false);
   const [openTypeDropdownId, setOpenTypeDropdownId] = useState<string | null>(null);
   const [editingImageForId, setEditingImageForId] = useState<string | null>(null);
+  // Drag & drop untuk mengurutkan ulang elemen
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const heroFileInputRef = React.useRef<HTMLInputElement>(null);
   const bottomMenuRef = React.useRef<HTMLDivElement>(null);
 
@@ -232,6 +237,15 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
       };
     }
 
+    if (type === 'date' || type === 'time') {
+      return {
+        id: newId,
+        type,
+        title: type === 'date' ? 'Tanggal' : 'Jam / Waktu',
+        required: false,
+      };
+    }
+
     return {
       id: newId,
       type,
@@ -272,6 +286,42 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
     const [movedItem] = newQuestions.splice(index, 1);
     newQuestions.splice(targetIndex, 0, movedItem);
     onChangeForm({ ...form, questions: newQuestions });
+  };
+
+  // Drag & drop: mulai menyeret elemen
+  const handleDragStart = (index: number) => {
+    if (readOnly) return;
+    setDraggingIndex(index);
+    setDragOverIndex(null);
+  };
+
+  // Drag & drop: saat melewati kartu lain
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    if (readOnly || draggingIndex === null) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) setDragOverIndex(index);
+  };
+
+  // Drag & drop: lepas di posisi kartu tujuan
+  const handleDropAt = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (readOnly || draggingIndex === null || draggingIndex === index) {
+      setDraggingIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const newQuestions = [...form.questions];
+    const [movedItem] = newQuestions.splice(draggingIndex, 1);
+    newQuestions.splice(index, 0, movedItem);
+    onChangeForm({ ...form, questions: newQuestions });
+    setDraggingIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingIndex(null);
+    setDragOverIndex(null);
   };
 
   // Duplikat label
@@ -360,7 +410,7 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
 
   const handleDeleteOption = (qId: string, optId: string) => {
     const target = form.questions.find((q) => q.id === qId);
-    if (!target || !target.options || target.options.length <= 1) return;
+    if (!target || !target.options) return;
     const newOptions = target.options.filter((opt) => opt.id !== optId);
     handleUpdateQuestion(qId, { options: newOptions });
   };
@@ -623,6 +673,8 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
           const isActive = activeQuestionId === question.id;
           const isImageBlock = question.type === 'image_block';
           const isSectionHeader = question.type === 'section_header';
+          const isDragging = draggingIndex === index;
+          const isDragOver = dragOverIndex === index && draggingIndex !== null && draggingIndex !== index;
 
           return (
             <React.Fragment key={question.id}>
@@ -679,9 +731,24 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
               {/* KARTU LABEL / PERTANYAAN */}
               <div
                 onClick={() => setActiveQuestionId(question.id)}
+                draggable={!readOnly}
+                onDragStart={(e) => {
+                  const target = e.target as HTMLElement;
+                  // Jangan mulai drag dari kontrol interaktif (input/tombol/tautan)
+                  if (target.closest('input, textarea, select, button, a, [contenteditable="true"]')) {
+                    e.preventDefault();
+                    return;
+                  }
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', String(index));
+                  handleDragStart(index);
+                }}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={(e) => handleDropAt(e, index)}
                 className={`border transition-all relative ${
                   isActive ? 'z-20' : 'cursor-pointer hover:shadow-sm z-10'
-                }`}
+                } ${isDragging ? 'opacity-50' : ''}`}
                 style={{
                   borderRadius: `${form.theme?.borderRadiusNum ?? 20}px`,
                   backgroundColor: form.theme?.cardBg || '#ffffff',
@@ -693,6 +760,9 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                     : '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
                 }}
               >
+                {isDragOver && (
+                  <div className="absolute -top-1.5 left-3 right-3 h-1 rounded-full z-30" style={{ backgroundColor: form.theme?.primaryColor || '#223A5E' }} />
+                )}
                 <div className="p-5 sm:p-6 space-y-3">
                   {/* Baris Atas: Bobot Nilai Soal (Hanya jika Kuis), Judul Label, & Dropdown Ganti Tipe */}
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -748,71 +818,6 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                       </div>
                     </div>
 
-                    {/* Dropdown Ganti Tipe Bebas - Modern Custom Popover */}
-                    {isActive && (() => {
-                      const currentItem = ELEMENT_CATALOG.find((cat) => cat.type === question.type) || ELEMENT_CATALOG[0];
-                      const isOpen = openTypeDropdownId === question.id;
-
-                      return (
-                        <div className="relative shrink-0 sm:ml-2">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenTypeDropdownId(isOpen ? null : question.id);
-                            }}
-                            className="bg-white hover:bg-blue-50/80 active:bg-blue-100 border border-blue-200 hover:border-blue-300 text-slate-800 text-xs font-semibold rounded-xl px-3.5 py-2 flex items-center justify-between gap-2.5 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#223A5E]/10 cursor-pointer"
-                            title="Ganti tipe pertanyaan"
-                          >
-                            <span className="whitespace-nowrap font-medium text-slate-900">{currentItem.label}</span>
-                            <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
-                          </button>
-
-                          {isOpen && (
-                            <>
-                              {/* Backdrop for click outside */}
-                              <div 
-                                className="fixed inset-0 z-40" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenTypeDropdownId(null);
-                                }} 
-                              />
-
-                              {/* Modern White Menu Panel - Text Only */}
-                              <div 
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 top-full mt-1.5 w-60 bg-white rounded-xl shadow-2xl border border-blue-200/90 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
-                              >
-                                {ELEMENT_CATALOG.map((item) => {
-                                  const isSelected = item.type === question.type;
-                                  return (
-                                    <button
-                                      key={item.type}
-                                      type="button"
-                                      onClick={() => {
-                                        handleChangeType(question.id, item.type);
-                                        setOpenTypeDropdownId(null);
-                                      }}
-                                      className={`w-full px-4 py-2 text-left text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                                        isSelected 
-                                          ? 'bg-blue-50 text-[var(--system-primary)] font-bold' 
-                                          : 'hover:bg-blue-50/60 text-slate-700 font-medium'
-                                      }`}
-                                    >
-                                      <span>{item.label}</span>
-                                      {isSelected && (
-                                        <Check className="w-3.5 h-3.5 text-[var(--system-primary)] shrink-0" />
-                                      )}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      );
-                    })()}
                   </div>
 
                   {/* GAMBAR KHUSUS BLOK GAMBAR (IMAGE_BLOCK) */}
@@ -975,14 +980,14 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                 </button>
                               )}
 
-                              {isActive && (question.options?.length || 0) > 1 && (
+                              {isActive && (
                                 <button
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteOption(question.id, opt.id);
                                   }}
-                                  className="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="text-slate-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
                                   title="Hapus pilihan"
                                 >
                                   <X className="w-3.5 h-3.5" />
@@ -1047,14 +1052,14 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                 </button>
                               )}
 
-                              {isActive && (question.options?.length || 0) > 1 && (
+                              {isActive && (
                                 <button
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteOption(question.id, opt.id);
                                   }}
-                                  className="text-neutral-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100"
+                                  className="text-neutral-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -1116,14 +1121,14 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                                 </button>
                               )}
 
-                              {isActive && (question.options?.length || 0) > 1 && (
+                              {isActive && (
                                 <button
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteOption(question.id, opt.id);
                                   }}
-                                  className="text-neutral-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100"
+                                  className="text-neutral-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -1192,42 +1197,63 @@ export const BuilderTab: React.FC<BuilderTabProps> = ({
                         <span>Hari / Bulan / Tahun</span>
                       </div>
                     )}
+
+                    {/* Jam */}
+                    {question.type === 'time' && (
+                      <div className="flex items-center gap-2 py-1 text-xs text-neutral-500 font-mono">
+                        <Clock className="w-4 h-4 text-neutral-600" />
+                        <span>Jam : Menit</span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* PREVIEW ISIAN KE-2 */}
+                  {question.secondaryType && !isImageBlock && !isSectionHeader && (
+                    <div className="px-5 sm:px-6 pb-3 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Isian ke-2 (opsional)</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleUpdateQuestion(question.id, { secondaryType: undefined }); }}
+                          className="text-slate-400 hover:text-red-500 p-0.5 cursor-pointer"
+                          title="Hapus isian ke-2"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      {question.secondaryType === 'date' ? (
+                        <div className="flex items-center gap-2 text-xs text-neutral-500 font-mono border border-neutral-200 rounded-lg px-3 py-2 bg-neutral-50">
+                          <Calendar className="w-4 h-4" /> <span>Hari / Bulan / Tahun</span>
+                        </div>
+                      ) : question.secondaryType === 'time' ? (
+                        <div className="flex items-center gap-2 text-xs text-neutral-500 font-mono border border-neutral-200 rounded-lg px-3 py-2 bg-neutral-50">
+                          <Clock className="w-4 h-4" /> <span>Jam : Menit</span>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-neutral-400 border border-neutral-200 rounded-lg px-3 py-2 bg-neutral-50">Isian teks singkat tambahan...</div>
+                      )}
+                    </div>
+                  )}
 
                   {/* BARIS AKSI: GESER URUTAN (NAIK/TURUN), DUPLIKAT, HAPUS, & GAMBAR */}
                   {isActive && (
                     <div className="mt-4 pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-600">
                       
-                      {/* FITUR GESER URUTAN (MOVE UP / DOWN) */}
-                      <div className="flex items-center gap-1.5 bg-blue-50/80 p-1 rounded-lg border border-blue-200/70">
-                        <span className="text-[11px] font-medium text-slate-500 px-1">Geser:</span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMove(index, 'up');
-                          }}
-                          disabled={index === 0}
-                          className="p-1 rounded hover:bg-white text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent flex items-center gap-1 cursor-pointer"
-                          title="Geser ke atas"
-                        >
-                          <ArrowUp className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">Naik</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMove(index, 'down');
-                          }}
-                          disabled={index === form.questions.length - 1}
-                          className="p-1 rounded hover:bg-white text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent flex items-center gap-1 cursor-pointer"
-                          title="Geser ke bawah"
-                        >
-                          <ArrowDown className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">Turun</span>
-                        </button>
-                      </div>
+                      {/* Isian ke-2 (opsional): tambahkan tanggal/jam/teks di elemen yang sama */}
+                      {!isImageBlock && !isSectionHeader && (
+                        <label onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-slate-700">
+                          <span className="text-[11px] font-semibold">Isian ke-2:</span>
+                          <select
+                            value={question.secondaryType || ''}
+                            onChange={(e) => handleUpdateQuestion(question.id, { secondaryType: (e.target.value || undefined) as any })}
+                            className="text-[11px] border border-blue-200 rounded-lg px-2 py-1 bg-white text-slate-700 cursor-pointer focus:outline-none focus:border-[var(--system-primary)]"
+                          >
+                            <option value="">Tidak ada</option>
+                            <option value="date">Tanggal</option>
+                            <option value="time">Jam</option>
+                          </select>
+                        </label>
+                      )}
 
                       {/* Tombol Sisipkan Gambar ke Pertanyaan Ini */}
                       <button

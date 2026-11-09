@@ -700,6 +700,12 @@ export const LiveFormView: React.FC<LiveFormViewProps> = ({
                         {/* Render Inputs */}
                         {renderInputs(q, answers, handleAnswerChange, handleToggleCheckbox, theme.primaryColor)}
 
+                        {q.secondaryType && ['date', 'time', 'short_text'].includes(q.secondaryType) && (
+                          <div className="pt-2">
+                            {renderSecondaryInput(q, answers, handleAnswerChange)}
+                          </div>
+                        )}
+
                         {errors[q.id] && (
                           <p className="text-xs text-red-500 font-medium mt-2">
                             {errors[q.id]}
@@ -916,7 +922,58 @@ function renderInputs(
         />
       );
 
+    case 'time':
+      return (
+        <input
+          type="time"
+          value={current || ''}
+          onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+          className="border border-blue-300 rounded-xl p-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 bg-white"
+        />
+      );
+
     default:
       return null;
   }
+}
+
+function renderSecondaryInput(
+  q: Question,
+  answers: Record<string, any>,
+  handleAnswerChange: (id: string, val: any) => void
+) {
+  const key = `${q.id}__secondary`;
+  const current = answers[key];
+
+  if (q.secondaryType === 'date') {
+    return (
+      <input
+        type="date"
+        value={current || ''}
+        onChange={(e) => handleAnswerChange(key, e.target.value)}
+        className="border border-blue-300 rounded-xl p-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 bg-white"
+      />
+    );
+  }
+
+  if (q.secondaryType === 'time') {
+    return (
+      <input
+        type="time"
+        value={current || ''}
+        onChange={(e) => handleAnswerChange(key, e.target.value)}
+        className="border border-blue-300 rounded-xl p-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-[#223A5E] focus:ring-2 focus:ring-blue-100 bg-white"
+      />
+    );
+  }
+
+  return (
+    <input
+      type="text"
+      value={current || ''}
+      onChange={(e) => handleAnswerChange(key, e.target.value)}
+      placeholder="Isian tambahan..."
+      className="w-full text-xs sm:text-sm border-b border-blue-300 focus:border-[#223A5E] focus:outline-none py-2 bg-transparent text-slate-900 transition-colors"
+    />
+  );
 }
