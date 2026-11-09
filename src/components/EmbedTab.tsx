@@ -3,6 +3,7 @@ import {
   Copy, 
   Check, 
   Send, 
+  QrCode,
   FileSpreadsheet, 
   Download, 
   Link2, 
@@ -30,6 +31,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
 }) => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.app';
   const formUrl = formShareUrl(form, origin);
@@ -159,7 +161,33 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
             <span>Kirim Cepat ke WhatsApp</span>
           </a>
 
+          <button
+            type="button"
+            onClick={() => setShowQR((v) => !v)}
+            className="inline-flex text-xs font-bold text-[var(--system-primary)] hover:opacity-75 items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-2.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>{showQR ? 'Sembunyikan QR' : 'Tampilkan Kode QR'}</span>
+          </button>
         </div>
+
+        {showQR && (
+          <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200 flex flex-col sm:flex-row items-center gap-4 animate-in fade-in duration-200">
+            <div className="w-32 h-32 bg-white p-2 rounded-xl border border-blue-200 shadow-2xs flex items-center justify-center shrink-0">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(formUrl)}`}
+                alt="QR Code Formulir"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="space-y-1 text-center sm:text-left">
+              <h4 className="text-xs font-bold text-slate-900">Scan Kode QR Langsung</h4>
+              <p className="text-xs text-slate-600 leading-relaxed max-w-md">
+                Scan QR untuk langsung ke formulir.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ALUR 2: SEMATKAN KE WEBSITE (IFRAME) */}
