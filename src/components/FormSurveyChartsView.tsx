@@ -327,46 +327,6 @@ export const FormSurveyChartsView: React.FC<FormSurveyChartsViewProps> = ({
         </div>
       )}
 
-      {/* 4. KESIMPULAN RINGKAS (CLEAN METRICS, TANPA BANYAK TULISAN) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-0.5">
-        
-        <div className="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200">
-          <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-            Pilihan Terbanyak
-          </div>
-          <div className="text-xs font-bold text-neutral-900 truncate mt-0.5">
-            {activeQuestionStats.topOption?.label || '-'}
-          </div>
-          <div className="text-xs font-mono font-semibold text-neutral-600">
-            {activeQuestionStats.topOption?.count || 0} suara ({activeQuestionStats.topOption?.percentage || 0}%)
-          </div>
-        </div>
-
-        <div className="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200">
-          <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-            Pilihan Kedua
-          </div>
-          <div className="text-xs font-bold text-neutral-900 truncate mt-0.5">
-            {activeQuestionStats.secondOption?.label || '-'}
-          </div>
-          <div className="text-xs font-mono font-semibold text-neutral-600">
-            {activeQuestionStats.secondOption?.count || 0} suara ({activeQuestionStats.secondOption?.percentage || 0}%)
-          </div>
-        </div>
-
-        <div className="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200">
-          <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-            Kelengkapan Data
-          </div>
-          <div className="text-xs font-bold text-neutral-900 truncate mt-0.5">
-            {activeQuestionStats.totalAnswered} dari {total} Responden
-          </div>
-          <div className="text-xs font-mono font-semibold text-neutral-800">
-            100% Tanggapan Tervalidasi
-          </div>
-        </div>
-
-      </div>
 
     </div>
   );
