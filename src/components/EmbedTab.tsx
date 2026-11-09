@@ -180,21 +180,21 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
         if (!c) return reject(new Error('canvas'));
         c.fillStyle = '#ffffff';
         c.fillRect(0, 0, canvas.width, canvas.height);
-        c.drawImage(img, 0, 0);
+        c.drawImage(img, 0, textH);
         c.textAlign = 'center';
-        let y = textH;
+        c.textBaseline = 'top';
+        let y = padTop;
         c.fillStyle = '#1a2d4a';
         c.font = `600 ${fontSize}px sans-serif`;
-        c.textBaseline = 'bottom';
-        for (let i = titleLines.length - 1; i >= 0; i--) {
-          y -= lineH;
-          c.fillText(titleLines[i], W / 2, y + lineH);
+        for (const ln of titleLines) {
+          c.fillText(ln, W / 2, y);
+          y += lineH;
         }
         c.fillStyle = '#475569';
         c.font = `400 ${linkSize}px sans-serif`;
         for (const ln of linkLines) {
-          y -= linkH;
-          c.fillText(ln, W / 2, y + linkH);
+          c.fillText(ln, W / 2, y);
+          y += linkH;
         }
         canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('canvas'))), 'image/png');
       };
