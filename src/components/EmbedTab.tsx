@@ -128,54 +128,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
     try {
       const res = await fetch(qrApi);
       const blob = await res.blob();
-      // Gabungkan caption ke dalam gambar QR (tekanan + teks di atas QR, bukan link terpisah)
-      const imgBlob = await new Promise<Blob>((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const W = img.width;
-          const padX = Math.round(W * 0.06);
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return reject(new Error('Canvas tidak tersedia'));
-          const fontSize = Math.round(W * 0.045);
-          ctx.font = `600 ${fontSize}px sans-serif`;
-          const wrapText = (t: string, maxW: number) => {
-            const words = t.split(' ');
-            const lines: string[] = [];
-            let cur = '';
-            for (const w of words) {
-              const test = cur ? `${cur} ${w}` : w;
-              if (ctx.measureText(test).width > maxW && cur) {
-                lines.push(cur);
-                cur = w;
-              } else cur = test;
-            }
-            if (cur) lines.push(cur);
-            return lines;
-          };
-          const lines = wrapText(qrCaption, W - padX * 2);
-          const lineH = fontSize * 1.35;
-          const textH = lines.length * lineH + padX * 1.5;
-          canvas.width = W;
-          canvas.height = img.height + textH;
-          const c = canvas.getContext('2d');
-          if (!c) return reject(new Error('Canvas tidak tersedia'));
-          c.fillStyle = '#ffffff';
-          c.fillRect(0, 0, canvas.width, canvas.height);
-          c.drawImage(img, 0, textH);
-          c.fillStyle = '#111827';
-          c.font = `600 ${fontSize}px sans-serif`;
-          c.textAlign = 'center';
-          c.textBaseline = 'middle';
-          lines.forEach((ln, i) => {
-            c.fillText(ln, W / 2, padX * 0.6 + lineH * (i + 0.5));
-          });
-          canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Gagal membuat gambar'))), 'image/png');
-        };
-        img.onerror = reject;
-        img.src = URL.createObjectURL(blob);
-      });
-      const file = new File([imgBlob], qrFilename, { type: 'image/png' });
+      const file = new File([blob], qrFilename, { type: 'image/png' });
       const nav: any = navigator as any;
       if (nav.canShare && nav.canShare({ files: [file] })) {
         await nav.share({
@@ -186,7 +139,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
         return;
       }
       const link = document.createElement('a');
-      link.href = URL.createObjectURL(imgBlob);
+      link.href = URL.createObjectURL(blob);
       link.download = qrFilename;
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 3000);
