@@ -123,10 +123,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const qrCaption = `Yuk, isi formulir "${form.title}"!\nScan QR atau klik link berikut: ${formUrl}\nTerima kasih atas waktu Anda.`;
   const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
 
-  const handleShareQrWhatsApp = async () => {
-    // Satu-satunya cara mengesankan foto + teks ke WhatsApp sebagai satu pesan
-    // adalah Web Share API dengan file + text. Di ponsel yang mendukung share
-    // file, WhatsApp akan menerima satu pesan berisi keduanya.
+  const handleShareQr = async () => {
     const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=16&data=${encodeURIComponent(formUrl)}`;
     try {
       const res = await fetch(qrApi, { cache: 'no-store' });
@@ -138,10 +135,16 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
         await nav.share(payload);
         return;
       }
+      // Fallback desktop: salin teks + unduh QR
+      await navigator.clipboard.writeText(qrCaption);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = qrFilename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 3000);
     } catch (e) {
-      // diamkan: fallback di bawah
+      // diamkan
     }
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
   };
 
   return (
@@ -307,7 +310,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
 
               <div className="space-y-1">
                 <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">Kode QR Formulir</h3>
-                <p className="text-xs text-slate-600">Scan dengan kamera ponsel untuk membuka formulir, atau bagikan sebagai gambar via WhatsApp.</p>
+                <p className="text-xs text-slate-600">Scan dengan kamera ponsel untuk membuka formulir, atau bagikan sebagai gambar.</p>
               </div>
 
               <div className="w-56 h-56 mx-auto bg-white p-3 rounded-2xl border border-blue-200 shadow-2xs flex items-center justify-center">
@@ -323,15 +326,15 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
               <div className="flex flex-col sm:flex-row items-center gap-2 justify-center">
                 <button
                   type="button"
-                  onClick={handleShareQrWhatsApp}
+                  onClick={handleShareQr}
                   className="w-full sm:w-auto inline-flex justify-center py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl items-center gap-2 transition-colors shadow-2xs cursor-pointer"
                 >
                   <Share className="w-4 h-4" />
-                  <span>Bagikan QR via WhatsApp</span>
+                  <span>Bagikan QR</span>
                 </button>
               </div>
 
-              <p className="text-[10px] text-slate-500">Satu kiriman: foto QR + teks ajakan terkirim bersamaan ke WhatsApp (tanpa mengetik manual).</p>
+              <p className="text-[10px] text-slate-500">Bagikan QR + teks ajakan sebagai satu kiriman (di ponsel). Di desktop, teks disalin dan QR diunduh.</p>
             </div>
           </div>
         </div>
