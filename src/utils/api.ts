@@ -21,6 +21,8 @@ export interface ApiUser {
 export interface RecentFormItem {
   id: string;
   title: string;
+  name?: string;
+  slug?: string;
   lastOpened: string;
   responseCount: number;
   coverImage?: string;

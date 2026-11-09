@@ -27,6 +27,7 @@ import {
   QrCode
 } from 'lucide-react';
 import { FormSchema, FormQuizConfig, FormScheduleConfig, Question } from '../types/form';
+import { formShareUrl } from '../utils/formUtils';
 import confetti from 'canvas-confetti';
 import { getContrastTextColor } from './SystemSettingsModal';
 
@@ -54,9 +55,8 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
   const [showMissingAlertModal, setShowMissingAlertModal] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
-  // Origin aktual (bukan domain hardcoded) agar tautan & QR selalu mengarah ke aplikasi ini.
-  const shareOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.vercel.app';
-  const shareUrl = `${shareOrigin}/f/${form.id}`;
+  // Tautan publik berbasis slug nama formulir (fallback id jika belum ada).
+  const shareUrl = formShareUrl(form);
 
   // Ref untuk scroll otomatis ke soal yang belum ada kunci
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});

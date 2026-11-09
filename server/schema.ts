@@ -111,9 +111,16 @@ export async function ensureSchema(): Promise<void> {
   await addColumn('forms', 'is_template', 'is_template TINYINT(1) NOT NULL DEFAULT 0');
   await addColumn('forms', 'status', "status ENUM('draft','published','closed') NOT NULL DEFAULT 'draft'");
   await addColumn('forms', 'name', 'name VARCHAR(255) NULL');
+  await addColumn('forms', 'slug', 'slug VARCHAR(255) NULL');
+  try {
+    await q('CREATE UNIQUE INDEX uq_forms_slug ON forms (slug)');
+  } catch {
+    // index may already exist
+  }
   await q(`ALTER TABLE forms MODIFY last_opened DATETIME NULL`);
   await q(`ALTER TABLE forms MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
   await q(`ALTER TABLE forms MODIFY updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`);
+  await backfillFormSlugs();
 
   await q(`CREATE TABLE IF NOT EXISTS form_collaborators (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
@@ -222,6 +229,50 @@ export async function ensureSchema(): Promise<void> {
 
   await seedTemplates();
 }
+
+function slugifyBase(input: string): string {
+  const s = String(input || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+    .replace(/-+$/g, '');
+  return s || 'formulir';
+}
+
+async function uniqueSlug(conn: { query: (sql: string, params?: any[]) => Promise<any> }, base: string, excludeId?: string): Promise<string> {
+  let candidate = base;
+  let n = 2;
+  for (;;) {
+    const [rows]: any = excludeId
+      ? await conn.query('SELECT id FROM forms WHERE slug = ? AND id <> ? LIMIT 1', [candidate, excludeId])
+      : await conn.query('SELECT id FROM forms WHERE slug = ? LIMIT 1', [candidate]);
+    if (!rows || (Array.isArray(rows) && rows.length === 0)) return candidate;
+    candidate = `${base}-${n}`;
+    n += 1;
+    if (n > 500) return `${base}-${Date.now()}`;
+  }
+}
+
+async function backfillFormSlugs(): Promise<void> {
+  const rows = await q<any[]>(`SELECT id, name, title, slug FROM forms WHERE slug IS NULL OR slug = ''`);
+  if (!rows.length) return;
+  const { pool } = await import('./db');
+  const conn = await pool.getConnection();
+  try {
+    for (const r of rows) {
+      const base = slugifyBase(r.name || r.title || 'formulir');
+      const slug = await uniqueSlug(conn as any, base, r.id);
+      await conn.query('UPDATE forms SET slug = ? WHERE id = ?', [slug, r.id]);
+    }
+  } finally {
+    conn.release();
+  }
+}
+
+export { slugifyBase, uniqueSlug };
 
 export async function seedTemplates(): Promise<void> {
   const existing = await q<{ c: number }[]>(`SELECT COUNT(*) AS c FROM templates`);

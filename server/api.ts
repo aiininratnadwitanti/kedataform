@@ -1,6 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import crypto from 'crypto';
 import { q, withTransaction, Row } from './db';
+import { slugifyBase, uniqueSlug } from './schema';
 import {
   SESSION_COOKIE,
   createSession,
@@ -92,6 +93,7 @@ function rowToSchema(form: Row, questions: Row[]) {
     id: form.id,
     title: form.title,
     name: form.name ?? undefined,
+    slug: form.slug ?? undefined,
     description: form.description ?? '',
     coverImage: form.cover_image ?? undefined,
     folderId: form.folder_id ?? undefined,
@@ -121,6 +123,7 @@ function rowToRecentItem(
     id: form.id,
     title: form.title,
     name: form.name ?? undefined,
+    slug: form.slug ?? undefined,
     lastOpened: form.last_opened ? new Date(form.last_opened).toISOString() : 'Baru saja',
     responseCount,
     coverImage: form.cover_image || '',
@@ -219,19 +222,21 @@ function normalizeFormInput(body: any) {
 }
 
 async function writeForm(conn: any, userId: string, id: string, form: ReturnType<typeof normalizeFormInput>) {
+  const base = slugifyBase(form.name || form.title || 'formulir');
+  const slug = await uniqueSlug(conn, base, id);
   await conn.query(
     `INSERT INTO forms
-      (id, user_id, title, name, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg,
+      (id, user_id, title, name, slug, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg,
        theme, schedule, quiz_config, collaboration, status, last_opened, created_at, updated_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW(),NOW())
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW(),NOW())
      ON DUPLICATE KEY UPDATE
-       title=VALUES(title), name=VALUES(name), description=VALUES(description), cover_image=VALUES(cover_image),
+       title=VALUES(title), name=VALUES(name), slug=COALESCE(slug, VALUES(slug)), description=VALUES(description), cover_image=VALUES(cover_image),
        folder_id=VALUES(folder_id), folder_name=VALUES(folder_name), icon_type=VALUES(icon_type),
        accent_color=VALUES(accent_color), accent_bg=VALUES(accent_bg), theme=VALUES(theme),
        schedule=VALUES(schedule), quiz_config=VALUES(quiz_config), collaboration=VALUES(collaboration),
        status=VALUES(status), last_opened=NOW(), updated_at=NOW()`,
     [
-      id, userId, form.title, form.name, form.description, form.coverImage, form.folderId, form.folderName,
+      id, userId, form.title, form.name, slug, form.description, form.coverImage, form.folderId, form.folderName,
       form.iconType, form.accentColor, form.accentBg, j(form.theme), j(form.schedule),
       j(form.quizConfig), j(form.collaboration), form.status,
     ]
@@ -690,15 +695,17 @@ router.post(
     if (!rows.length) return fail(res, 404, 'Form not found');
     const newId = `form_${Date.now()}`;
     await withTransaction(async (conn) => {
+      const dupBase = slugifyBase(((rows[0].name || rows[0].title || 'formulir') as string) + ' salinan');
+      const dupSlug = await uniqueSlug(conn, dupBase);
       await conn.query(
-        `INSERT INTO forms (id, user_id, title, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg, theme, schedule, quiz_config, collaboration, status, last_opened, created_at, updated_at)
-         SELECT ?, user_id, CONCAT(title, ' (Salinan)'), description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg, theme, schedule, quiz_config, collaboration, 'draft', NOW(), NOW(), NOW()
+        `INSERT INTO forms (id, user_id, title, name, slug, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg, theme, schedule, quiz_config, collaboration, status, last_opened, created_at, updated_at)
+         SELECT ?, user_id, CONCAT(title, ' (Salinan)'), CONCAT(COALESCE(name, title), ' (Salinan)'), ?, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg, theme, schedule, quiz_config, collaboration, 'draft', NOW(), NOW(), NOW()
          FROM forms WHERE id = ?`,
-        [newId, req.params.id]
+        [newId, dupSlug, req.params.id]
       );
       await conn.query(
-        `INSERT INTO questions (form_id, id, position, type, title, description, required, options, scale_min, scale_max, scale_min_label, scale_max_label, placeholder, icon, image_url, image_caption, points, correct_answer, explanation)
-         SELECT ?, id, position, type, title, description, required, options, scale_min, scale_max, scale_min_label, scale_max_label, placeholder, icon, image_url, image_caption, points, correct_answer, explanation
+        `INSERT INTO questions (form_id, id, position, type, secondary_type, title, description, required, options, scale_min, scale_max, scale_min_label, scale_max_label, placeholder, icon, image_url, image_caption, points, correct_answer, explanation)
+         SELECT ?, id, position, type, secondary_type, title, description, required, options, scale_min, scale_max, scale_min_label, scale_max_label, placeholder, icon, image_url, image_caption, points, correct_answer, explanation
          FROM questions WHERE form_id = ?`,
         [newId, req.params.id]
       );
@@ -961,19 +968,27 @@ router.get(
 router.post(
   '/forms/:id/submissions',
   asyncH(async (req, res) => {
-    const rows = await q<Row[]>(
+    const key = req.params.id;
+    let rows = await q<Row[]>(
       `SELECT f.*, u.plan AS owner_plan, u.max_free_responses AS owner_max
-       FROM forms f JOIN users u ON u.id = f.user_id WHERE f.id = ?`,
-      [req.params.id]
+       FROM forms f JOIN users u ON u.id = f.user_id WHERE f.slug = ?`,
+      [key]
     );
+    if (!rows.length) {
+      rows = await q<Row[]>(
+        `SELECT f.*, u.plan AS owner_plan, u.max_free_responses AS owner_max
+         FROM forms f JOIN users u ON u.id = f.user_id WHERE f.id = ?`,
+        [key]
+      );
+    }
     if (!rows.length) return fail(res, 404, 'Form not found');
     const form = rows[0];
-    const questions = await q<Row[]>(`SELECT * FROM questions WHERE form_id = ? ORDER BY position`, [req.params.id]);
+    const questions = await q<Row[]>(`SELECT * FROM questions WHERE form_id = ? ORDER BY position`, [form.id]);
 
     const availability = isFormOpen(parseJson(form.schedule));
     if (!availability.open) return fail(res, 403, availability.reason);
 
-    const count = await q<{ c: number }[]>(`SELECT COUNT(*) AS c FROM submissions WHERE form_id = ?`, [req.params.id]);
+    const count = await q<{ c: number }[]>(`SELECT COUNT(*) AS c FROM submissions WHERE form_id = ?`, [form.id]);
     if (form.owner_plan !== 'pro' && Number(count[0]?.c || 0) >= Number(form.owner_max || 100)) {
       return fail(res, 403, 'Kuota respons gratis (100) sudah tercapai. Pemilik form perlu upgrade ke Pro.');
     }
@@ -993,7 +1008,7 @@ router.post(
     await q(
       `INSERT INTO submissions (id, form_id, submitted_at, answers, score, total_possible_score, is_passed, respondent_ip)
        VALUES (?,?,NOW(),?,?,?,?,?)`,
-      [id, req.params.id, j(answers), scoring.score ?? null, scoring.totalPossibleScore ?? null, scoring.isPassed === undefined ? null : scoring.isPassed ? 1 : 0, ip || null]
+      [id, form.id, j(answers), scoring.score ?? null, scoring.totalPossibleScore ?? null, scoring.isPassed === undefined ? null : scoring.isPassed ? 1 : 0, ip || null]
     );
     ok(
       res,
@@ -1170,11 +1185,16 @@ router.get(
 router.get(
   '/public/forms/:id',
   asyncH(async (req, res) => {
-    const rows = await q<Row[]>(`SELECT * FROM forms WHERE id = ?`, [req.params.id]);
+    const key = req.params.id;
+    let rows = await q<Row[]>(`SELECT * FROM forms WHERE slug = ? LIMIT 1`, [key]);
+    if (!rows.length) {
+      rows = await q<Row[]>(`SELECT * FROM forms WHERE id = ? LIMIT 1`, [key]);
+    }
     if (!rows.length) return fail(res, 404, 'Form not found');
-    const questions = await q<Row[]>(`SELECT * FROM questions WHERE form_id = ? ORDER BY position`, [req.params.id]);
-    const availability = isFormOpen(parseJson(rows[0].schedule));
-    ok(res, { form: rowToSchema(rows[0], questions), availability });
+    const formRow = rows[0];
+    const questions = await q<Row[]>(`SELECT * FROM questions WHERE form_id = ? ORDER BY position`, [formRow.id]);
+    const availability = isFormOpen(parseJson(formRow.schedule));
+    ok(res, { form: rowToSchema(formRow, questions), availability });
   })
 );
 

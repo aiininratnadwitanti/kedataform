@@ -12,6 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { FormSchema } from '../types/form';
+import { formShareUrl } from '../utils/formUtils';
 import confetti from 'canvas-confetti';
 
 interface EmbedTabProps {
@@ -33,7 +34,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const [showQR, setShowQR] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.app';
-  const formUrl = `${origin}/f/${form.id}`;
+  const formUrl = formShareUrl(form, origin);
   const embedUrl = `${formUrl}?embed=true`;
   const safeTitle = form.title.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const frameId = `kedataform-${form.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;

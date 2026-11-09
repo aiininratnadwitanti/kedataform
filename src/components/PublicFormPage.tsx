@@ -69,7 +69,7 @@ export const PublicFormPage: React.FC<PublicFormPageProps> = ({ formId, isEmbed 
       hideTopBar
       onClose={() => {}}
       onSubmit={async (answers) => {
-        await api.submit(form.id, answers);
+        await api.submit(form.slug || form.id, answers);
       }}
     />
   );

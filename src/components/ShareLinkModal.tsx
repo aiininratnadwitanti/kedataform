@@ -12,6 +12,7 @@ import {
   Eye
 } from 'lucide-react';
 import { FormSchema } from '../types/form';
+import { formShareUrl } from '../utils/formUtils';
 import confetti from 'canvas-confetti';
 
 interface ShareLinkModalProps {
@@ -34,9 +35,7 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
 
   if (!isOpen) return null;
 
-  const formUrl = `${
-    typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.vercel.app'
-  }/f/${form.id}`;
+  const formUrl = formShareUrl(form);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(formUrl);
