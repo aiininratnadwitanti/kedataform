@@ -123,28 +123,122 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const qrCaption = `Yuk, isi formulir "${form.title}"!\nScan QR atau klik link berikut: ${formUrl}\nTerima kasih atas waktu Anda.`;
   const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
 
+  // Gambar QR + teks di dalam gambarnya (supaya tetap ada saat dibagikan ke mana pun).
+  const buildQrWithCaption = (qrBlob: Blob): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const W = img.width;
+        const padX = Math.round(W * 0.05);
+        const padTop = Math.round(W * 0.06);
+        const padBot = Math.round(W * 0.06);
+        const fontSize = Math.round(W * 0.048);
+        const linkSize = Math.round(W * 0.038);
+        const meas = document.createElement('canvas').getContext('2d');
+        if (!meas) return reject(new Error('canvas'));
+        meas.font = `600 ${fontSize}px sans-serif`;
+        const titleLines = (() => {
+          const words = qrCaption.split('\n')[0].split(' ');
+          const lines: string[] = [];
+          let cur = '';
+          for (const w of words) {
+            const t = cur ? `${cur} ${w}` : w;
+            if (meas.measureText(t).width > W - padX * 2 && cur) {
+              lines.push(cur);
+              cur = w;
+            } else cur = t;
+          }
+          if (cur) lines.push(cur);
+          return lines;
+        })();
+        meas.font = `400 ${linkSize}px sans-serif`;
+        const linkLines = (() => {
+          const max = W - padX * 2;
+          const ls: string[] = [];
+          const text = formUrl;
+          if (meas.measureText(text).width <= max) ls.push(text);
+          else {
+            let cur = '';
+            for (const ch of text) {
+              const t = cur + ch;
+              if (meas.measureText(t).width > max && cur) {
+                ls.push(cur);
+                cur = ch;
+              } else cur = t;
+            }
+            if (cur) ls.push(cur);
+          }
+          return ls;
+        })();
+        const lineH = fontSize * 1.3;
+        const linkH = linkSize * 1.35;
+        const textH = padTop + titleLines.length * lineH + linkLines.length * linkH + padBot;
+        const canvas = document.createElement('canvas');
+        canvas.width = W;
+        canvas.height = img.height + textH;
+        const c = canvas.getContext('2d');
+        if (!c) return reject(new Error('canvas'));
+        c.fillStyle = '#ffffff';
+        c.fillRect(0, 0, canvas.width, canvas.height);
+        c.drawImage(img, 0, 0);
+        c.textAlign = 'center';
+        let y = textH;
+        c.fillStyle = '#1a2d4a';
+        c.font = `600 ${fontSize}px sans-serif`;
+        c.textBaseline = 'bottom';
+        for (let i = titleLines.length - 1; i >= 0; i--) {
+          y -= lineH;
+          c.fillText(titleLines[i], W / 2, y + lineH);
+        }
+        c.fillStyle = '#475569';
+        c.font = `400 ${linkSize}px sans-serif`;
+        for (const ln of linkLines) {
+          y -= linkH;
+          c.fillText(ln, W / 2, y + linkH);
+        }
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('canvas'))), 'image/png');
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(qrBlob);
+    });
+
   const handleShareQr = async () => {
     const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=16&data=${encodeURIComponent(formUrl)}`;
+    let blob: Blob;
     try {
       const res = await fetch(qrApi, { cache: 'no-store' });
-      const blob = await res.blob();
-      const file = new File([blob], qrFilename, { type: 'image/png' });
-      const payload = { files: [file], text: qrCaption, title: `Formulir ${form.title}` };
-      const nav: any = navigator as any;
-      if (nav.canShare && nav.canShare(payload)) {
+      blob = await res.blob();
+    } catch {
+      return;
+    }
+    // 1) Gabungkan teks ke dalam gambar QR
+    let imgBlob = blob;
+    try {
+      imgBlob = await buildQrWithCaption(blob);
+    } catch {
+      imgBlob = blob;
+    }
+    // 2) Bagikan: gambar QR berteks + caption teks terpisah (bawaan pesan)
+    const file = new File([imgBlob], qrFilename, { type: 'image/png' });
+    const payload = { files: [file], text: qrCaption, title: `Formulir ${form.title}` };
+    const nav: any = navigator as any;
+    if (nav.canShare && nav.canShare(payload)) {
+      try {
         await nav.share(payload);
         return;
+      } catch {
+        return;
       }
-      // Fallback desktop: salin teks + unduh QR
-      await navigator.clipboard.writeText(qrCaption);
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = qrFilename;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(link.href), 3000);
-    } catch (e) {
-      // diamkan
     }
+    // Fallback desktop: salin caption + unduh QR berteks
+    try {
+      await navigator.clipboard.writeText(qrCaption);
+    } catch {}
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(imgBlob);
+    link.download = qrFilename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 3000);
   };
 
   return (
