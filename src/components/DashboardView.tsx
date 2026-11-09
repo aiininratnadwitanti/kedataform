@@ -597,6 +597,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const setRecentForms = onUpdateRecentForms || setLocalRecentForms;
   const [activeMenuFormId, setActiveMenuFormId] = useState<string | null>(null);
 
+  // Ubah nama formulir di daftar (tanpa mengubah judul di dalam formulir)
+  const [renameFormId, setRenameFormId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+
   // Schedule modal state
   const [selectedFormForSchedule, setSelectedFormForSchedule] = useState<FormSchema | null>(null);
 
@@ -785,6 +789,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       setFormPendingDelete(target);
       setIsDeleteModalOpen(true);
     }
+  };
+
+  const handleOpenRenameForm = (item: RecentFormItem) => {
+    setActiveMenuFormId(null);
+    setRenameValue(item.form.name || item.title);
+    setRenameFormId(item.id);
+  };
+
+  const handleSaveRenameForm = () => {
+    if (!renameFormId) return;
+    const value = renameValue.trim();
+    setRecentForms(
+      recentForms.map((it) =>
+        it.form.id === renameFormId
+          ? { ...it, form: { ...it.form, name: value || undefined } }
+          : it
+      )
+    );
+    setRenameFormId(null);
+    showCenterToast('Nama Formulir Diperbarui', 'Nama di daftar diubah tanpa mengubah judul di dalam formulir.', 'success', 2000);
   };
 
   const handleConfirmDelete = () => {
@@ -1902,7 +1926,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     }`}
                                     style={{ fontFamily: systemFontFamily }}
                                   >
-                                    {item.title}
+                                    {item.form.name || item.title}
                                   </h3>
                                   {item.accessRole && item.accessRole !== 'owner' && (
                                     <div className="flex items-center gap-1.5 mt-1">
@@ -1962,6 +1986,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                         <BarChart2 className="w-3.5 h-3.5 stroke-[2]" style={{ color: primaryAccent }} />
                                         <span>{isEn ? `Respondent Data (${isolatedCount})` : `Data Responden (${isolatedCount})`}</span>
                                       </button>
+                                      {item.accessRole !== 'viewer' && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenRenameForm(item)}
+                                          className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
+                                            isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
+                                          }`}
+                                        >
+                                          <PenTool className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
+                                          <span>{isEn ? 'Rename Form' : 'Ubah Nama Formulir'}</span>
+                                        </button>
+                                      )}
                                       {item.accessRole !== 'viewer' && (
                                         <button
                                           type="button"
@@ -2067,7 +2103,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                   }`}
                                   style={{ fontFamily: systemFontFamily }}
                                 >
-                                  {item.title}
+                                  {item.form.name || item.title}
                                 </h3>
                               </div>
                             </div>
@@ -2138,6 +2174,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     >
                                       <BarChart2 className="w-3.5 h-3.5 stroke-[2]" style={{ color: primaryAccent }} />
                                       <span>{isEn ? `Respondent Data (${isolatedCount})` : `Data Responden (${isolatedCount})`}</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenRenameForm(item)}
+                                      className={`w-full px-3.5 py-2 text-left text-xs flex items-center gap-2 cursor-pointer ${
+                                        isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-50'
+                                      }`}
+                                    >
+                                      <PenTool className="w-3.5 h-3.5 stroke-[2] text-slate-400" />
+                                      <span>{isEn ? 'Rename Form' : 'Ubah Nama Formulir'}</span>
                                     </button>
                                     <button
                                       type="button"
@@ -3433,6 +3479,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   Mengerti
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ubah Nama Formulir */}
+      {renameFormId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs" onClick={() => setRenameFormId(null)} />
+          <div className={`relative z-10 w-full max-w-sm rounded-2xl border shadow-2xl p-5 space-y-4 ${isDark ? 'bg-[#18181b] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
+            <div>
+              <h3 className="text-sm font-bold">Ubah Nama Formulir</h3>
+              <p className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Nama ini hanya mengubah label di daftar. Judul di dalam formulir tetap sama.</p>
+            </div>
+            <input
+              autoFocus
+              type="text"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveRenameForm(); }}
+              placeholder="Nama formulir..."
+              className={`w-full text-sm rounded-xl px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-200 ${isDark ? 'bg-[#161619] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'}`}
+            />
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setRenameFormId(null)} className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:bg-slate-100 cursor-pointer">Batal</button>
+              <button type="button" onClick={handleSaveRenameForm} className="px-3 py-1.5 rounded-lg text-xs font-bold text-white cursor-pointer" style={{ backgroundColor: primaryAccent }}>Simpan</button>
             </div>
           </div>
         </div>

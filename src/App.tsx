@@ -1114,9 +1114,9 @@ function MainApp() {
         <>
           {/* Header Editor dengan 2 Menu Utama: Custom & Bagikan */}
           <Header
-            formTitle={form.title}
-            onUpdateTitle={(title) => {
-              const updated = { ...form, title };
+            formTitle={form.name || form.title}
+            onUpdateTitle={(name) => {
+              const updated = { ...form, name };
               setForm(updated);
               setIsFormDirty(true);
               setIsFormSaved(false);
