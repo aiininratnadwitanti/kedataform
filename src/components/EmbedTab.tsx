@@ -3,13 +3,16 @@ import {
   Copy, 
   Check, 
   Send, 
+  QrCode,
   FileSpreadsheet, 
   Download, 
   Link2, 
   Code2,
   CheckCircle2,
   Sparkles,
-  Pencil
+  Pencil,
+  X,
+  Share
 } from 'lucide-react';
 import { FormSchema } from '../types/form';
 import { formShareUrl, validateCustomSlug } from '../utils/formUtils';
@@ -38,6 +41,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const [slugValue, setSlugValue] = useState(form.slug || '');
   const [slugError, setSlugError] = useState('');
   const [isSavingSlug, setIsSavingSlug] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.app';
   const formUrl = formShareUrl(form, origin);
@@ -116,6 +120,34 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
   const whatsappMessage = encodeURIComponent(
     `Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${formUrl}`
   );
+  const qrCaption = `Scan QR untuk membuka formulir "${form.title}": ${formUrl}`;
+  const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
+
+  const handleShareQrWhatsApp = async () => {
+    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=16&data=${encodeURIComponent(formUrl)}`;
+    try {
+      const res = await fetch(qrApi);
+      const blob = await res.blob();
+      const file = new File([blob], qrFilename, { type: 'image/png' });
+      const nav: any = navigator as any;
+      if (nav.canShare && nav.canShare({ files: [file] })) {
+        await nav.share({
+          files: [file],
+          title: `Formulir ${form.title}`,
+          text: qrCaption,
+        });
+        return;
+      }
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = qrFilename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 3000);
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
+    } catch {
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(qrCaption)}`, '_blank', 'noopener');
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-6">
@@ -242,8 +274,73 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
             <Send className="w-3.5 h-3.5" />
             <span>Kirim Cepat ke WhatsApp</span>
           </a>
+
+          <button
+            type="button"
+            onClick={() => setShowQR(true)}
+            className="inline-flex text-xs font-bold text-[var(--system-primary)] hover:opacity-75 items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-2.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Tampilkan Kode QR</span>
+          </button>
         </div>
       </div>
+
+      {showQR && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setShowQR(false)}
+        >
+          <div
+            className="bg-[var(--system-bg-soft)] rounded-3xl max-w-md w-full shadow-2xl border border-blue-200/90 overflow-hidden relative flex flex-col ring-1 ring-blue-500/10 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-1.5 bg-gradient-to-r from-blue-400 via-[#223A5E] to-blue-500" />
+            <button
+              type="button"
+              onClick={() => setShowQR(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-blue-100/70 transition-colors cursor-pointer"
+              aria-label="Tutup kode QR"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-6 space-y-4 text-center">
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-blue-100 text-[#223A5E] border border-blue-200 flex items-center justify-center shadow-2xs">
+                <QrCode className="w-6 h-6" />
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">Kode QR Formulir</h3>
+                <p className="text-xs text-slate-600">Scan dengan kamera ponsel untuk membuka formulir, atau bagikan sebagai gambar via WhatsApp.</p>
+              </div>
+
+              <div className="w-56 h-56 mx-auto bg-white p-3 rounded-2xl border border-blue-200 shadow-2xs flex items-center justify-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=16&data=${encodeURIComponent(formUrl)}`}
+                  alt="QR Code Formulir"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              <p className="text-[11px] text-slate-500 leading-relaxed">{qrCaption}</p>
+
+              <div className="flex flex-col sm:flex-row items-center gap-2 justify-center">
+                <button
+                  type="button"
+                  onClick={handleShareQrWhatsApp}
+                  className="w-full sm:w-auto inline-flex justify-center py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl items-center gap-2 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <Share className="w-4 h-4" />
+                  <span>Bagikan QR via WhatsApp</span>
+                </button>
+              </div>
+
+              <p className="text-[10px] text-slate-500">Bagikan QR: di ponsel, lembar bagikan langsung membuka WhatsApp dengan gambar QR dan tulisan di atas. Di desktop, QR diunduh lalu WhatsApp dibuka.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ALUR 2: SEMATKAN KE WEBSITE (IFRAME) */}
       <div className="bg-white p-5 sm:p-6 rounded-2xl border border-blue-200 shadow-xs space-y-4">
