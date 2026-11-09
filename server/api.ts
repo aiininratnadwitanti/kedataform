@@ -208,6 +208,7 @@ function normalizeFormInput(body: any) {
     id: f.id || item.id,
     title: f.title ?? 'Formulir Tanpa Judul',
     name: f.name ?? item.name ?? null,
+    slug: f.slug ?? item.slug ?? null,
     description: f.description ?? '',
     coverImage: f.coverImage ?? item.coverImage ?? null,
     folderId: f.folderId ?? item.folderId ?? null,
@@ -225,15 +226,18 @@ function normalizeFormInput(body: any) {
 }
 
 async function writeForm(conn: any, userId: string, id: string, form: ReturnType<typeof normalizeFormInput>) {
-  const base = slugifyBase(form.name || form.title || 'formulir');
-  const slug = await uniqueSlug(conn, base, id);
+  const customSlug = form.slug ? slugifyBase(form.slug) : null;
+  const base = customSlug || slugifyBase(form.name || form.title || 'formulir');
+  const existing = await conn.query('SELECT slug FROM forms WHERE id = ? LIMIT 1', [id]);
+  const currentSlug = existing?.[0]?.[0]?.slug;
+  const slug = customSlug ? await uniqueSlug(conn, base, id) : (currentSlug || (await uniqueSlug(conn, base, id)));
   await conn.query(
     `INSERT INTO forms
       (id, user_id, title, name, slug, description, cover_image, folder_id, folder_name, icon_type, accent_color, accent_bg,
        theme, schedule, quiz_config, collaboration, status, last_opened, created_at, updated_at)
      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW(),NOW())
      ON DUPLICATE KEY UPDATE
-       title=VALUES(title), name=VALUES(name), slug=COALESCE(slug, VALUES(slug)), description=VALUES(description), cover_image=VALUES(cover_image),
+       title=VALUES(title), name=VALUES(name), slug=VALUES(slug), description=VALUES(description), cover_image=VALUES(cover_image),
        folder_id=VALUES(folder_id), folder_name=VALUES(folder_name), icon_type=VALUES(icon_type),
        accent_color=VALUES(accent_color), accent_bg=VALUES(accent_bg), theme=VALUES(theme),
        schedule=VALUES(schedule), quiz_config=VALUES(quiz_config), collaboration=VALUES(collaboration),

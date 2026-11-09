@@ -170,7 +170,7 @@ export interface FormSchema {
   id: string;
   title: string;
   name?: string;          // Nama formulir di daftar/dashboard (terpisah dari judul di dalam form)
-  slug?: string;          // Slug URL publik (berbasis nama), mis. "formulir-pemesanan-produk"
+  slug?: string;          // Kustom nama link (slug) publik, terpisah dari nama/judul; mis. "promo-2026"
   description: string;
   coverImage?: string;
   folderId?: string;

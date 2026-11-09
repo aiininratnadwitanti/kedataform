@@ -3,19 +3,18 @@ import {
   Copy, 
   Check, 
   Send, 
-  QrCode,
   FileSpreadsheet, 
   Download, 
   Link2, 
   Code2,
   CheckCircle2,
   Sparkles,
-  X,
-  Share
+  Pencil
 } from 'lucide-react';
 import { FormSchema } from '../types/form';
-import { formShareUrl } from '../utils/formUtils';
+import { formShareUrl, validateCustomSlug } from '../utils/formUtils';
 import confetti from 'canvas-confetti';
+import { api } from '../utils/api';
 
 interface EmbedTabProps {
   form: FormSchema;
@@ -24,19 +23,25 @@ interface EmbedTabProps {
   onSaveDesign?: () => void;
   isDesignSaved?: boolean;
   onOpenPreview?: () => void;
+  onUpdateForm?: (form: FormSchema) => void | Promise<void>;
 }
 
 export const EmbedTab: React.FC<EmbedTabProps> = ({ 
   form, 
   responseCount = 0,
   onExportCSV,
+  onUpdateForm,
 }) => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [showQR, setShowQR] = useState(false);
+  const [isEditingSlug, setIsEditingSlug] = useState(false);
+  const [slugValue, setSlugValue] = useState(form.slug || '');
+  const [slugError, setSlugError] = useState('');
+  const [isSavingSlug, setIsSavingSlug] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.app';
   const formUrl = formShareUrl(form, origin);
+  const previewSlugUrl = isEditingSlug && slugValue.trim() ? `${origin}/f/${validateCustomSlug(slugValue).slug || slugValue.trim()}` : formUrl;
   const embedUrl = `${formUrl}?embed=true`;
   const safeTitle = form.title.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const frameId = `kedataform-${form.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
@@ -83,37 +88,34 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const handleSaveCustomSlug = async () => {
+    if (isSavingSlug) return;
+    const result = validateCustomSlug(slugValue);
+    if (!result.ok) {
+      setSlugError(result.error || 'Nama link tidak valid.');
+      return;
+    }
+    setSlugError('');
+    setIsSavingSlug(true);
+    try {
+      const updatedForm = { ...form, slug: result.slug };
+      if (onUpdateForm) {
+        await onUpdateForm(updatedForm);
+      } else {
+        await api.updateForm(form.id, { form: updatedForm });
+      }
+      setIsEditingSlug(false);
+    } catch (e: any) {
+      setSlugError(e?.message || 'Gagal menyimpan nama link. Coba nama lain.');
+    } finally {
+      setIsSavingSlug(false);
+    }
+  };
+
 
   const whatsappMessage = encodeURIComponent(
     `Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${formUrl}`
   );
-  const qrFilename = `kode-qr-${(form.name || form.title || 'formulir').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
-
-  const handleShareQrWhatsApp = async () => {
-    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(formUrl)}`;
-    try {
-      const res = await fetch(qrApi);
-      const blob = await res.blob();
-      const file = new File([blob], qrFilename, { type: 'image/png' });
-      const nav: any = navigator as any;
-      if (nav.canShare && nav.canShare({ files: [file] })) {
-        await nav.share({ files: [file], title: `Formulir ${form.title}`, text: `Isi "${form.title}" di sini: ${formUrl}` });
-        return;
-      }
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = qrFilename;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(link.href), 3000);
-      window.open(
-        `https://api.whatsapp.com/send?text=${encodeURIComponent(`Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${formUrl}`)}`,
-        '_blank',
-        'noopener'
-      );
-    } catch {
-      window.open(`https://api.whatsapp.com/send?text=${whatsappMessage}`, '_blank', 'noopener');
-    }
-  };
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-6">
@@ -159,10 +161,23 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
           <input
             type="text"
             readOnly
-            value={formUrl}
+            value={isEditingSlug ? previewSlugUrl : formUrl}
             className="flex-1 bg-blue-50/50 border border-blue-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 select-all focus:outline-none focus:border-[var(--system-primary)]"
             onClick={(e) => (e.target as HTMLInputElement).select()}
           />
+          <button
+            type="button"
+            onClick={() => {
+              setSlugValue(form.slug || '');
+              setSlugError('');
+              setIsEditingSlug((v) => !v);
+            }}
+            className="px-3 py-2.5 text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer flex items-center gap-1.5 bg-white border border-blue-200 text-[var(--system-primary)] hover:bg-blue-50 shadow-2xs"
+            title="Kustom nama link"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            <span>{isEditingSlug ? 'Batal' : 'Ubah Nama Link'}</span>
+          </button>
           <button
             type="button"
             onClick={handleCopyLink}
@@ -178,6 +193,44 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
           </button>
         </div>
 
+        {/* Kustom Nama Link (slug terpisah dari nama formulir/judul) */}
+        {isEditingSlug && (
+          <div className="p-3.5 bg-blue-50/60 rounded-xl border border-blue-200 space-y-2 animate-in fade-in">
+            <label className="block text-xs font-bold text-slate-800">
+              Kustom Nama Link
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-slate-500 shrink-0">{origin}/f/</span>
+              <input
+                type="text"
+                value={slugValue}
+                onChange={(e) => {
+                  setSlugValue(e.target.value);
+                  setSlugError('');
+                }}
+                placeholder="mis. promo-diskon-eksklusif"
+                className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800 focus:outline-none focus:border-[var(--system-primary)]"
+              />
+              <button
+                type="button"
+                onClick={handleSaveCustomSlug}
+                disabled={isSavingSlug}
+                className="px-3.5 py-2 text-xs font-bold rounded-lg bg-[var(--system-primary)] text-white hover:opacity-90 disabled:opacity-60 shrink-0 cursor-pointer"
+              >
+                {isSavingSlug ? 'Menyimpan…' : 'Simpan'}
+              </button>
+            </div>
+            {slugError ? (
+              <p className="text-[11px] font-semibold text-rose-600">{slugError}</p>
+            ) : (
+              <p className="text-[11px] text-slate-500">
+                Hanya huruf, angka, dan tanda hubung “-”. Nama link tersimpan sendiri dan tidak mengubah nama/judul formulir. Jika nama sudah dipakai, otomatis ditambah “-2”, “-3”, dst.
+              </p>
+            )}
+            <p className="text-[11px] font-mono text-slate-600 break-all">Tautan: {previewSlugUrl}</p>
+          </div>
+        )}
+
         {/* Tombol Bagikan ke WhatsApp & Toggle QR Sejajar */}
         <div className="pt-2 flex flex-wrap items-center gap-2.5">
           <a
@@ -189,80 +242,8 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
             <Send className="w-3.5 h-3.5" />
             <span>Kirim Cepat ke WhatsApp</span>
           </a>
-
-          <button
-            type="button"
-            onClick={() => setShowQR(true)}
-            className="inline-flex text-xs font-bold text-[var(--system-primary)] hover:opacity-75 items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-2.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>Tampilkan Kode QR</span>
-          </button>
         </div>
       </div>
-
-      {showQR && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200"
-          onClick={() => setShowQR(false)}
-        >
-          <div
-            className="bg-[var(--system-bg-soft)] rounded-3xl max-w-md w-full shadow-2xl border border-blue-200/90 overflow-hidden relative flex flex-col ring-1 ring-blue-500/10 animate-in zoom-in-95 duration-150"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="h-1.5 bg-gradient-to-r from-blue-400 via-[#223A5E] to-blue-500" />
-            <button
-              type="button"
-              onClick={() => setShowQR(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-blue-100/70 transition-colors cursor-pointer"
-              aria-label="Tutup kode QR"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="p-6 space-y-4 text-center">
-              <div className="w-12 h-12 mx-auto rounded-2xl bg-blue-100 text-[#223A5E] border border-blue-200 flex items-center justify-center shadow-2xs">
-                <QrCode className="w-6 h-6" />
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">Kode QR Formulir</h3>
-                <p className="text-xs text-slate-600">Scan dengan kamera ponsel untuk membuka formulir, atau bagikan sebagai gambar via WhatsApp.</p>
-              </div>
-
-              <div className="w-56 h-56 mx-auto bg-white p-3 rounded-2xl border border-blue-200 shadow-2xs flex items-center justify-center">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(formUrl)}`}
-                  alt="QR Code Formulir"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-2 justify-center">
-                <button
-                  type="button"
-                  onClick={handleShareQrWhatsApp}
-                  className="w-full sm:w-auto inline-flex justify-center py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl items-center gap-2 transition-colors shadow-2xs cursor-pointer"
-                >
-                  <Share className="w-4 h-4" />
-                  <span>Bagikan QR via WhatsApp</span>
-                </button>
-                <a
-                  href={`https://api.whatsapp.com/send?text=${whatsappMessage}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex justify-center py-2.5 px-4 bg-white border border-blue-200 text-[var(--system-primary)] text-xs font-bold rounded-xl items-center gap-2 transition-colors shadow-2xs cursor-pointer"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Kirim Cepat ke WhatsApp</span>
-                </a>
-              </div>
-
-              <p className="text-[10px] text-slate-500">Bagikan QR: di ponsel, lembar bagikan langsung membuka WhatsApp dengan gambar QR. Di desktop, QR diunduh lalu WhatsApp dibuka.</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ALUR 2: SEMATKAN KE WEBSITE (IFRAME) */}
       <div className="bg-white p-5 sm:p-6 rounded-2xl border border-blue-200 shadow-xs space-y-4">
@@ -318,14 +299,6 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
           >
             {copiedCode ? <Check className="w-3.5 h-3.5 text-white stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedCode ? 'Kode Berhasil Disalin!' : 'Salin Kode iFrame'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowQR(true)}
-            className="inline-flex text-xs font-bold text-[var(--system-primary)] hover:opacity-75 items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-2.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>Tampilkan Kode QR</span>
           </button>
         </div>
       </div>

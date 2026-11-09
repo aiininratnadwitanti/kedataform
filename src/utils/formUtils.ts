@@ -13,6 +13,7 @@ export function slugifyFormName(input: string): string {
 }
 
 export function formShareKey(form: Pick<FormSchema, 'slug' | 'name' | 'title' | 'id'>): string {
+  // Prioritas: kustom nama link (slug) > nama formulir > judul > id.
   if (form.slug) return form.slug;
   if (form.name || form.title) return slugifyFormName(form.name || form.title);
   return form.id;
@@ -21,4 +22,13 @@ export function formShareKey(form: Pick<FormSchema, 'slug' | 'name' | 'title' | 
 export function formShareUrl(form: Pick<FormSchema, 'slug' | 'name' | 'title' | 'id'>, origin?: string): string {
   const o = origin ?? (typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.vercel.app');
   return `${o}/f/${encodeURIComponent(formShareKey(form))}`;
+}
+
+export function validateCustomSlug(input: string): { ok: boolean; slug: string; error?: string } {
+  const slug = slugifyFormName(input);
+  if (!slug) return { ok: false, slug: '', error: 'Nama link wajib diisi.' };
+  if (/[^a-z0-9-]/i.test(slug)) return { ok: false, slug, error: 'Hanya huruf, angka, dan tanda hubung "-" yang diperbolehkan.' };
+  if (slug.length > 80) return { ok: false, slug, error: 'Nama link maksimal 80 karakter.' };
+  if (slug === 'formulir') return { ok: false, slug, error: 'Nama link tidak boleh kosong.' };
+  return { ok: true, slug };
 }
