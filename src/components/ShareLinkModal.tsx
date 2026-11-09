@@ -5,7 +5,6 @@ import {
   Share2, 
   X, 
   Sparkles, 
-  QrCode, 
   Send, 
   Globe, 
   ArrowRight,
@@ -31,7 +30,6 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
   onGoToEmbedTab,
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const [showQR, setShowQR] = useState(false);
 
   if (!isOpen) return null;
 
@@ -156,37 +154,7 @@ export const ShareLinkModal: React.FC<ShareLinkModalProps> = ({
               </div>
             </a>
 
-            {/* QR Code Toggle */}
-            <button
-              type="button"
-              onClick={() => setShowQR(!showQR)}
-              className="p-3 rounded-2xl border border-blue-200 bg-white hover:bg-blue-50/70 text-slate-800 transition-all flex items-center gap-2.5 text-xs font-bold shadow-2xs cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-xl bg-blue-100 text-[#223A5E] flex items-center justify-center shrink-0 border border-blue-200">
-                <QrCode className="w-3.5 h-3.5" />
-              </div>
-              <div className="text-left">
-                <div>{showQR ? 'Sembunyikan QR' : 'Tampilkan QR'}</div>
-                <div className="text-[10px] font-normal text-slate-500">Scan dari ponsel</div>
-              </div>
-            </button>
           </div>
-
-          {/* QR Code Container Preview */}
-          {showQR && (
-            <div className="p-4 bg-white rounded-2xl border border-blue-200 text-center space-y-2 animate-in zoom-in-95 duration-150 shadow-2xs">
-              <div className="w-36 h-36 mx-auto bg-white p-2 rounded-xl border border-blue-200 shadow-2xs flex items-center justify-center">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(formUrl)}`}
-                  alt="QR Code Formulir"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Pindai kode QR ini dengan kamera HP untuk langsung membuka formulir
-              </p>
-            </div>
-          )}
 
           {/* Bottom Actions */}
           <div className="pt-2 border-t border-blue-200/80 flex items-center justify-end">

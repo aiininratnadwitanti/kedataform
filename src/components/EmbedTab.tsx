@@ -3,7 +3,6 @@ import {
   Copy, 
   Check, 
   Send, 
-  QrCode, 
   FileSpreadsheet, 
   Download, 
   Link2, 
@@ -31,7 +30,6 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
 }) => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [showQR, setShowQR] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://kedataform.app';
   const formUrl = formShareUrl(form, origin);
@@ -81,15 +79,6 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const handleDownloadQR = () => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(formUrl)}`;
-    const link = document.createElement('a');
-    link.href = qrUrl;
-    link.download = `qrcode_${form.id}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const whatsappMessage = encodeURIComponent(
     `Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${formUrl}`
@@ -132,14 +121,6 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowQR(!showQR)}
-            className="self-start sm:self-auto text-xs font-bold text-[var(--system-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>{showQR ? 'Sembunyikan QR' : 'Tampilkan Kode QR'}</span>
-          </button>
         </div>
 
         {/* Input URL & Salin Link */}
@@ -178,34 +159,7 @@ export const EmbedTab: React.FC<EmbedTabProps> = ({
             <span>Kirim Cepat ke WhatsApp</span>
           </a>
 
-          <button
-            type="button"
-            onClick={() => setShowQR(!showQR)}
-            className="inline-flex text-xs font-bold text-[var(--system-primary)] hover:opacity-75 items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-2.5 rounded-xl border border-blue-200 transition-colors shadow-2xs"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>{showQR ? 'Sembunyikan QR' : 'Tampilkan Kode QR'}</span>
-          </button>
         </div>
-
-        {/* Kotak Kode QR jika diaktifkan */}
-        {showQR && (
-          <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200 flex flex-col sm:flex-row items-center gap-4 animate-in fade-in duration-200">
-            <div className="w-32 h-32 bg-white p-2 rounded-xl border border-blue-200 shadow-2xs flex items-center justify-center shrink-0">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(formUrl)}`}
-                alt="QR Code Formulir"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div className="space-y-1 text-center sm:text-left">
-              <h4 className="text-xs font-bold text-slate-900">Scan Kode QR Langsung</h4>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-md">
-                Scan QR untuk langsung ke formulir.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ALUR 2: SEMATKAN KE WEBSITE (IFRAME) */}

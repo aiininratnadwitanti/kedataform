@@ -24,7 +24,6 @@ import {
   Copy,
   Link2,
   Send,
-  QrCode
 } from 'lucide-react';
 import { FormSchema, FormQuizConfig, FormScheduleConfig, Question } from '../types/form';
 import { formShareUrl } from '../utils/formUtils';
@@ -53,7 +52,6 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
 
   // Dialog konfirmasi jika saat klik simpan masih ada soal yang belum ditentukan jawabannya
   const [showMissingAlertModal, setShowMissingAlertModal] = useState(false);
-  const [showQR, setShowQR] = useState(false);
 
   // Tautan publik berbasis slug nama formulir (fallback id jika belum ada).
   const shareUrl = formShareUrl(form);
@@ -415,7 +413,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   <span>Salin</span>
                 </button>
               </div>
-              {/* WhatsApp & QR */}
+              {/* WhatsApp */}
               <div className="flex flex-wrap items-center gap-2">
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Halo! Silakan mengisi formulir "${form.title}" melalui tautan resmi berikut ini:\n${shareUrl}`)}`}
@@ -426,24 +424,7 @@ export const SaveValidationModal: React.FC<SaveValidationModalProps> = ({
                   <Send className="w-3.5 h-3.5" />
                   <span>Kirim ke WhatsApp</span>
                 </a>
-                <button
-                  type="button"
-                  onClick={() => setShowQR((v) => !v)}
-                  className="text-xs font-bold text-[#223A5E] flex items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-3 py-2 rounded-lg border border-blue-200 transition-colors"
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>{showQR ? 'Sembunyikan QR' : 'Tampilkan QR'}</span>
-                </button>
               </div>
-              {showQR && (
-                <div className="flex items-center gap-3">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(shareUrl)}`}
-                    alt="QR Code"
-                    className="w-24 h-24 object-contain border border-blue-200 rounded-lg"
-                  />
-                </div>
-              )}
             </div>
             
             {/* Bagian 1: Aturan Jenis Formulir (Mau Kuis atau Bukan) */}
