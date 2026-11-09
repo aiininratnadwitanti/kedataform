@@ -3,7 +3,6 @@ import {
   X, 
   Award, 
   Download, 
-  ExternalLink, 
   ArrowUpDown, 
   Check, 
   Sparkles,
@@ -619,7 +618,7 @@ export const ResponseModal: React.FC<ResponseModalProps> = ({
             <span>Unduh Spreadsheet (.CSV)</span>
           </button>
 
-          {/* Tombol Tutup & Buka Editor Lengkap */}
+          {/* Tombol Tutup */}
           <div className="flex items-center gap-2.5 self-end sm:self-auto">
             <button
               type="button"
@@ -627,18 +626,6 @@ export const ResponseModal: React.FC<ResponseModalProps> = ({
               className="px-4 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-xl transition-colors cursor-pointer"
             >
               Tutup
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                onOpenEditor(form);
-              }}
-              className="px-4 py-2 bg-[var(--system-primary)] hover:opacity-90 text-[var(--system-primary-contrast)] font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>Buka Editor Lengkap</span>
-              <ExternalLink className="w-3.5 h-3.5" />
             </button>
           </div>
 
